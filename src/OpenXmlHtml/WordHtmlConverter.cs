@@ -62,6 +62,28 @@ public static class WordHtmlConverter
         }
     }
 
+    /// <summary>
+    /// Converts an HTML string to a docx file written to the given stream.
+    /// </summary>
+    public static void ConvertToDocx(string html, Stream stream)
+    {
+        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+        var mainPart = document.AddMainDocumentPart();
+        var body = new Body();
+        AppendHtml(body, html);
+        mainPart.Document = new DocumentFormat.OpenXml.Wordprocessing.Document(body);
+    }
+
+    /// <summary>
+    /// Converts an HTML file to a docx file.
+    /// </summary>
+    public static void ConvertFileToDocx(string htmlPath, string docxPath)
+    {
+        var html = File.ReadAllText(htmlPath);
+        using var stream = File.Create(docxPath);
+        ConvertToDocx(html, stream);
+    }
+
     static Paragraph BuildParagraph(List<Run> runs)
     {
         var paragraph = new Paragraph();

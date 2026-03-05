@@ -138,6 +138,37 @@ var paragraphs = WordHtmlConverter.ToParagraphs(
 <!-- endSnippet -->
 
 
+### ConvertToDocx
+
+Convert an HTML string directly to a docx file:
+
+<!-- snippet: ConvertToDocx -->
+<a id='snippet-ConvertToDocx'></a>
+```cs
+using var stream = new MemoryStream();
+WordHtmlConverter.ConvertToDocx(
+    "<h1>Report</h1>" +
+    "<p>This is a <b>bold</b> statement.</p>" +
+    "<ul><li>Item one</li><li>Item two</li></ul>",
+    stream);
+```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L59-L68' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+### ConvertFileToDocx
+
+Convert an HTML file to a docx file:
+
+<!-- snippet: ConvertFileToDocx -->
+<a id='snippet-ConvertFileToDocx'></a>
+```cs
+WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
+```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L80-L84' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
 ## Supported HTML Elements
 
 ### Text Formatting

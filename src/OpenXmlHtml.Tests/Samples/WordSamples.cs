@@ -52,4 +52,41 @@ public class WordSamples
 
         #endregion
     }
+
+    [Test]
+    public void ConvertToDocx()
+    {
+        #region ConvertToDocx
+
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            "<h1>Report</h1>" +
+            "<p>This is a <b>bold</b> statement.</p>" +
+            "<ul><li>Item one</li><li>Item two</li></ul>",
+            stream);
+
+        #endregion
+    }
+
+    [Test]
+    public void ConvertFileToDocx()
+    {
+        var htmlPath = Path.GetTempFileName();
+        var docxPath = Path.ChangeExtension(htmlPath, ".docx");
+        try
+        {
+            File.WriteAllText(htmlPath, "<h1>Hello</h1><p>World</p>");
+
+            #region ConvertFileToDocx
+
+            WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
+
+            #endregion
+        }
+        finally
+        {
+            File.Delete(htmlPath);
+            File.Delete(docxPath);
+        }
+    }
 }
