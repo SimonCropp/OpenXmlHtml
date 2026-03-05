@@ -25,7 +25,7 @@ public class WordConvertFileTests
 
         WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
-        await VerifyFile(docxPath).UniqueForTargetFrameworkAndVersion();
+        await VerifyFile(docxPath);
     }
 
     [Test]
@@ -58,6 +58,6 @@ public class WordConvertFileTests
 
         WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
-        await VerifyFile(docxPath).UniqueForTargetFrameworkAndVersion();
+        await VerifyFile(docxPath);
     }
 }

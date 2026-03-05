@@ -7,7 +7,7 @@ public class WordConvertToDocxTests
         using var stream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx("<p>Hello <b>World</b></p>", stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -29,7 +29,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -45,7 +45,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -67,7 +67,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -107,7 +107,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -116,7 +116,7 @@ public class WordConvertToDocxTests
         using var stream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx("", stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -133,7 +133,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -148,7 +148,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -166,7 +166,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -177,7 +177,7 @@ public class WordConvertToDocxTests
             "<p>She said <q>hello world</q> to everyone.</p>",
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -195,7 +195,7 @@ public class WordConvertToDocxTests
             """,
             stream);
         stream.Position = 0;
-        return VerifyStream(stream, "docx");
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -206,9 +206,6 @@ public class WordConvertToDocxTests
         using var docxStream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx(htmlStream, docxStream);
         docxStream.Position = 0;
-        return VerifyStream(docxStream, "docx");
+        return Verify(docxStream, "docx");
     }
-
-    static SettingsTask VerifyStream(Stream stream, string extension) =>
-        Verify(stream, extension).UniqueForTargetFrameworkAndVersion();
 }

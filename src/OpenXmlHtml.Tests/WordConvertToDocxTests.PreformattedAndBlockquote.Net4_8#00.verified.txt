@@ -1,7 +1,0 @@
-﻿{
-  Text:
-To be or not to be
-  line 1
-  line 2
-  line 3
-}

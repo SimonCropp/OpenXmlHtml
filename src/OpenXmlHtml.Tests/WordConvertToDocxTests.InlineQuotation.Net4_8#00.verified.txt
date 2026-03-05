@@ -1,3 +1,0 @@
-﻿{
-  Text: She said “hello world” to everyone.
-}

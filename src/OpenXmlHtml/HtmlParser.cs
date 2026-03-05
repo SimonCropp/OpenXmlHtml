@@ -199,7 +199,7 @@ static class HtmlSegmentParser
                 format.FontFamily ??= "Courier New";
                 break;
             case "small":
-                format.FontSizePt = (format.FontSizePt ?? 12) * 0.8;
+                format.FontSizePt = Math.Round((format.FontSizePt ?? 12) * 0.8, 2);
                 break;
         }
 

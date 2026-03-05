@@ -1,6 +1,0 @@
-﻿{
-  Text:
-Navy bold
-Verdana 14pt
-Both decorations
-}

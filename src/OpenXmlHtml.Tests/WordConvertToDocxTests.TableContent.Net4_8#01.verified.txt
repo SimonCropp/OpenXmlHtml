@@ -1,4 +1,0 @@
-﻿Q1 Sales
-Region	Revenue
-North	$500K
-South	$700K

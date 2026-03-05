@@ -85,7 +85,7 @@ public class WordSamples
         #endregion
 
         stream.Position = 0;
-        return Verify(stream, "docx").UniqueForTargetFrameworkAndVersion();
+        return Verify(stream, "docx");
     }
 
     [Test]
@@ -101,7 +101,7 @@ public class WordSamples
         #endregion
 
         docxStream.Position = 0;
-        return Verify(docxStream, "docx").UniqueForTargetFrameworkAndVersion();
+        return Verify(docxStream, "docx");
     }
 
     [Test]
@@ -116,6 +116,6 @@ public class WordSamples
 
         #endregion
 
-        await VerifyFile(docxPath).UniqueForTargetFrameworkAndVersion();
+        await VerifyFile(docxPath);
     }
 }
