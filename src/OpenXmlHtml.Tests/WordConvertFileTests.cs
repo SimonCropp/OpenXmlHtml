@@ -2,7 +2,7 @@
 public class WordConvertFileTests
 {
     [Test]
-    public Task ConvertHtmlFile()
+    public async Task ConvertHtmlFile()
     {
         var dir = Path.Combine(Path.GetTempPath(), "OpenXmlHtmlTests", Guid.NewGuid().ToString());
         Directory.CreateDirectory(dir);
@@ -27,8 +27,7 @@ public class WordConvertFileTests
 
             WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
-            using var stream = File.OpenRead(docxPath);
-            return VerifyStream(stream, "docx");
+            await VerifyFile(docxPath);
         }
         finally
         {
@@ -37,7 +36,7 @@ public class WordConvertFileTests
     }
 
     [Test]
-    public Task ConvertFullHtmlPage()
+    public async Task ConvertFullHtmlPage()
     {
         var dir = Path.Combine(Path.GetTempPath(), "OpenXmlHtmlTests", Guid.NewGuid().ToString());
         Directory.CreateDirectory(dir);
@@ -68,15 +67,11 @@ public class WordConvertFileTests
 
             WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
-            using var stream = File.OpenRead(docxPath);
-            return VerifyStream(stream, "docx");
+            await VerifyFile(docxPath);
         }
         finally
         {
             Directory.Delete(dir, true);
         }
     }
-
-    static SettingsTask VerifyStream(Stream stream, string extension) =>
-        Verify(stream, extension);
 }

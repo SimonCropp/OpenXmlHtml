@@ -1,10 +1,8 @@
-using DocumentFormat.OpenXml.Spreadsheet;
-
 [TestFixture]
 public class SpreadsheetSamples
 {
     [Test]
-    public void SetCellHtml()
+    public Task SetCellHtml()
     {
         #region SetCellHtml
 
@@ -12,10 +10,12 @@ public class SpreadsheetSamples
         SpreadsheetHtmlConverter.SetCellHtml(cell, "<b>Hello</b> <i>World</i>");
 
         #endregion
+
+        return Verify(cell);
     }
 
     [Test]
-    public void ToInlineString()
+    public Task ToInlineString()
     {
         #region ToInlineString
 
@@ -23,10 +23,12 @@ public class SpreadsheetSamples
             "<b>Revenue:</b> <font color=\"#008000\">$1.2M</font>");
 
         #endregion
+
+        return Verify(inlineString);
     }
 
     [Test]
-    public void FormattedList()
+    public Task FormattedList()
     {
         #region SpreadsheetList
 
@@ -39,10 +41,12 @@ public class SpreadsheetSamples
             """);
 
         #endregion
+
+        return Verify(inlineString);
     }
 
     [Test]
-    public void RichContent()
+    public Task RichContent()
     {
         #region SpreadsheetRichContent
 
@@ -60,5 +64,7 @@ public class SpreadsheetSamples
             """);
 
         #endregion
+
+        return Verify(cell);
     }
 }

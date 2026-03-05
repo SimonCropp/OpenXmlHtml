@@ -7,7 +7,7 @@ public class WordIntegrationTests
         using var stream = new MemoryStream();
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
-        mainPart.Document = new Document(new Body());
+        mainPart.Document = new(new Body());
 
         WordHtmlConverter.AppendHtml(mainPart.Document.Body!,
             "<h1>Report Title</h1><p>This is a <b>bold</b> statement.</p>");

@@ -7,9 +7,9 @@ public class SpreadsheetIntegrationTests
         using var stream = new MemoryStream();
         using var document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
         var workbookPart = document.AddWorkbookPart();
-        workbookPart.Workbook = new Workbook(new Sheets());
+        workbookPart.Workbook = new(new Sheets());
         var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-        worksheetPart.Worksheet = new Worksheet(new SheetData());
+        worksheetPart.Worksheet = new(new SheetData());
 
         var sheets = workbookPart.Workbook.GetFirstChild<Sheets>()!;
         sheets.Append(new Sheet

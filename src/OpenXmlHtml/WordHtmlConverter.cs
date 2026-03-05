@@ -45,7 +45,7 @@ public static class WordHtmlConverter
 
         if (paragraphs.Count == 0)
         {
-            paragraphs.Add(new Paragraph());
+            paragraphs.Add(new());
         }
 
         return paragraphs;
@@ -71,7 +71,7 @@ public static class WordHtmlConverter
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
         AppendHtml(body, html);
-        mainPart.Document = new DocumentFormat.OpenXml.Wordprocessing.Document(body);
+        mainPart.Document = new(body);
     }
 
     /// <summary>

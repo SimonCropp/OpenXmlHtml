@@ -136,7 +136,7 @@ static class HtmlSegmentParser
             {
                 ProcessNode(element, newFormat, segments, inPre);
                 var nextSibling = element.NextElementSibling;
-                if (nextSibling != null && nextSibling.LocalName is "td" or "th")
+                if (nextSibling is { LocalName: "td" or "th" })
                 {
                     segments.Add(new("\t", format.Copy()));
                 }
@@ -339,7 +339,7 @@ static class HtmlSegmentParser
 
     static string CollapseWhitespace(string text)
     {
-        var builder = new System.Text.StringBuilder(text.Length);
+        var builder = new StringBuilder(text.Length);
         var lastWasSpace = false;
         foreach (var c in text)
         {

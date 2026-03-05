@@ -2,7 +2,7 @@
 public class WordSamples
 {
     [Test]
-    public void ToParagraphs()
+    public Task ToParagraphs()
     {
         #region ToParagraphs
 
@@ -13,10 +13,12 @@ public class WordSamples
             """);
 
         #endregion
+
+        return Verify(paragraphs);
     }
 
     [Test]
-    public void AppendHtml()
+    public Task AppendHtml()
     {
         #region AppendHtml
 
@@ -24,7 +26,7 @@ public class WordSamples
         using var document = WordprocessingDocument.Create(
             stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
-        mainPart.Document = new Document(new Body());
+        mainPart.Document = new(new Body());
 
         WordHtmlConverter.AppendHtml(
             mainPart.Document.Body!,
@@ -38,10 +40,12 @@ public class WordSamples
             """);
 
         #endregion
+
+        return Verify(mainPart.Document.Body!);
     }
 
     [Test]
-    public void RichDocument()
+    public Task RichDocument()
     {
         #region WordRichDocument
 
@@ -57,10 +61,12 @@ public class WordSamples
             """);
 
         #endregion
+
+        return Verify(paragraphs);
     }
 
     [Test]
-    public void ConvertToDocx()
+    public Task ConvertToDocx()
     {
         #region ConvertToDocx
 
@@ -77,10 +83,13 @@ public class WordSamples
             stream);
 
         #endregion
+
+        stream.Position = 0;
+        return Verify(stream, "docx");
     }
 
     [Test]
-    public void ConvertFileToDocx()
+    public async Task ConvertFileToDocx()
     {
         var htmlPath = Path.GetTempFileName();
         var docxPath = Path.ChangeExtension(htmlPath, ".docx");
@@ -93,6 +102,8 @@ public class WordSamples
             WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
             #endregion
+
+            await VerifyFile(docxPath);
         }
         finally
         {

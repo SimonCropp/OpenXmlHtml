@@ -23,7 +23,7 @@ Set the value of a spreadsheet cell from HTML:
 var cell = new SpreadsheetCell();
 SpreadsheetHtmlConverter.SetCellHtml(cell, "<b>Hello</b> <i>World</i>");
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L9-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-SetCellHtml' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L7-L12' title='Snippet source file'>snippet source</a> | <a href='#snippet-SetCellHtml' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -54,7 +54,7 @@ var inlineString = SpreadsheetHtmlConverter.ToInlineString(
     </ul>
     """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L31-L41' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetList' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L33-L43' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetList' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -76,7 +76,7 @@ SpreadsheetHtmlConverter.SetCellHtml(cell,
     </table>
     """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L47-L62' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetRichContent' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L51-L66' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetRichContent' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -111,7 +111,7 @@ using var stream = new MemoryStream();
 using var document = WordprocessingDocument.Create(
     stream, WordprocessingDocumentType.Document);
 var mainPart = document.AddMainDocumentPart();
-mainPart.Document = new Document(new Body());
+mainPart.Document = new(new Body());
 
 WordHtmlConverter.AppendHtml(
     mainPart.Document.Body!,
@@ -124,7 +124,7 @@ WordHtmlConverter.AppendHtml(
     </ol>
     """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L21-L40' title='Snippet source file'>snippet source</a> | <a href='#snippet-AppendHtml' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L23-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-AppendHtml' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -144,7 +144,7 @@ var paragraphs = WordHtmlConverter.ToParagraphs(
     <p>Contact <a href="mailto:ops@example.com">ops team</a> for details.</p>
     """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L46-L59' title='Snippet source file'>snippet source</a> | <a href='#snippet-WordRichDocument' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L50-L63' title='Snippet source file'>snippet source</a> | <a href='#snippet-WordRichDocument' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -167,7 +167,7 @@ WordHtmlConverter.ConvertToDocx(
     """,
     stream);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L65-L79' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L71-L85' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -180,7 +180,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L91-L95' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L100-L104' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 

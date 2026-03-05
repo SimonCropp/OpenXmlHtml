@@ -94,12 +94,7 @@ static class ColorParser
             return ParseRgb(value);
         }
 
-        if (namedColors.TryGetValue(value, out var named))
-        {
-            return named;
-        }
-
-        return null;
+        return namedColors.GetValueOrDefault(value);
     }
 
     static string? ParseRgb(string value)

@@ -14,4 +14,3 @@ global using SpreadsheetColor = DocumentFormat.OpenXml.Spreadsheet.Color;
 global using SpreadsheetFontSize = DocumentFormat.OpenXml.Spreadsheet.FontSize;
 global using SpreadsheetRunFont = DocumentFormat.OpenXml.Spreadsheet.RunFont;
 global using SpreadsheetText = DocumentFormat.OpenXml.Spreadsheet.Text;
-global using SpreadsheetInlineString = DocumentFormat.OpenXml.Spreadsheet.InlineString;

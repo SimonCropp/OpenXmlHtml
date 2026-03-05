@@ -13,7 +13,7 @@ public static class SpreadsheetHtmlConverter
     public static InlineString ToInlineString(string html)
     {
         var segments = HtmlSegmentParser.Parse(html);
-        var inlineString = new SpreadsheetInlineString();
+        var inlineString = new InlineString();
 
         foreach (var segment in segments)
         {
