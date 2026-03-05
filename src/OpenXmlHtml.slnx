@@ -1,4 +1,14 @@
 <Solution>
   <Project Path="OpenXmlHtml\OpenXmlHtml.csproj" />
+  <Folder Name="/SolutionFolder/">
+    <File Path="../readme.md" />
+    <File Path="appveyor.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="dotnet-tools.json" />
+    <File Path="global.json" />
+    <File Path="mdsnippets.json" />
+    <File Path="nuget.config" />
+  </Folder>
   <Project Path="OpenXmlHtml.Tests\OpenXmlHtml.Tests.csproj" />
 </Solution>
