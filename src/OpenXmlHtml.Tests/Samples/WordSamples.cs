@@ -107,24 +107,15 @@ public class WordSamples
     [Test]
     public async Task ConvertFileToDocx()
     {
-        var htmlPath = Path.GetTempFileName();
-        var docxPath = Path.ChangeExtension(htmlPath, ".docx");
-        try
-        {
-            File.WriteAllText(htmlPath, "<h1>Hello</h1><p>World</p>");
+        var htmlPath = await TempFile.CreateText("<h1>Hello</h1><p>World</p>");
+        var docxPath = new TempFile("docx");
 
-            #region ConvertFileToDocx
+        #region ConvertFileToDocx
 
-            WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
+        WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
-            #endregion
+        #endregion
 
-            await VerifyFile(docxPath).UniqueForTargetFrameworkAndVersion();
-        }
-        finally
-        {
-            File.Delete(htmlPath);
-            File.Delete(docxPath);
-        }
+        await VerifyFile(docxPath).UniqueForTargetFrameworkAndVersion();
     }
 }
