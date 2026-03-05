@@ -9,8 +9,16 @@ public class WordTableTests
     [Test]
     public Task TableWithHeaders() =>
         Verify(WordHtmlConverter.ToParagraphs(
-            "<table><thead><tr><th>Name</th><th>Value</th></tr></thead>" +
-            "<tbody><tr><td>foo</td><td>bar</td></tr></tbody></table>"));
+            """
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Value</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>foo</td><td>bar</td></tr>
+              </tbody>
+            </table>
+            """));
 
     [Test]
     public Task TableWithCaption() =>

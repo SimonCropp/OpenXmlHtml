@@ -12,11 +12,18 @@ public class WordConvertFileTests
             var docxPath = Path.Combine(dir, "test.docx");
 
             File.WriteAllText(htmlPath,
-                "<html><body>" +
-                "<h1>Document Title</h1>" +
-                "<p>A paragraph with <b>bold</b> and <i>italic</i> text.</p>" +
-                "<ul><li>Item one</li><li>Item two</li></ul>" +
-                "</body></html>");
+                """
+                <html>
+                <body>
+                  <h1>Document Title</h1>
+                  <p>A paragraph with <b>bold</b> and <i>italic</i> text.</p>
+                  <ul>
+                    <li>Item one</li>
+                    <li>Item two</li>
+                  </ul>
+                </body>
+                </html>
+                """);
 
             WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 

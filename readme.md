@@ -47,12 +47,14 @@ var inlineString = SpreadsheetHtmlConverter.ToInlineString(
 <a id='snippet-SpreadsheetList'></a>
 ```cs
 var inlineString = SpreadsheetHtmlConverter.ToInlineString(
-    "<ul>" +
-    "<li><span style=\"color: green\">Passed</span>: 47</li>" +
-    "<li><span style=\"color: red\">Failed</span>: 3</li>" +
-    "</ul>");
+    """
+    <ul>
+      <li><span style="color: green">Passed</span>: 47</li>
+      <li><span style="color: red">Failed</span>: 3</li>
+    </ul>
+    """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L31-L39' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetList' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L31-L41' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetList' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -63,16 +65,18 @@ var inlineString = SpreadsheetHtmlConverter.ToInlineString(
 ```cs
 var cell = new SpreadsheetCell();
 SpreadsheetHtmlConverter.SetCellHtml(cell,
-    "<h2>Q1 Report</h2>" +
-    "<p>Revenue: <b style=\"color: green\">$1.2M</b></p>" +
-    "<p>See <a href=\"https://example.com/report\">full report</a></p>" +
-    "<table>" +
-    "<tr><th>Region</th><th>Sales</th></tr>" +
-    "<tr><td>North</td><td>$500K</td></tr>" +
-    "<tr><td>South</td><td>$700K</td></tr>" +
-    "</table>");
+    """
+    <h2>Q1 Report</h2>
+    <p>Revenue: <b style="color: green">$1.2M</b></p>
+    <p>See <a href="https://example.com/report">full report</a></p>
+    <table>
+      <tr><th>Region</th><th>Sales</th></tr>
+      <tr><td>North</td><td>$500K</td></tr>
+      <tr><td>South</td><td>$700K</td></tr>
+    </table>
+    """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L45-L58' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetRichContent' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/SpreadsheetSamples.cs#L47-L62' title='Snippet source file'>snippet source</a> | <a href='#snippet-SpreadsheetRichContent' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -87,10 +91,12 @@ Convert HTML to a list of `Paragraph` elements:
 <a id='snippet-ToParagraphs'></a>
 ```cs
 var paragraphs = WordHtmlConverter.ToParagraphs(
-    "<h1>Report Title</h1>" +
-    "<p>This is a <b>bold</b> statement with <i>emphasis</i>.</p>");
+    """
+    <h1>Report Title</h1>
+    <p>This is a <b>bold</b> statement with <i>emphasis</i>.</p>
+    """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L7-L13' title='Snippet source file'>snippet source</a> | <a href='#snippet-ToParagraphs' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L7-L15' title='Snippet source file'>snippet source</a> | <a href='#snippet-ToParagraphs' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -109,14 +115,16 @@ mainPart.Document = new Document(new Body());
 
 WordHtmlConverter.AppendHtml(
     mainPart.Document.Body!,
-    "<h1>Meeting Notes</h1>" +
-    "<p><i>Date: January 15, 2024</i></p>" +
-    "<ol>" +
-    "<li>Review <code>PR #123</code></li>" +
-    "<li>Update <u>documentation</u></li>" +
-    "</ol>");
+    """
+    <h1>Meeting Notes</h1>
+    <p><i>Date: January 15, 2024</i></p>
+    <ol>
+      <li>Review <code>PR #123</code></li>
+      <li>Update <u>documentation</u></li>
+    </ol>
+    """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L19-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-AppendHtml' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L21-L40' title='Snippet source file'>snippet source</a> | <a href='#snippet-AppendHtml' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -126,15 +134,17 @@ WordHtmlConverter.AppendHtml(
 <a id='snippet-WordRichDocument'></a>
 ```cs
 var paragraphs = WordHtmlConverter.ToParagraphs(
-    "<h2>Status Report</h2>" +
-    "<p>All systems <span style=\"color: green\"><b>operational</b></span>.</p>" +
-    "<ul>" +
-    "<li>Server: <span style=\"color: green\">OK</span></li>" +
-    "<li>Cache: <span style=\"color: red\">Down</span></li>" +
-    "</ul>" +
-    "<p>Contact <a href=\"mailto:ops@example.com\">ops team</a> for details.</p>");
+    """
+    <h2>Status Report</h2>
+    <p>All systems <span style="color: green"><b>operational</b></span>.</p>
+    <ul>
+      <li>Server: <span style="color: green">OK</span></li>
+      <li>Cache: <span style="color: red">Down</span></li>
+    </ul>
+    <p>Contact <a href="mailto:ops@example.com">ops team</a> for details.</p>
+    """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L42-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-WordRichDocument' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L46-L59' title='Snippet source file'>snippet source</a> | <a href='#snippet-WordRichDocument' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -147,12 +157,17 @@ Convert an HTML string directly to a docx file:
 ```cs
 using var stream = new MemoryStream();
 WordHtmlConverter.ConvertToDocx(
-    "<h1>Report</h1>" +
-    "<p>This is a <b>bold</b> statement.</p>" +
-    "<ul><li>Item one</li><li>Item two</li></ul>",
+    """
+    <h1>Report</h1>
+    <p>This is a <b>bold</b> statement.</p>
+    <ul>
+      <li>Item one</li>
+      <li>Item two</li>
+    </ul>
+    """,
     stream);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L59-L68' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L65-L79' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -165,7 +180,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L80-L84' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L91-L95' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 

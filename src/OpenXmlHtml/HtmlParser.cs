@@ -26,7 +26,9 @@ static class HtmlSegmentParser
                 case IText textNode:
                 {
                     var text = inPre ? textNode.Data : CollapseWhitespace(textNode.Data);
-                    if (text.Length > 0)
+                    if (text.Length > 0 &&
+                        !(string.IsNullOrWhiteSpace(text) &&
+                          IsInterBlockWhitespace(textNode)))
                     {
                         segments.Add(new(text, format.Copy()));
                     }
@@ -311,7 +313,29 @@ static class HtmlSegmentParser
             or "tr" or "hr" or "section" or "article" or "header" or "footer"
             or "nav" or "aside" or "main" or "figure" or "figcaption" or "details"
             or "summary" or "address" or "dt" or "dd" or "dl"
-            or "caption" or "tbody" or "thead" or "tfoot";
+            or "caption" or "tbody" or "thead" or "tfoot"
+            or "body" or "html";
+
+    static bool IsInterBlockWhitespace(IText textNode)
+    {
+        var parent = textNode.ParentElement;
+        if (parent == null)
+        {
+            return false;
+        }
+
+        var hasChildren = false;
+        foreach (var child in parent.Children)
+        {
+            hasChildren = true;
+            if (!IsBlockElement(child.LocalName))
+            {
+                return false;
+            }
+        }
+
+        return hasChildren;
+    }
 
     static string CollapseWhitespace(string text)
     {

@@ -20,9 +20,11 @@ public class SpreadsheetColorTests
     [Test]
     public Task MultipleColors() =>
         Verify(SpreadsheetHtmlConverter.ToInlineString(
-            "<span style=\"color: red\">red</span> " +
-            "<span style=\"color: blue\">blue</span> " +
-            "<span style=\"color: green\">green</span>"));
+            """
+            <span style="color: red">red</span>
+            <span style="color: blue">blue</span>
+            <span style="color: green">green</span>
+            """));
 
     [Test]
     public Task ColorWithFormatting() =>

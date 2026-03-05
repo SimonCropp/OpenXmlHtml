@@ -31,10 +31,12 @@ public class SpreadsheetSamples
         #region SpreadsheetList
 
         var inlineString = SpreadsheetHtmlConverter.ToInlineString(
-            "<ul>" +
-            "<li><span style=\"color: green\">Passed</span>: 47</li>" +
-            "<li><span style=\"color: red\">Failed</span>: 3</li>" +
-            "</ul>");
+            """
+            <ul>
+              <li><span style="color: green">Passed</span>: 47</li>
+              <li><span style="color: red">Failed</span>: 3</li>
+            </ul>
+            """);
 
         #endregion
     }
@@ -46,14 +48,16 @@ public class SpreadsheetSamples
 
         var cell = new SpreadsheetCell();
         SpreadsheetHtmlConverter.SetCellHtml(cell,
-            "<h2>Q1 Report</h2>" +
-            "<p>Revenue: <b style=\"color: green\">$1.2M</b></p>" +
-            "<p>See <a href=\"https://example.com/report\">full report</a></p>" +
-            "<table>" +
-            "<tr><th>Region</th><th>Sales</th></tr>" +
-            "<tr><td>North</td><td>$500K</td></tr>" +
-            "<tr><td>South</td><td>$700K</td></tr>" +
-            "</table>");
+            """
+            <h2>Q1 Report</h2>
+            <p>Revenue: <b style="color: green">$1.2M</b></p>
+            <p>See <a href="https://example.com/report">full report</a></p>
+            <table>
+              <tr><th>Region</th><th>Sales</th></tr>
+              <tr><td>North</td><td>$500K</td></tr>
+              <tr><td>South</td><td>$700K</td></tr>
+            </table>
+            """);
 
         #endregion
     }

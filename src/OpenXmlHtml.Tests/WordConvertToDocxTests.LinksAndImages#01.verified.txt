@@ -1,3 +1,3 @@
 ﻿Visit our site (https://example.com)
-Company Logo
+ Company Logo 
 Figure 1: Logo

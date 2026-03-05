@@ -36,9 +36,13 @@ public class SpreadsheetIntegrationTests
     {
         var cell = new SpreadsheetCell();
         SpreadsheetHtmlConverter.SetCellHtml(cell,
-            "<p>Report <b>Summary</b></p>" +
-            "<ul><li><span style=\"color: red\">Critical</span>: 3</li>" +
-            "<li><span style=\"color: green\">Passed</span>: 47</li></ul>");
+            """
+            <p>Report <b>Summary</b></p>
+            <ul>
+              <li><span style="color: red">Critical</span>: 3</li>
+              <li><span style="color: green">Passed</span>: 47</li>
+            </ul>
+            """);
         return Verify(cell);
     }
 
@@ -47,10 +51,12 @@ public class SpreadsheetIntegrationTests
     {
         var cell = new SpreadsheetCell();
         SpreadsheetHtmlConverter.SetCellHtml(cell,
-            "<b>Q1 Results</b><br>" +
-            "Revenue: <font color=\"#008000\">$1.2M</font><br>" +
-            "Expenses: <font color=\"#FF0000\">$800K</font><br>" +
-            "<i>Net: <b>$400K</b></i>");
+            """
+            <b>Q1 Results</b><br>
+            Revenue: <font color="#008000">$1.2M</font><br>
+            Expenses: <font color="#FF0000">$800K</font><br>
+            <i>Net: <b>$400K</b></i>
+            """);
         return Verify(cell);
     }
 }
