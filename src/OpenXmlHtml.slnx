@@ -1,4 +1,4 @@
 <Solution>
   <Project Path="OpenXmlHtml\OpenXmlHtml.csproj" />
-  <Project Path="OpenXmlHtml.Tests\OpenXmlHtml.Tests.csproj" />
+  <Project Path="Tests\Tests.csproj" />
 </Solution>
