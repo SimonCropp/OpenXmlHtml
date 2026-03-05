@@ -271,3 +271,8 @@ Inline `style` attributes are supported:
  * Hex: `#RGB`, `#RRGGBB`, `#RRGGBBAA`
  * Named: `red`, `blue`, `green`, `darkred`, `steelblue`, etc. (60+ colors)
  * RGB: `rgb(255, 0, 0)`
+
+
+## Icon
+
+https://thenounproject.com/icon/dog-6292156/
