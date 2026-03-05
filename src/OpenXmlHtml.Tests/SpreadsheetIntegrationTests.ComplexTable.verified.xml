@@ -1,0 +1,4 @@
+﻿<x:c t="inlineStr" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><x:is><x:r><x:rPr><x:b /></x:rPr><x:t xml:space="preserve">Q1 Results</x:t></x:r><x:r><x:t xml:space="preserve">
+</x:t></x:r><x:r><x:t xml:space="preserve">Revenue: </x:t></x:r><x:r><x:rPr><x:color rgb="FF008000" /></x:rPr><x:t xml:space="preserve">$1.2M</x:t></x:r><x:r><x:t xml:space="preserve">
+</x:t></x:r><x:r><x:t xml:space="preserve">Expenses: </x:t></x:r><x:r><x:rPr><x:color rgb="FFFF0000" /></x:rPr><x:t xml:space="preserve">$800K</x:t></x:r><x:r><x:t xml:space="preserve">
+</x:t></x:r><x:r><x:rPr><x:i /></x:rPr><x:t xml:space="preserve">Net: </x:t></x:r><x:r><x:rPr><x:b /><x:i /></x:rPr><x:t xml:space="preserve">$400K</x:t></x:r></x:is></x:c>
