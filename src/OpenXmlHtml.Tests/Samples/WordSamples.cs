@@ -105,6 +105,63 @@ public class WordSamples
     }
 
     [Test]
+    public Task EmployeeOnboardingGuide()
+    {
+        var logo = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==";
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            $"""
+            <p><img src="data:image/png;base64,{logo}" width="64" height="64"></p>
+            <h1>Employee Onboarding Guide</h1>
+            <p><i>Human Resources Department</i></p>
+            <hr>
+            <h2>Welcome to <span style="color: #0563C1">Contoso Ltd</span></h2>
+            <p>We're excited to have you join the team! Below you'll find everything
+            you need to get started on your <b>first day</b>.</p>
+
+            <h3>Checklist</h3>
+            <ol>
+              <li>Sign employment agreement</li>
+              <li>Complete <a href="https://hr.contoso.com/tax">tax forms</a></li>
+              <li>Collect your <mark>badge and laptop</mark> from IT</li>
+              <li>Read the <u>code of conduct</u></li>
+            </ol>
+
+            <h3>Key Contacts</h3>
+            <table>
+              <caption>Department Contacts</caption>
+              <thead>
+                <tr><th>Department</th><th>Contact</th><th>Extension</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>IT Support</td><td>helpdesk@contoso.com</td><td><code>x4100</code></td></tr>
+                <tr><td>Facilities</td><td>facilities@contoso.com</td><td><code>x4200</code></td></tr>
+                <tr><td>HR</td><td>hr@contoso.com</td><td><code>x4300</code></td></tr>
+              </tbody>
+            </table>
+
+            <h3>Important Policies</h3>
+            <dl>
+              <dt>Remote Work</dt>
+              <dd>Up to <b>3 days per week</b> after probation period.</dd>
+              <dt>Time Off</dt>
+              <dd>20 days PTO plus <span style="color: green">10 public holidays</span>.</dd>
+            </dl>
+
+            <blockquote>
+              <q>The strength of the team is each individual member.</q>
+              — Phil Jackson
+            </blockquote>
+
+            <p><small>Last updated: January 2024. For questions contact
+            <a href="mailto:onboarding@contoso.com">onboarding@contoso.com</a>.</small></p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
     public async Task ConvertFileToDocx()
     {
         var htmlPath = await TempFile.CreateText("<h1>Hello</h1><p>World</p>");

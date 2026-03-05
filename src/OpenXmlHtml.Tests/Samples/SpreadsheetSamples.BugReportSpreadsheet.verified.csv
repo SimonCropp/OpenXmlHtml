@@ -1,0 +1,8 @@
+﻿ID,Priority,Summary,Details
+BUG-4821,Critical,Login fails after password reset — returns 200 403,"Steps:
+1. Reset password via auth portal (https://auth.example.com/reset)
+2. Attempt login with new credentials
+3. Observe 403 Forbidden
+Expected: Successful login
+ Actual: ERR_AUTH_STALE_TOKEN
+Affects Chrome 120*, Firefox, Safari. Related to PR-891 (https://jira.example.com/PR-891). The H2O auth header contains a stale nonce."
