@@ -57,12 +57,16 @@ static class HtmlSegmentParser
                 segments.Add(new("\n", format.Copy()));
                 return;
             case "img":
+            {
                 var alt = element.GetAttribute("alt");
                 if (!string.IsNullOrEmpty(alt))
                 {
                     segments.Add(new(alt, format.Copy()));
                 }
 
+                return;
+            }
+            case "svg":
                 return;
         }
 
@@ -104,6 +108,47 @@ static class HtmlSegmentParser
                 EnsureNewline(segments, format);
                 return;
             }
+            case "a":
+            {
+                ProcessNode(element, newFormat, segments, inPre);
+                var href = element.GetAttribute("href");
+                if (!string.IsNullOrEmpty(href))
+                {
+                    var linkText = element.TextContent.Trim();
+                    if (linkText != href)
+                    {
+                        segments.Add(new($" ({href})", format.Copy()));
+                    }
+                }
+
+                return;
+            }
+            case "q":
+            {
+                segments.Add(new("\u201C", format.Copy()));
+                ProcessNode(element, newFormat, segments, inPre);
+                segments.Add(new("\u201D", format.Copy()));
+                return;
+            }
+            case "td" or "th":
+            {
+                ProcessNode(element, newFormat, segments, inPre);
+                var nextSibling = element.NextElementSibling;
+                if (nextSibling != null && nextSibling.LocalName is "td" or "th")
+                {
+                    segments.Add(new("\t", format.Copy()));
+                }
+
+                return;
+            }
+            case "tr":
+            {
+                ProcessNode(element, newFormat, segments, inPre);
+                EnsureNewline(segments, format);
+                return;
+            }
+            case "col":
+                return;
             case "pre":
                 ProcessNode(element, newFormat, segments, true);
                 break;
@@ -122,7 +167,7 @@ static class HtmlSegmentParser
     {
         switch (tag)
         {
-            case "b" or "strong":
+            case "b" or "strong" or "h1" or "h2" or "h3" or "h4" or "h5" or "h6" or "th" or "caption" or "dt":
                 format.Bold = true;
                 break;
             case "i" or "em" or "cite" or "dfn" or "var":
@@ -133,6 +178,10 @@ static class HtmlSegmentParser
                 break;
             case "s" or "strike" or "del":
                 format.Strikethrough = true;
+                break;
+            case "a":
+                format.Underline = true;
+                format.Color ??= "0563C1";
                 break;
             case "sup":
                 format.Superscript = true;
@@ -261,7 +310,8 @@ static class HtmlSegmentParser
             or "ul" or "ol" or "li" or "blockquote" or "pre" or "table"
             or "tr" or "hr" or "section" or "article" or "header" or "footer"
             or "nav" or "aside" or "main" or "figure" or "figcaption" or "details"
-            or "summary" or "address" or "dt" or "dd" or "dl";
+            or "summary" or "address" or "dt" or "dd" or "dl"
+            or "caption" or "tbody" or "thead" or "tfoot";
 
     static string CollapseWhitespace(string text)
     {
