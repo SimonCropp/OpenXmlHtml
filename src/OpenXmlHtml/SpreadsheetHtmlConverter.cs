@@ -17,6 +17,11 @@ public static class SpreadsheetHtmlConverter
 
         foreach (var segment in segments)
         {
+            if (segment.Format.Image != null)
+            {
+                continue;
+            }
+
             var run = new SpreadsheetRun();
 
             if (segment.Format.HasFormatting)

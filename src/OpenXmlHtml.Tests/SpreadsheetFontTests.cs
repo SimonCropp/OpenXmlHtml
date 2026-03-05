@@ -50,4 +50,17 @@ public class SpreadsheetFontTests
     [Test]
     public Task KbdTag() =>
         Verify(SpreadsheetHtmlConverter.ToInlineString("Press <kbd>Ctrl+C</kbd> to copy"));
+
+    [Test]
+    public Task Base64ImageSkipped()
+    {
+        var png = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==";
+        return Verify(SpreadsheetHtmlConverter.ToInlineString(
+            $"""before <img src="data:image/png;base64,{png}"> after"""));
+    }
+
+    [Test]
+    public Task ImageWithAltTextInSpreadsheet() =>
+        Verify(SpreadsheetHtmlConverter.ToInlineString(
+            """before <img src="https://example.com/logo.png" alt="Logo"> after"""));
 }

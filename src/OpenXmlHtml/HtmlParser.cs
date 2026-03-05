@@ -412,27 +412,37 @@ static class HtmlSegmentParser
             return null;
         }
 
-        var contentType = meta.Slice(0, meta.Length - 7).ToString();
+        var contentType = meta[..^7].ToString();
         var base64 = src.AsSpan(commaIndex + 1);
 
+#if NETFRAMEWORK
         byte[] bytes;
         try
         {
-            bytes = System.Convert.FromBase64String(base64.ToString());
+            bytes = Convert.FromBase64String(base64.ToString());
         }
         catch (FormatException)
         {
             return null;
         }
+#else
+        var bytes = new byte[base64.Length];
+        if (!Convert.TryFromBase64Chars(base64, bytes, out var bytesWritten))
+        {
+            return null;
+        }
+
+        Array.Resize(ref bytes, bytesWritten);
+#endif
 
         int? width = null;
-        int? height = null;
         var widthAttr = element.GetAttribute("width");
         if (widthAttr != null && int.TryParse(widthAttr, out var w))
         {
             width = w;
         }
 
+        int? height = null;
         var heightAttr = element.GetAttribute("height");
         if (heightAttr != null && int.TryParse(heightAttr, out var h))
         {
