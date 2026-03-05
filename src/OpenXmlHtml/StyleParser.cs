@@ -1,7 +1,3 @@
-using System.Globalization;
-
-namespace OpenXmlHtml;
-
 static class StyleParser
 {
     internal static Dictionary<string, string> Parse(string? style)

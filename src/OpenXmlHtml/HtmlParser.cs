@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace OpenXmlHtml;
 
 static class HtmlSegmentParser

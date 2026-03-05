@@ -1,3 +1,4 @@
+global using System.Globalization;
 global using AngleSharp.Dom;
 global using AngleSharp.Html.Parser;
 global using DocumentFormat.OpenXml;

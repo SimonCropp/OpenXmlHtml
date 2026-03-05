@@ -1,5 +1,3 @@
-namespace OpenXmlHtml;
-
 class FormatState
 {
     internal bool Bold { get; set; }

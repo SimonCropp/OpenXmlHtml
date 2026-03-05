@@ -1,5 +1,3 @@
-namespace OpenXmlHtml;
-
 static class ColorParser
 {
     static readonly Dictionary<string, string> namedColors = new(StringComparer.OrdinalIgnoreCase)
