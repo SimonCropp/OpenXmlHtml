@@ -61,7 +61,8 @@ static class HtmlSegmentParser
                 var alt = element.GetAttribute("alt");
                 if (!string.IsNullOrEmpty(alt))
                 {
-                    segments.Add(new(alt, format.Copy()));
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
+                    segments.Add(new(alt!, format.Copy()));
                 }
 
                 return;

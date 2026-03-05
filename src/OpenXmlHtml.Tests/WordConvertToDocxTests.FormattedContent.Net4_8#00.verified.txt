@@ -1,0 +1,7 @@
+﻿{
+  Text:
+Bold, italic, underline, strike
+super and sub
+monospace and small
+styled font
+}

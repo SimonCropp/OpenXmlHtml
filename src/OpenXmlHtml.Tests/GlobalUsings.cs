@@ -3,6 +3,7 @@ global using DocumentFormat.OpenXml.Packaging;
 global using DocumentFormat.OpenXml.Spreadsheet;
 global using DocumentFormat.OpenXml.Wordprocessing;
 global using OpenXmlHtml;
+global using Polyfills;
 global using SpreadsheetCell = DocumentFormat.OpenXml.Spreadsheet.Cell;
 global using SpreadsheetColor = DocumentFormat.OpenXml.Spreadsheet.Color;
 global using SpreadsheetRun = DocumentFormat.OpenXml.Spreadsheet.Run;

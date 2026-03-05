@@ -210,5 +210,5 @@ public class WordConvertToDocxTests
     }
 
     static SettingsTask VerifyStream(Stream stream, string extension) =>
-        Verify(stream, extension);
+        Verify(stream, extension).UniqueForTargetFrameworkAndVersion();
 }

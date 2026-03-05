@@ -41,7 +41,8 @@ public class SpreadsheetFontTests
 
     [Test]
     public Task SmallTag() =>
-        Verify(SpreadsheetHtmlConverter.ToInlineString("normal <small>smaller</small> normal"));
+        Verify(SpreadsheetHtmlConverter.ToInlineString("normal <small>smaller</small> normal"))
+            .UniqueForTargetFrameworkAndVersion();
 
     [Test]
     public Task CodeTag() =>

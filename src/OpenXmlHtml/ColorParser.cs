@@ -64,7 +64,8 @@ static class ColorParser
             return null;
         }
 
-        value = value.Trim();
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
+        value = value!.Trim();
 
         if (value.StartsWith('#'))
         {
@@ -125,5 +126,5 @@ static class ColorParser
 
     static bool IsValidHex(string hex) =>
         hex.Length is 3 or 6 or 8 &&
-        hex.All(c => char.IsAsciiHexDigit(c));
+        hex.All(char.IsAsciiHexDigit);
 }
