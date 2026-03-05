@@ -58,11 +58,21 @@ static class HtmlSegmentParser
                 return;
             case "img":
             {
-                var alt = element.GetAttribute("alt");
-                if (!string.IsNullOrEmpty(alt))
+                var imageData = ParseImageSrc(element);
+                if (imageData != null)
                 {
-                    // ReSharper disable once RedundantSuppressNullableWarningExpression
-                    segments.Add(new(alt!, format.Copy()));
+                    var imageFormat = format.Copy();
+                    imageFormat.Image = imageData;
+                    segments.Add(new("\uFFFC", imageFormat));
+                }
+                else
+                {
+                    var alt = element.GetAttribute("alt");
+                    if (!string.IsNullOrEmpty(alt))
+                    {
+                        // ReSharper disable once RedundantSuppressNullableWarningExpression
+                        segments.Add(new(alt!, format.Copy()));
+                    }
                 }
 
                 return;
@@ -380,5 +390,55 @@ static class HtmlSegmentParser
         {
             segments.RemoveAt(segments.Count - 1);
         }
+    }
+
+    static ImageData? ParseImageSrc(IElement element)
+    {
+        var src = element.GetAttribute("src");
+        if (src == null || !src.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var commaIndex = src.IndexOf(',');
+        if (commaIndex < 0)
+        {
+            return null;
+        }
+
+        var meta = src.AsSpan(5, commaIndex - 5);
+        if (!meta.EndsWith(";base64".AsSpan(), StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var contentType = meta.Slice(0, meta.Length - 7).ToString();
+        var base64 = src.AsSpan(commaIndex + 1);
+
+        byte[] bytes;
+        try
+        {
+            bytes = System.Convert.FromBase64String(base64.ToString());
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+
+        int? width = null;
+        int? height = null;
+        var widthAttr = element.GetAttribute("width");
+        if (widthAttr != null && int.TryParse(widthAttr, out var w))
+        {
+            width = w;
+        }
+
+        var heightAttr = element.GetAttribute("height");
+        if (heightAttr != null && int.TryParse(heightAttr, out var h))
+        {
+            height = h;
+        }
+
+        return new(bytes, contentType, width, height);
     }
 }

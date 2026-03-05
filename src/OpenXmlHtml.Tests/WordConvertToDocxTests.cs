@@ -199,6 +199,36 @@ public class WordConvertToDocxTests
     }
 
     [Test]
+    public Task Base64Image()
+    {
+        // 2x2 red PNG
+        var png = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==";
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            $"""
+            <p>Before image</p>
+            <p><img src="data:image/png;base64,{png}" width="50" height="50"></p>
+            <p>After image</p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
+    public Task Base64ImageWithAltFallback()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <p><img src="https://example.com/logo.png" alt="Logo"></p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
     public Task FromStream()
     {
         var htmlBytes = "<p>Hello <b>World</b></p>"u8.ToArray();

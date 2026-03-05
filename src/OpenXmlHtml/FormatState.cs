@@ -9,6 +9,7 @@ class FormatState
     internal string? FontFamily { get; set; }
     internal bool Superscript { get; set; }
     internal bool Subscript { get; set; }
+    internal ImageData? Image { get; set; }
 
     internal FormatState Copy() =>
         new()
@@ -21,7 +22,8 @@ class FormatState
             FontSizePt = FontSizePt,
             FontFamily = FontFamily,
             Superscript = Superscript,
-            Subscript = Subscript
+            Subscript = Subscript,
+            Image = Image
         };
 
     internal bool HasFormatting =>
