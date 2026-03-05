@@ -171,6 +171,22 @@ WordHtmlConverter.ConvertToDocx(
 <!-- endSnippet -->
 
 
+### ConvertStreamToDocx
+
+Convert an HTML stream to a docx stream:
+
+<!-- snippet: ConvertStreamToDocx -->
+<a id='snippet-ConvertStreamToDocx'></a>
+```cs
+using var htmlStream = new MemoryStream(
+    "<h1>Report</h1><p>Content</p>"u8.ToArray());
+using var docxStream = new MemoryStream();
+WordHtmlConverter.ConvertToDocx(htmlStream, docxStream);
+```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L94-L101' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertStreamToDocx' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
 ### ConvertFileToDocx
 
 Convert an HTML file to a docx file:
@@ -180,7 +196,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L100-L104' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L116-L120' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 

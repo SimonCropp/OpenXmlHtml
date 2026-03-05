@@ -198,6 +198,17 @@ public class WordConvertToDocxTests
         return VerifyStream(stream, "docx");
     }
 
+    [Test]
+    public Task FromStream()
+    {
+        var htmlBytes = "<p>Hello <b>World</b></p>"u8.ToArray();
+        using var htmlStream = new MemoryStream(htmlBytes);
+        using var docxStream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(htmlStream, docxStream);
+        docxStream.Position = 0;
+        return VerifyStream(docxStream, "docx");
+    }
+
     static SettingsTask VerifyStream(Stream stream, string extension) =>
         Verify(stream, extension);
 }

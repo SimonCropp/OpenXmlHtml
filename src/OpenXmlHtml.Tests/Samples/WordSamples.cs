@@ -89,6 +89,22 @@ public class WordSamples
     }
 
     [Test]
+    public Task ConvertStreamToDocx()
+    {
+        #region ConvertStreamToDocx
+
+        using var htmlStream = new MemoryStream(
+            "<h1>Report</h1><p>Content</p>"u8.ToArray());
+        using var docxStream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(htmlStream, docxStream);
+
+        #endregion
+
+        docxStream.Position = 0;
+        return Verify(docxStream, "docx");
+    }
+
+    [Test]
     public async Task ConvertFileToDocx()
     {
         var htmlPath = Path.GetTempFileName();

@@ -75,6 +75,16 @@ public static class WordHtmlConverter
     }
 
     /// <summary>
+    /// Converts HTML from a stream to a docx file written to the given stream.
+    /// </summary>
+    public static void ConvertToDocx(Stream htmlStream, Stream docxStream)
+    {
+        using var reader = new StreamReader(htmlStream);
+        var html = reader.ReadToEnd();
+        ConvertToDocx(html, docxStream);
+    }
+
+    /// <summary>
     /// Converts an HTML file to a docx file.
     /// </summary>
     public static void ConvertFileToDocx(string htmlPath, string docxPath)
