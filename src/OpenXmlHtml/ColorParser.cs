@@ -64,12 +64,11 @@ static class ColorParser
             return null;
         }
 
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        value = value!.Trim();
+        var span = value.AsSpan().Trim();
 
-        if (value.StartsWith('#'))
+        if (span[0] == '#')
         {
-            var hex = value[1..];
+            var hex = span[1..];
             if (!IsValidHex(hex))
             {
                 return null;
@@ -77,43 +76,55 @@ static class ColorParser
 
             if (hex.Length == 3)
             {
-                hex = string.Concat(hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]);
+                return string.Concat(
+                    hex[0].ToString(), hex[0].ToString(),
+                    hex[1].ToString(), hex[1].ToString(),
+                    hex[2].ToString(), hex[2].ToString()).ToUpperInvariant();
             }
 
             if (hex.Length is 6 or 8)
             {
-                return hex.ToUpperInvariant();
+                return hex.ToString().ToUpperInvariant();
             }
 
             return null;
         }
 
-        if (value.StartsWith("rgb", StringComparison.OrdinalIgnoreCase))
+        if (span.StartsWith("rgb".AsSpan(), StringComparison.OrdinalIgnoreCase))
         {
-            return ParseRgb(value);
+            return ParseRgb(span);
         }
 
-        return namedColors.GetValueOrDefault(value);
+        return namedColors.GetValueOrDefault(span.ToString());
     }
 
-    static string? ParseRgb(string value)
+    static string? ParseRgb(ReadOnlySpan<char> span)
     {
-        var start = value.IndexOf('(');
-        var end = value.IndexOf(')');
+        var start = span.IndexOf('(');
+        var end = span.IndexOf(')');
         if (start < 0 || end < 0)
         {
             return null;
         }
 
-        var parts = value[(start + 1)..end].Split(',');
-        if (parts.Length < 3)
+        var inner = span[(start + 1)..end];
+
+        var firstComma = inner.IndexOf(',');
+        if (firstComma < 0)
         {
             return null;
         }
 
-        if (!int.TryParse(parts[0].Trim(), out var r) ||
-            !int.TryParse(parts[1].Trim(), out var g) ||
-            !int.TryParse(parts[2].Trim(), out var b))
+        var rest = inner[(firstComma + 1)..];
+        var secondComma = rest.IndexOf(',');
+        if (secondComma < 0)
+        {
+            return null;
+        }
+
+        if (!int.TryParse(inner[..firstComma].Trim().ToString(), out var r) ||
+            !int.TryParse(rest[..secondComma].Trim().ToString(), out var g) ||
+            !int.TryParse(rest[(secondComma + 1)..].Trim().ToString(), out var b))
         {
             return null;
         }
@@ -124,7 +135,21 @@ static class ColorParser
     static int Clamp(int value) =>
         Math.Max(0, Math.Min(255, value));
 
-    static bool IsValidHex(string hex) =>
-        hex.Length is 3 or 6 or 8 &&
-        hex.All(char.IsAsciiHexDigit);
+    static bool IsValidHex(ReadOnlySpan<char> hex)
+    {
+        if (hex.Length is not (3 or 6 or 8))
+        {
+            return false;
+        }
+
+        foreach (var c in hex)
+        {
+            if (!char.IsAsciiHexDigit(c))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

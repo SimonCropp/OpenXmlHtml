@@ -6,6 +6,8 @@
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="DocumentFormat.OpenXml" />
     <PackageReference Include="Polyfill" PrivateAssets="all" />
+    <PackageReference Include="System.Memory" />
+
     <PackageReference Include="ProjectDefaults" PrivateAssets="all" />
   </ItemGroup>
 </Project>
