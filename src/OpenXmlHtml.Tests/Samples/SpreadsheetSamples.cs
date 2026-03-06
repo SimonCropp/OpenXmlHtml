@@ -114,9 +114,9 @@ public class SpreadsheetSamples
             var workbookPart = document.AddWorkbookPart();
             var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
             var sheetData = new SheetData();
-            worksheetPart.Worksheet = new Worksheet(sheetData);
+            worksheetPart.Worksheet = new(sheetData);
 
-            workbookPart.Workbook = new Workbook(
+            workbookPart.Workbook = new(
                 new Sheets(
                     new Sheet
                     {
@@ -154,7 +154,7 @@ public class SpreadsheetSamples
 
             var summaryCell = new SpreadsheetCell();
             SpreadsheetHtmlConverter.SetCellHtml(summaryCell,
-                """Login fails after <u>password reset</u> — returns <s>200</s> <b>403</b>""");
+                "Login fails after <u>password reset</u> — returns <s>200</s> <b>403</b>");
             bugRow.Append(summaryCell);
 
             var detailsCell = new SpreadsheetCell();
