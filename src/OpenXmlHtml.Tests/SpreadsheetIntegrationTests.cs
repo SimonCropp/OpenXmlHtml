@@ -47,6 +47,54 @@ public class SpreadsheetIntegrationTests
     }
 
     [Test]
+    public Task NestedListXlsx()
+    {
+        using var stream = new MemoryStream();
+        using (var document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+        {
+            var workbookPart = document.AddWorkbookPart();
+            var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+            var sheetData = new SheetData();
+            worksheetPart.Worksheet = new(sheetData);
+
+            workbookPart.Workbook = new(
+                new Sheets(
+                    new Sheet
+                    {
+                        Id = workbookPart.GetIdOfPart(worksheetPart),
+                        SheetId = 1,
+                        Name = "Sheet1"
+                    }));
+
+            var row = new Row { RowIndex = 1 };
+            var cell = new SpreadsheetCell();
+            SpreadsheetHtmlConverter.SetCellHtml(cell,
+                """
+                <ul>
+                  <li>Top level</li>
+                  <li>
+                    <ul>
+                      <li>Nested item</li>
+                      <li>
+                        <ul>
+                          <li>Deep item</li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li>Back to top</li>
+                </ul>
+                """,
+                workbookPart);
+            row.Append(cell);
+            sheetData.Append(row);
+        }
+
+        stream.Position = 0;
+        return Verify(stream, "xlsx");
+    }
+
+    [Test]
     public Task ComplexTable()
     {
         var cell = new SpreadsheetCell();
