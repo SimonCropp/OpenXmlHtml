@@ -31,7 +31,7 @@ public static class SpreadsheetHtmlConverter
         cell.DataType = CellValues.InlineString;
         cell.InlineString = ToInlineString(segments);
 
-        var workbookPart = ((SpreadsheetDocument)worksheetPart.OpenXmlPackage).WorkbookPart!;
+        var workbookPart = ((SpreadsheetDocument) worksheetPart.OpenXmlPackage).WorkbookPart!;
 
         if (HasNewlines(cell.InlineString))
         {
@@ -84,7 +84,8 @@ public static class SpreadsheetHtmlConverter
                 continue;
             }
 
-            if (url != null && url != segment.Format.LinkUrl)
+            if (url != null &&
+                url != segment.Format.LinkUrl)
             {
                 return null;
             }
@@ -105,7 +106,7 @@ public static class SpreadsheetHtmlConverter
         var relationship = worksheetPart.AddHyperlinkRelationship(uri, true);
 
         var worksheet = worksheetPart.Worksheet!;
-        var hyperlinks = worksheet.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.Hyperlinks>();
+        var hyperlinks = worksheet.GetFirstChild<Hyperlinks>();
         if (hyperlinks == null)
         {
             hyperlinks = new();
@@ -121,18 +122,9 @@ public static class SpreadsheetHtmlConverter
             });
     }
 
-    static bool HasNewlines(InlineString inlineString)
-    {
-        foreach (var text in inlineString.Descendants<SpreadsheetText>())
-        {
-            if (text.Text.Contains('\n'))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    static bool HasNewlines(InlineString inlineString) =>
+        inlineString.Descendants<SpreadsheetText>()
+            .Any(_ => _.Text.Contains('\n'));
 
     static uint EnsureWrapTextStyle(WorkbookPart workbookPart)
     {
@@ -146,15 +138,38 @@ public static class SpreadsheetHtmlConverter
             stylesPart.Stylesheet = stylesheet;
         }
 
-        stylesheet.Fonts ??= new(new DocumentFormat.OpenXml.Spreadsheet.Font()) { Count = 1 };
-        stylesheet.Fills ??= new(
-            new Fill(new PatternFill { PatternType = PatternValues.None }),
-            new Fill(new PatternFill { PatternType = PatternValues.Gray125 })
-        )
-        { Count = 2 };
-        stylesheet.Borders ??= new(
-            new DocumentFormat.OpenXml.Spreadsheet.Border()) { Count = 1 };
-        stylesheet.CellFormats ??= new(new CellFormat()) { Count = 1 };
+        stylesheet.Fonts ??=
+            new(new DocumentFormat.OpenXml.Spreadsheet.Font())
+            {
+                Count = 1
+            };
+        stylesheet.Fills ??=
+            new(
+                new Fill(
+                    new PatternFill
+                    {
+                        PatternType = PatternValues.None
+                    }),
+                new Fill(
+                    new PatternFill
+                    {
+                        PatternType = PatternValues.Gray125
+                    })
+            )
+            {
+                Count = 2
+            };
+        stylesheet.Borders ??=
+            new(
+                new DocumentFormat.OpenXml.Spreadsheet.Border())
+            {
+                Count = 1
+            };
+        stylesheet.CellFormats ??=
+            new(new CellFormat())
+            {
+                Count = 1
+            };
 
         uint index = 0;
         foreach (var cf in stylesheet.CellFormats.Elements<CellFormat>())
@@ -206,17 +221,29 @@ public static class SpreadsheetHtmlConverter
 
         if (format.Color != null)
         {
-            props.Append(new SpreadsheetColor { Rgb = "FF" + format.Color });
+            props.Append(
+                new SpreadsheetColor
+                {
+                    Rgb = "FF" + format.Color
+                });
         }
 
         if (format.FontSizePt != null)
         {
-            props.Append(new SpreadsheetFontSize { Val = format.FontSizePt.Value });
+            props.Append(
+                new SpreadsheetFontSize
+                {
+                    Val = format.FontSizePt.Value
+                });
         }
 
         if (format.FontFamily != null)
         {
-            props.Append(new SpreadsheetRunFont { Val = format.FontFamily });
+            props.Append(
+                new SpreadsheetRunFont
+                {
+                    Val = format.FontFamily
+                });
         }
 
         if (format.Superscript)
