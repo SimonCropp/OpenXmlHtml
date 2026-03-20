@@ -1,4 +1,7 @@
-# OpenXmlHtml
+# <img src="/src/icon.png" height="30px"> OpenXmlHtml
+
+[![Build status](https://img.shields.io/appveyor/build/SimonCropp/OpenXmlHtml)](https://ci.appveyor.com/project/SimonCropp/OpenXmlHtml)
+[![NuGet Status](https://img.shields.io/nuget/v/MsWordDiff.svg?label=OpenXmlHtml)](https://www.nuget.org/packages/OpenXmlHtml/)
 
 Converts HTML to OpenXml elements for use in xlsx and docx files.
 
