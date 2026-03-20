@@ -10,9 +10,43 @@ public static class SpreadsheetHtmlConverter
     /// <summary>
     /// Converts an HTML string to an InlineString containing formatted Run elements.
     /// </summary>
-    public static InlineString ToInlineString(string html)
+    public static InlineString ToInlineString(string html) =>
+        ToInlineString(HtmlSegmentParser.Parse(html));
+
+    /// <summary>
+    /// Sets the value of a spreadsheet cell from HTML content.
+    /// </summary>
+    public static void SetCellHtml(SpreadsheetCell cell, string html)
+    {
+        cell.DataType = CellValues.InlineString;
+        cell.InlineString = ToInlineString(html);
+    }
+
+    /// <summary>
+    /// Sets the value of a spreadsheet cell from HTML content, applying wrap text and hyperlinks.
+    /// </summary>
+    public static void SetCellHtml(SpreadsheetCell cell, string html, WorksheetPart worksheetPart)
     {
         var segments = HtmlSegmentParser.Parse(html);
+        cell.DataType = CellValues.InlineString;
+        cell.InlineString = ToInlineString(segments);
+
+        var workbookPart = ((SpreadsheetDocument)worksheetPart.OpenXmlPackage).WorkbookPart!;
+
+        if (HasNewlines(cell.InlineString))
+        {
+            cell.StyleIndex = EnsureWrapTextStyle(workbookPart);
+        }
+
+        var linkUrl = GetSingleLinkUrl(segments);
+        if (linkUrl != null && cell.CellReference?.Value != null)
+        {
+            ApplyHyperlink(worksheetPart, cell.CellReference!, linkUrl);
+        }
+    }
+
+    static InlineString ToInlineString(List<TextSegment> segments)
+    {
         var inlineString = new InlineString();
 
         foreach (var segment in segments)
@@ -40,26 +74,51 @@ public static class SpreadsheetHtmlConverter
         return inlineString;
     }
 
-    /// <summary>
-    /// Sets the value of a spreadsheet cell from HTML content.
-    /// </summary>
-    public static void SetCellHtml(SpreadsheetCell cell, string html)
+    static string? GetSingleLinkUrl(List<TextSegment> segments)
     {
-        cell.DataType = CellValues.InlineString;
-        cell.InlineString = ToInlineString(html);
+        string? url = null;
+        foreach (var segment in segments)
+        {
+            if (segment.Format.LinkUrl == null)
+            {
+                continue;
+            }
+
+            if (url != null && url != segment.Format.LinkUrl)
+            {
+                return null;
+            }
+
+            url = segment.Format.LinkUrl;
+        }
+
+        return url;
     }
 
-    /// <summary>
-    /// Sets the value of a spreadsheet cell from HTML content, applying wrap text when the content contains newlines.
-    /// </summary>
-    public static void SetCellHtml(SpreadsheetCell cell, string html, WorkbookPart workbookPart)
+    static void ApplyHyperlink(WorksheetPart worksheetPart, string cellReference, string url)
     {
-        SetCellHtml(cell, html);
-
-        if (HasNewlines(cell.InlineString!))
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            cell.StyleIndex = EnsureWrapTextStyle(workbookPart);
+            return;
         }
+
+        var relationship = worksheetPart.AddHyperlinkRelationship(uri, true);
+
+        var worksheet = worksheetPart.Worksheet!;
+        var hyperlinks = worksheet.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.Hyperlinks>();
+        if (hyperlinks == null)
+        {
+            hyperlinks = new();
+            var sheetData = worksheet.GetFirstChild<SheetData>()!;
+            worksheet.InsertAfter(hyperlinks, sheetData);
+        }
+
+        hyperlinks.Append(
+            new DocumentFormat.OpenXml.Spreadsheet.Hyperlink
+            {
+                Reference = cellReference,
+                Id = relationship.Id
+            });
     }
 
     static bool HasNewlines(InlineString inlineString)
