@@ -92,6 +92,8 @@ static class HtmlSegmentParser
             case "li":
             {
                 var parent = element.ParentElement?.LocalName;
+                var depth = GetListDepth(element);
+                var indent = depth > 0 ? new string(' ', depth * 2) : "";
                 if (parent == "ol")
                 {
                     var index = 1;
@@ -108,11 +110,17 @@ static class HtmlSegmentParser
                         }
                     }
 
-                    segments.Add(new($"{index}. ", newFormat.Copy()));
+                    segments.Add(new($"{indent}{index}. ", newFormat.Copy()));
                 }
                 else
                 {
-                    segments.Add(new("● ", newFormat.Copy()));
+                    var bullet = depth switch
+                    {
+                        0 => "●",
+                        1 => "○",
+                        _ => "■"
+                    };
+                    segments.Add(new($"{indent}{bullet} ", newFormat.Copy()));
                 }
 
                 ProcessNode(element, newFormat, segments, inPre);
@@ -382,6 +390,24 @@ static class HtmlSegmentParser
         {
             segments.Add(new("\n", format.Copy()));
         }
+    }
+
+    static int GetListDepth(IElement listItem)
+    {
+        var depth = 0;
+        var current = listItem.ParentElement;
+        while (current != null)
+        {
+            if (current.LocalName is "ul" or "ol")
+            {
+                depth++;
+            }
+
+            current = current.ParentElement;
+        }
+
+        // Subtract 1 because the immediate parent ul/ol is depth 0
+        return Math.Max(0, depth - 1);
     }
 
     static void TrimTrailingNewlines(List<TextSegment> segments)

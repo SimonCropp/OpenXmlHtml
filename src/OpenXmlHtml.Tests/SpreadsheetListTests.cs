@@ -20,4 +20,12 @@ public class SpreadsheetListTests
     [Test]
     public Task NestedLists() =>
         Verify(SpreadsheetHtmlConverter.ToInlineString("<ul><li>outer</li><li><ul><li>inner</li></ul></li></ul>"));
+
+    [Test]
+    public Task DeeplyNestedLists() =>
+        Verify(SpreadsheetHtmlConverter.ToInlineString("<ul><li>level 0</li><li><ul><li>level 1</li><li><ul><li>level 2</li></ul></li></ul></li></ul>"));
+
+    [Test]
+    public Task NestedOrderedList() =>
+        Verify(SpreadsheetHtmlConverter.ToInlineString("<ol><li>first</li><li><ol><li>nested</li></ol></li></ol>"));
 }
