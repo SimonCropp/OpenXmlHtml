@@ -93,7 +93,9 @@ static class HtmlSegmentParser
             {
                 var parent = element.ParentElement?.LocalName;
                 var depth = GetListDepth(element);
-                var indent = depth > 0 ? new string(' ', depth * 2) : "";
+                var indent = depth > 0 ? new(' ', depth * 2) : "";
+                var bulletFormat = newFormat.Copy();
+                bulletFormat.ListDepth = depth;
                 if (parent == "ol")
                 {
                     var index = 1;
@@ -110,7 +112,7 @@ static class HtmlSegmentParser
                         }
                     }
 
-                    segments.Add(new($"{indent}{index}. ", newFormat.Copy()));
+                    segments.Add(new($"{indent}{index}. ", bulletFormat));
                 }
                 else
                 {
@@ -120,7 +122,7 @@ static class HtmlSegmentParser
                         1 => "○",
                         _ => "■"
                     };
-                    segments.Add(new($"{indent}{bullet} ", newFormat.Copy()));
+                    segments.Add(new($"{indent}{bullet} ", bulletFormat));
                 }
 
                 ProcessNode(element, newFormat, segments, inPre);

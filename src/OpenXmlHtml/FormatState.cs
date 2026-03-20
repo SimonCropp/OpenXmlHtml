@@ -10,6 +10,7 @@ class FormatState
     internal bool Superscript { get; set; }
     internal bool Subscript { get; set; }
     internal ImageData? Image { get; set; }
+    internal int ListDepth { get; set; }
 
     internal FormatState Copy() =>
         new()
@@ -23,7 +24,8 @@ class FormatState
             FontFamily = FontFamily,
             Superscript = Superscript,
             Subscript = Subscript,
-            Image = Image
+            Image = Image,
+            ListDepth = ListDepth
         };
 
     internal bool HasFormatting =>

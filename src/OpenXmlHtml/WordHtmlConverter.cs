@@ -24,13 +24,15 @@ public static class WordHtmlConverter
         var paragraphs = new List<Paragraph>();
         var currentRuns = new List<OpenXmlElement>();
         var imageIndex = 0;
+        var listDepth = 0;
 
         foreach (var segment in segments)
         {
             if (segment.Text == "\n")
             {
-                paragraphs.Add(BuildParagraph(currentRuns));
+                paragraphs.Add(BuildParagraph(currentRuns, listDepth));
                 currentRuns = [];
+                listDepth = 0;
                 continue;
             }
 
@@ -45,6 +47,13 @@ public static class WordHtmlConverter
                 continue;
             }
 
+            var text = segment.Text;
+            if (segment.Format.ListDepth > 0)
+            {
+                listDepth = segment.Format.ListDepth;
+                text = text.TrimStart();
+            }
+
             var run = new Run();
 
             if (segment.Format.HasFormatting)
@@ -53,7 +62,7 @@ public static class WordHtmlConverter
             }
 
             run.Append(
-                new Text(segment.Text)
+                new Text(text)
                 {
                     Space = SpaceProcessingModeValues.Preserve
                 });
@@ -62,7 +71,7 @@ public static class WordHtmlConverter
 
         if (currentRuns.Count > 0)
         {
-            paragraphs.Add(BuildParagraph(currentRuns));
+            paragraphs.Add(BuildParagraph(currentRuns, listDepth));
         }
 
         if (paragraphs.Count == 0)
@@ -122,9 +131,16 @@ public static class WordHtmlConverter
         ConvertToDocx(html, stream);
     }
 
-    static Paragraph BuildParagraph(List<OpenXmlElement> runs)
+    static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)
     {
         var paragraph = new Paragraph();
+
+        if (listDepth > 0)
+        {
+            paragraph.ParagraphProperties = new ParagraphProperties(
+                new Indentation { Left = (listDepth * 360).ToString() });
+        }
+
         foreach (var run in runs)
         {
             paragraph.Append(run);
