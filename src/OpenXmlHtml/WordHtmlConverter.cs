@@ -137,8 +137,11 @@ public static class WordHtmlConverter
 
         if (listDepth > 0)
         {
-            paragraph.ParagraphProperties = new ParagraphProperties(
-                new Indentation { Left = (listDepth * 360).ToString() });
+            paragraph.ParagraphProperties = new(
+                new Indentation
+                {
+                    Left = (listDepth * 360).ToString()
+                });
         }
 
         foreach (var run in runs)

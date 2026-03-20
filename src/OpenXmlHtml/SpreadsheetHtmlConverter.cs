@@ -66,7 +66,7 @@ public static class SpreadsheetHtmlConverter
     {
         foreach (var text in inlineString.Descendants<SpreadsheetText>())
         {
-            if (text.Text?.Contains('\n') == true)
+            if (text.Text.Contains('\n'))
             {
                 return true;
             }
@@ -83,23 +83,24 @@ public static class SpreadsheetHtmlConverter
         var stylesheet = stylesPart.Stylesheet;
         if (stylesheet == null)
         {
-            stylesheet = new Stylesheet();
+            stylesheet = new();
             stylesPart.Stylesheet = stylesheet;
         }
 
-        stylesheet.Fonts ??= new DocumentFormat.OpenXml.Spreadsheet.Fonts(new DocumentFormat.OpenXml.Spreadsheet.Font()) { Count = 1 };
-        stylesheet.Fills ??= new Fills(
+        stylesheet.Fonts ??= new(new DocumentFormat.OpenXml.Spreadsheet.Font()) { Count = 1 };
+        stylesheet.Fills ??= new(
             new Fill(new PatternFill { PatternType = PatternValues.None }),
             new Fill(new PatternFill { PatternType = PatternValues.Gray125 })
         )
         { Count = 2 };
-        stylesheet.Borders ??= new Borders(new DocumentFormat.OpenXml.Spreadsheet.Border()) { Count = 1 };
-        stylesheet.CellFormats ??= new CellFormats(new CellFormat()) { Count = 1 };
+        stylesheet.Borders ??= new(
+            new DocumentFormat.OpenXml.Spreadsheet.Border()) { Count = 1 };
+        stylesheet.CellFormats ??= new(new CellFormat()) { Count = 1 };
 
         uint index = 0;
         foreach (var cf in stylesheet.CellFormats.Elements<CellFormat>())
         {
-            if (cf.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.Alignment>()?.WrapText?.Value == true)
+            if (cf.GetFirstChild<Alignment>()?.WrapText?.Value == true)
             {
                 return index;
             }
@@ -108,7 +109,11 @@ public static class SpreadsheetHtmlConverter
         }
 
         stylesheet.CellFormats.Append(
-            new CellFormat(new DocumentFormat.OpenXml.Spreadsheet.Alignment { WrapText = true })
+            new CellFormat(
+                new Alignment
+                {
+                    WrapText = true
+                })
             {
                 ApplyAlignment = true
             });

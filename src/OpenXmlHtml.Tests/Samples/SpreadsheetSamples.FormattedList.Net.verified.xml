@@ -1,0 +1,2 @@
+﻿<x:is xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><x:r><x:t xml:space="preserve">● </x:t></x:r><x:r><x:rPr><x:color rgb="FF008000" /></x:rPr><x:t xml:space="preserve">Passed</x:t></x:r><x:r><x:t xml:space="preserve">: 47</x:t></x:r><x:r><x:t xml:space="preserve">
+</x:t></x:r><x:r><x:t xml:space="preserve">● </x:t></x:r><x:r><x:rPr><x:color rgb="FFFF0000" /></x:rPr><x:t xml:space="preserve">Failed</x:t></x:r><x:r><x:t xml:space="preserve">: 3</x:t></x:r></x:is>
