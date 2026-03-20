@@ -11,6 +11,7 @@ class FormatState
     internal bool Subscript { get; set; }
     internal ImageData? Image { get; set; }
     internal int ListDepth { get; set; }
+    internal string? LinkUrl { get; set; }
 
     internal FormatState Copy() =>
         new()
@@ -25,7 +26,8 @@ class FormatState
             Superscript = Superscript,
             Subscript = Subscript,
             Image = Image,
-            ListDepth = ListDepth
+            ListDepth = ListDepth,
+            LinkUrl = LinkUrl
         };
 
     internal bool HasFormatting =>
