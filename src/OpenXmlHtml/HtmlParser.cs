@@ -184,7 +184,7 @@ static class HtmlSegmentParser
         }
     }
 
-    static void ApplyElementFormatting(IElement element, string tag, FormatState format)
+    internal static void ApplyElementFormatting(IElement element, string tag, FormatState format)
     {
         switch (tag)
         {
@@ -327,7 +327,7 @@ static class HtmlSegmentParser
         }
     }
 
-    static bool IsBlockElement(string tag) =>
+    internal static bool IsBlockElement(string tag) =>
         tag is "p" or "div" or "h1" or "h2" or "h3" or "h4" or "h5" or "h6"
             or "ul" or "ol" or "li" or "blockquote" or "pre" or "table"
             or "tr" or "hr" or "section" or "article" or "header" or "footer"
@@ -336,7 +336,7 @@ static class HtmlSegmentParser
             or "caption" or "tbody" or "thead" or "tfoot"
             or "body" or "html";
 
-    static bool IsInterBlockWhitespace(IText textNode)
+    internal static bool IsInterBlockWhitespace(IText textNode)
     {
         var parent = textNode.ParentElement;
         if (parent == null)
@@ -357,7 +357,7 @@ static class HtmlSegmentParser
         return hasChildren;
     }
 
-    static string CollapseWhitespace(string text)
+    internal static string CollapseWhitespace(string text)
     {
         var builder = new StringBuilder(text.Length);
         var lastWasSpace = false;
@@ -395,7 +395,7 @@ static class HtmlSegmentParser
         }
     }
 
-    static int GetListDepth(IElement listItem)
+    internal static int GetListDepth(IElement listItem)
     {
         var depth = 0;
         var current = listItem.ParentElement;
@@ -421,7 +421,7 @@ static class HtmlSegmentParser
         }
     }
 
-    static ImageData? ParseImageSrc(IElement element)
+    internal static ImageData? ParseImageSrc(IElement element)
     {
         var src = element.GetAttribute("src");
         if (src == null || !src.StartsWith("data:", StringComparison.OrdinalIgnoreCase))

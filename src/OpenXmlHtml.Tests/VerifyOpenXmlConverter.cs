@@ -5,6 +5,7 @@ static class VerifyOpenXmlConverter
         VerifierSettings.RegisterFileConverter<SpreadsheetInlineString>(ConvertInlineString);
         VerifierSettings.RegisterFileConverter<SpreadsheetCell>(ConvertCell);
         VerifierSettings.RegisterFileConverter<List<Paragraph>>(ConvertParagraphs);
+        VerifierSettings.RegisterFileConverter<List<OpenXmlElement>>(ConvertElements);
         VerifierSettings.RegisterFileConverter<Body>(ConvertBody);
     }
 
@@ -15,6 +16,9 @@ static class VerifyOpenXmlConverter
         new(null, "xml", value.OuterXml);
 
     static ConversionResult ConvertParagraphs(List<Paragraph> value, IReadOnlyDictionary<string, object> context) =>
+        new(null, "xml", string.Join('\n', value.Select(_ => _.OuterXml)));
+
+    static ConversionResult ConvertElements(List<OpenXmlElement> value, IReadOnlyDictionary<string, object> context) =>
         new(null, "xml", string.Join('\n', value.Select(_ => _.OuterXml)));
 
     static ConversionResult ConvertBody(Body value, IReadOnlyDictionary<string, object> context) =>

@@ -10,10 +10,6 @@ Checklist
 4. Read the code of conduct
 Key Contacts
 Department Contacts
-Department	Contact	Extension
-IT Support	helpdesk@contoso.com	x4100
-Facilities	facilities@contoso.com	x4200
-HR	hr@contoso.com	x4300
 Important Policies
 Remote Work
 Up to 3 days per week after probation period.
@@ -21,3 +17,7 @@ Time Off
 20 days PTO plus 10 public holidays.
  “The strength of the team is each individual member.” — Phil Jackson 
 Last updated: January 2024. For questions contact onboarding@contoso.com (mailto:onboarding@contoso.com).
+Department	Contact	Extension
+IT Support	helpdesk@contoso.com	x4100
+Facilities	facilities@contoso.com	x4200
+HR	hr@contoso.com	x4300

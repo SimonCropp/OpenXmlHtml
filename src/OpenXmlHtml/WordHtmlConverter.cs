@@ -83,19 +83,31 @@ public static class WordHtmlConverter
     }
 
     /// <summary>
+    /// Converts HTML to a list of OpenXml elements (paragraphs, tables, etc.) for inserting into a Word document body.
+    /// </summary>
+    public static List<OpenXmlElement> ToElements(string html) =>
+        ToElements(html, null);
+
+    /// <summary>
+    /// Converts HTML to a list of OpenXml elements, embedding images into the given MainDocumentPart.
+    /// </summary>
+    public static List<OpenXmlElement> ToElements(string html, MainDocumentPart? mainPart) =>
+        WordContentBuilder.Build(html, mainPart);
+
+    /// <summary>
     /// Appends HTML content as paragraphs to a Word document body.
     /// </summary>
     public static void AppendHtml(Body body, string html) =>
         AppendHtml(body, html, null);
 
     /// <summary>
-    /// Appends HTML content as paragraphs to a Word document body, embedding images into the given MainDocumentPart.
+    /// Appends HTML content to a Word document body, embedding images into the given MainDocumentPart.
     /// </summary>
     public static void AppendHtml(Body body, string html, MainDocumentPart? mainPart)
     {
-        foreach (var paragraph in ToParagraphs(html, mainPart))
+        foreach (var element in ToElements(html, mainPart))
         {
-            body.Append(paragraph);
+            body.Append(element);
         }
     }
 
@@ -131,7 +143,7 @@ public static class WordHtmlConverter
         ConvertToDocx(html, stream);
     }
 
-    static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)
+    internal static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)
     {
         var paragraph = new Paragraph();
 
@@ -152,7 +164,7 @@ public static class WordHtmlConverter
         return paragraph;
     }
 
-    static RunProperties BuildWordRunProperties(FormatState format)
+    internal static RunProperties BuildWordRunProperties(FormatState format)
     {
         var props = new RunProperties();
 
@@ -204,7 +216,7 @@ public static class WordHtmlConverter
         return props;
     }
 
-    static Run BuildImageRun(MainDocumentPart mainPart, ImageData image, int imageIndex)
+    internal static Run BuildImageRun(MainDocumentPart mainPart, ImageData image, int imageIndex)
     {
         var imagePartType = GetImagePartType(image.ContentType);
         var relationshipId = $"rImage{imageIndex}";
