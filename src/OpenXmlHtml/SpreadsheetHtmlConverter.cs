@@ -49,6 +49,78 @@ public static class SpreadsheetHtmlConverter
         cell.InlineString = ToInlineString(html);
     }
 
+    /// <summary>
+    /// Sets the value of a spreadsheet cell from HTML content, applying wrap text when the content contains newlines.
+    /// </summary>
+    public static void SetCellHtml(SpreadsheetCell cell, string html, WorkbookPart workbookPart)
+    {
+        SetCellHtml(cell, html);
+
+        if (HasNewlines(cell.InlineString!))
+        {
+            cell.StyleIndex = EnsureWrapTextStyle(workbookPart);
+        }
+    }
+
+    static bool HasNewlines(InlineString inlineString)
+    {
+        foreach (var text in inlineString.Descendants<SpreadsheetText>())
+        {
+            if (text.Text.Contains('\n'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    static uint EnsureWrapTextStyle(WorkbookPart workbookPart)
+    {
+        var stylesPart = workbookPart.WorkbookStylesPart
+                         ?? workbookPart.AddNewPart<WorkbookStylesPart>();
+
+        var stylesheet = stylesPart.Stylesheet;
+        if (stylesheet == null)
+        {
+            stylesheet = new();
+            stylesPart.Stylesheet = stylesheet;
+        }
+
+        stylesheet.Fonts ??= new(new DocumentFormat.OpenXml.Spreadsheet.Font()) { Count = 1 };
+        stylesheet.Fills ??= new(
+            new Fill(new PatternFill { PatternType = PatternValues.None }),
+            new Fill(new PatternFill { PatternType = PatternValues.Gray125 })
+        )
+        { Count = 2 };
+        stylesheet.Borders ??= new(
+            new DocumentFormat.OpenXml.Spreadsheet.Border()) { Count = 1 };
+        stylesheet.CellFormats ??= new(new CellFormat()) { Count = 1 };
+
+        uint index = 0;
+        foreach (var cf in stylesheet.CellFormats.Elements<CellFormat>())
+        {
+            if (cf.GetFirstChild<Alignment>()?.WrapText?.Value == true)
+            {
+                return index;
+            }
+
+            index++;
+        }
+
+        stylesheet.CellFormats.Append(
+            new CellFormat(
+                new Alignment
+                {
+                    WrapText = true
+                })
+            {
+                ApplyAlignment = true
+            });
+        stylesheet.CellFormats.Count = index + 1;
+        return index;
+    }
+
     static SpreadsheetRunProperties BuildSpreadsheetRunProperties(FormatState format)
     {
         var props = new SpreadsheetRunProperties();

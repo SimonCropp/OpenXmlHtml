@@ -6,6 +6,7 @@ public static class ModuleInitializer
         VerifierSettings.DontScrubDateTimes();
         VerifierSettings.DontScrubGuids();
         VerifierSettings.InitializePlugins();
+        VerifierSettings.UniqueForRuntime();
         VerifyOpenXmlConverter.Initialize();
     }
 }

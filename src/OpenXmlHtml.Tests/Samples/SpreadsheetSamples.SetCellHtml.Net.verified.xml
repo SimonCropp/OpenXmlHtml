@@ -1,0 +1,1 @@
+﻿<x:c t="inlineStr" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><x:is><x:r><x:rPr><x:b /></x:rPr><x:t xml:space="preserve">Hello</x:t></x:r><x:r><x:t xml:space="preserve"> </x:t></x:r><x:r><x:rPr><x:i /></x:rPr><x:t xml:space="preserve">World</x:t></x:r></x:is></x:c>

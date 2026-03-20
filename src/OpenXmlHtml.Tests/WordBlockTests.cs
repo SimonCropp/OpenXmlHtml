@@ -40,4 +40,20 @@ public class WordBlockTests
     [Test]
     public Task FormattedListItems() =>
         Verify(WordHtmlConverter.ToParagraphs("<ul><li><b>bold</b> item</li><li><i>italic</i> item</li></ul>"));
+
+    [Test]
+    public Task NestedUnorderedLists() =>
+        Verify(WordHtmlConverter.ToParagraphs("<ul><li>outer</li><li><ul><li>inner</li></ul></li></ul>"));
+
+    [Test]
+    public Task NestedOrderedList() =>
+        Verify(WordHtmlConverter.ToParagraphs("<ol><li>first</li><li><ol><li>nested first</li><li>nested second</li></ol></li><li>second</li></ol>"));
+
+    [Test]
+    public Task DeeplyNestedList() =>
+        Verify(WordHtmlConverter.ToParagraphs("<ul><li>level 0</li><li><ul><li>level 1</li><li><ul><li>level 2</li></ul></li></ul></li></ul>"));
+
+    [Test]
+    public Task MixedNestedLists() =>
+        Verify(WordHtmlConverter.ToParagraphs("<ul><li>bullet</li><li><ol><li>numbered</li></ol></li></ul>"));
 }

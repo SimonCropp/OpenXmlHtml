@@ -38,3 +38,4 @@ nugets/
 
 # Verify
 *.received.*
+*~$*.xlsx
