@@ -1,4 +1,4 @@
-class FormatState
+struct FormatState
 {
     internal bool Bold { get; set; }
     internal bool Italic { get; set; }
@@ -18,29 +18,7 @@ class FormatState
     internal bool SmallCaps { get; set; }
     internal string? TextTransform { get; set; }
 
-    internal FormatState Copy() =>
-        new()
-        {
-            Bold = Bold,
-            Italic = Italic,
-            UnderlineStyle = UnderlineStyle,
-            Strikethrough = Strikethrough,
-            Color = Color,
-            FontSizePt = FontSizePt,
-            FontFamily = FontFamily,
-            Superscript = Superscript,
-            Subscript = Subscript,
-            Image = Image,
-            ListDepth = ListDepth,
-            LinkUrl = LinkUrl,
-            RunStyleId = RunStyleId,
-            BackgroundColor = BackgroundColor,
-            Border = Border,
-            SmallCaps = SmallCaps,
-            TextTransform = TextTransform
-        };
-
-    internal bool HasFormatting =>
+    internal readonly bool HasFormatting =>
         Bold ||
         Italic ||
         UnderlineStyle != null ||

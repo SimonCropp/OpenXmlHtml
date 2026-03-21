@@ -39,3 +39,4 @@ nugets/
 # Verify
 *.received.*
 *~$*.xlsx
+/src/OpenXmlHtml.Benchmarks/BenchmarkDotNet.Artifacts

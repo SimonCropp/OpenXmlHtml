@@ -7,7 +7,7 @@ static class HtmlSegmentParser
 
     internal static List<TextSegment> Parse(string html, HtmlConvertSettings? settings)
     {
-        var document = parser.ParseDocument($"<body>{html}</body>");
+        var document = parser.ParseDocument(string.Concat("<body>", html, "</body>"));
         var body = document.Body!;
         var segments = new List<TextSegment>();
         var format = new FormatState();
@@ -29,7 +29,7 @@ static class HtmlSegmentParser
                         !(string.IsNullOrWhiteSpace(text) &&
                           IsInterBlockWhitespace(textNode)))
                     {
-                        segments.Add(new(text, format.Copy()));
+                        segments.Add(new(text, format));
                     }
 
                     break;
@@ -44,25 +44,25 @@ static class HtmlSegmentParser
     static void ProcessElement(IElement element, FormatState format, List<TextSegment> segments, bool inPre, HtmlConvertSettings? settings)
     {
         var tag = element.LocalName;
-        var newFormat = format.Copy();
-        ApplyElementFormatting(element, tag, newFormat);
+        var newFormat = format;
+        ApplyElementFormatting(element, tag, ref newFormat);
 
         switch (tag)
         {
             case "br":
-                segments.Add(new("\n", format.Copy()));
+                segments.Add(new("\n", format));
                 return;
             case "hr":
                 EnsureNewline(segments, format);
-                segments.Add(new("———", format.Copy()));
-                segments.Add(new("\n", format.Copy()));
+                segments.Add(new("———", format));
+                segments.Add(new("\n", format));
                 return;
             case "img":
             {
                 var imageData = ImageResolver.Resolve(element, settings);
                 if (imageData != null)
                 {
-                    var imageFormat = format.Copy();
+                    var imageFormat = format;
                     imageFormat.Image = imageData;
                     segments.Add(new("\uFFFC", imageFormat));
                 }
@@ -72,7 +72,7 @@ static class HtmlSegmentParser
                     if (!string.IsNullOrEmpty(alt))
                     {
                         // ReSharper disable once RedundantSuppressNullableWarningExpression
-                        segments.Add(new(alt!, format.Copy()));
+                        segments.Add(new(alt!, format));
                     }
                 }
 
@@ -80,7 +80,7 @@ static class HtmlSegmentParser
             }
             case "svg":
             {
-                var imageFormat = format.Copy();
+                var imageFormat = format;
                 imageFormat.Image = ParseSvgElement(element);
                 segments.Add(new("\uFFFC", imageFormat));
                 return;
@@ -100,7 +100,7 @@ static class HtmlSegmentParser
                 var parent = element.ParentElement?.LocalName;
                 var depth = GetListDepth(element);
                 var indent = depth > 0 ? new(' ', depth * 2) : "";
-                var bulletFormat = newFormat.Copy();
+                var bulletFormat = newFormat;
                 bulletFormat.ListDepth = depth;
                 if (parent == "ol")
                 {
@@ -144,7 +144,7 @@ static class HtmlSegmentParser
                     var linkText = element.TextContent.Trim();
                     if (linkText != href)
                     {
-                        segments.Add(new($" ({href})", format.Copy()));
+                        segments.Add(new($" ({href})", format));
                     }
                 }
 
@@ -152,9 +152,9 @@ static class HtmlSegmentParser
             }
             case "q":
             {
-                segments.Add(new("\u201C", format.Copy()));
+                segments.Add(new("\u201C", format));
                 ProcessNode(element, newFormat, segments, inPre, settings);
-                segments.Add(new("\u201D", format.Copy()));
+                segments.Add(new("\u201D", format));
                 return;
             }
             case "td" or "th":
@@ -163,7 +163,7 @@ static class HtmlSegmentParser
                 var nextSibling = element.NextElementSibling;
                 if (nextSibling is { LocalName: "td" or "th" })
                 {
-                    segments.Add(new("\t", format.Copy()));
+                    segments.Add(new("\t", format));
                 }
 
                 return;
@@ -190,7 +190,7 @@ static class HtmlSegmentParser
         }
     }
 
-    internal static void ApplyElementFormatting(IElement element, string tag, FormatState format)
+    internal static void ApplyElementFormatting(IElement element, string tag, ref FormatState format)
     {
         switch (tag)
         {
@@ -253,10 +253,10 @@ static class HtmlSegmentParser
             format.FontSizePt = size;
         }
 
-        ApplyInlineStyle(element, format);
+        ApplyInlineStyle(element, ref format);
     }
 
-    static void ApplyInlineStyle(IElement element, FormatState format)
+    static void ApplyInlineStyle(IElement element, ref FormatState format)
     {
         var style = element.GetAttribute("style");
         if (style == null)
@@ -443,7 +443,7 @@ static class HtmlSegmentParser
         var last = segments[^1];
         if (!last.Text.EndsWith('\n'))
         {
-            segments.Add(new("\n", format.Copy()));
+            segments.Add(new("\n", format));
         }
     }
 

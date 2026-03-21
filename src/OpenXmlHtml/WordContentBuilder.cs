@@ -27,7 +27,7 @@ static class WordContentBuilder
 
     internal static List<OpenXmlElement> Build(string html, MainDocumentPart? mainPart, HtmlConvertSettings? settings = null)
     {
-        var document = parser.ParseDocument($"<body>{html}</body>");
+        var document = parser.ParseDocument(string.Concat("<body>", html, "</body>"));
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
         var ctx = new WordBuildContext
@@ -85,8 +85,8 @@ static class WordContentBuilder
     static void ProcessElement(IElement element, FormatState format, List<OpenXmlElement> elements, WordBuildContext context, bool inPre)
     {
         var tag = element.LocalName;
-        var newFormat = format.Copy();
-        HtmlSegmentParser.ApplyElementFormatting(element, tag, newFormat);
+        var newFormat = format;
+        HtmlSegmentParser.ApplyElementFormatting(element, tag, ref newFormat);
 
         switch (tag)
         {
@@ -654,7 +654,7 @@ static class WordContentBuilder
         }
 
         elements.Add(paragraph);
-        ctx.CurrentRuns = [];
+        ctx.CurrentRuns.Clear();
         ctx.ListDepth = 0;
         ctx.HeadingLevel = 0;
         ctx.ParagraphStyleId = null;
@@ -770,7 +770,7 @@ static class WordContentBuilder
     static void ForceFlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)
     {
         elements.Add(WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListDepth));
-        ctx.CurrentRuns = [];
+        ctx.CurrentRuns.Clear();
         ctx.ListDepth = 0;
     }
 
@@ -797,8 +797,8 @@ static class WordContentBuilder
 
         if (caption != null)
         {
-            var captionFormat = format.Copy();
-            HtmlSegmentParser.ApplyElementFormatting(caption, "caption", captionFormat);
+            var captionFormat = format;
+            HtmlSegmentParser.ApplyElementFormatting(caption, "caption", ref captionFormat);
             ProcessChildren(caption, captionFormat, elements, ctx, false);
             FlushParagraph(elements, ctx);
         }
@@ -1041,8 +1041,8 @@ static class WordContentBuilder
             tc.Append(tcPr);
         }
 
-        var cellFormat = format.Copy();
-        HtmlSegmentParser.ApplyElementFormatting(cellElement, cellElement.LocalName, cellFormat);
+        var cellFormat = format;
+        HtmlSegmentParser.ApplyElementFormatting(cellElement, cellElement.LocalName, ref cellFormat);
 
         var cellElements = new List<OpenXmlElement>();
         var cellCtx = new WordBuildContext

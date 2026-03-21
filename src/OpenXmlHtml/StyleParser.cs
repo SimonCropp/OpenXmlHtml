@@ -2,7 +2,7 @@ static class StyleParser
 {
     internal static Dictionary<string, string> Parse(string? style)
     {
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var result = new Dictionary<string, string>(8, StringComparer.OrdinalIgnoreCase);
         if (string.IsNullOrWhiteSpace(style))
         {
             return result;
