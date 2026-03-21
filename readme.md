@@ -414,6 +414,18 @@ The `class` attribute maps CSS class names to Word styles defined in the documen
  * RGBA: `rgba(255, 0, 0, 0.5)` (alpha channel is parsed but not applied — Word doesn't support color transparency)
 
 
+## Why Not altChunk?
+
+Word's altChunk (w:altChunk) mechanism can embed raw HTML inside a .docx file and have Word convert it at open time. This approach was considered and rejected for several reasons:
+
+ * Deferred and lossy conversion — Word processes the HTML when the file is opened, replacing the altChunk with its own interpretation. The output varies by Word version and is not round-trip stable.
+ * Undocumented tag support — Microsoft has never published a conformance spec for the HTML subset that Word's import filter accepts. Supported tags are determined empirically, and behaviour differs across versions.
+ * Poor ecosystem compatibility — Many .docx consumers (LibreOffice, headless processors, other libraries) have partial or broken altChunk support. Files are not reliably portable.
+ * No programmatic access — Because the HTML is opaque to the container, the content cannot be inspected, modified, or processed without first opening the file in Word.
+
+OpenXmlHtml instead parses HTML with AngleSharp and emits native OOXML elements directly. This means the output is valid, stable, portable OOXML from the moment it is written — with no dependency on Word being installed, no conversion step, and predictable behaviour across all .docx consumers.
+
+
 ## Icon
 
 https://thenounproject.com/icon/dog-6292156/
