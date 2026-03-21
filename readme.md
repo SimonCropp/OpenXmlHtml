@@ -301,7 +301,12 @@ When converting with a `MainDocumentPart` that has a `StyleDefinitionsPart`, CSS
  * `colspan`, `rowspan` - Cell spanning (Word)
  * `thead`, `tbody`, `tfoot` - Table sections
  * `caption` - Table caption (bold)
+ * `cellpadding` - HTML attribute for default cell padding (Word)
+ * `bgcolor` - HTML attribute for cell background color (Word)
+ * `width` - HTML attribute for cell width (Word)
  * Nested tables supported (Word)
+ * Cell CSS: `padding`, `width`, `background-color`, `vertical-align` (top/middle/bottom) (Word)
+ * Table CSS: `width`, `background-color`, `padding` (default cell padding) (Word)
 
 
 ### Inline / Other

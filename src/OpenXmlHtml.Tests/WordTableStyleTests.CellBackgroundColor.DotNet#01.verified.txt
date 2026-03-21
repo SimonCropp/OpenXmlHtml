@@ -1,0 +1,2 @@
+﻿Header	Value
+Row 1	$100

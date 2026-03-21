@@ -637,16 +637,60 @@ static class WordContentBuilder
         var columnCount = GetColumnCount(rows);
         var table = new Table();
 
-        table.Append(
-            new TableProperties(
-                new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
-                new TableBorders(
-                    new TopBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new LeftBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new BottomBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new RightBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" })));
+        var tblPr = new TableProperties(
+            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
+            new TableBorders(
+                new TopBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
+                new LeftBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
+                new BottomBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
+                new RightBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
+                new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
+                new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" }));
+
+        var tableStyle = tableElement.GetAttribute("style");
+        if (tableStyle != null)
+        {
+            var declarations = StyleParser.Parse(tableStyle);
+
+            if (declarations.TryGetValue("width", out var tableWidth))
+            {
+                var twips = StyleParser.ParseLengthToTwips(tableWidth);
+                if (twips != null)
+                {
+                    tblPr.TableWidth = new TableWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa };
+                }
+            }
+
+            if (declarations.TryGetValue("background-color", out var tableBg) ||
+                declarations.TryGetValue("background", out tableBg))
+            {
+                var parsed = ColorParser.Parse(tableBg);
+                if (parsed != null)
+                {
+                    tblPr.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = parsed });
+                }
+            }
+
+            ApplyTableCellPadding(declarations, tblPr);
+        }
+
+        // HTML cellpadding attribute
+        var cellPaddingAttr = tableElement.GetAttribute("cellpadding");
+        if (cellPaddingAttr != null)
+        {
+            var twips = StyleParser.ParseLengthToTwips(cellPaddingAttr);
+            if (twips != null)
+            {
+                var margin = new TableCellMarginDefault(
+                    new TopMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
+                    new StartMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
+                    new BottomMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
+                    new EndMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                tblPr.Append(margin);
+            }
+        }
+
+        table.Append(tblPr);
 
         var grid = new TableGrid();
         for (var i = 0; i < columnCount; i++)
@@ -723,10 +767,11 @@ static class WordContentBuilder
     static TableCell BuildTableCell(IElement cellElement, FormatState format, WordBuildContext parentCtx, int colspan, bool isRowspanStart)
     {
         var tc = new TableCell();
+        TableCellProperties? tcPr = null;
 
         if (colspan > 1 || isRowspanStart)
         {
-            var tcPr = new TableCellProperties();
+            tcPr = new TableCellProperties();
             if (colspan > 1)
             {
                 tcPr.Append(new GridSpan { Val = colspan });
@@ -736,7 +781,41 @@ static class WordContentBuilder
             {
                 tcPr.Append(new VerticalMerge { Val = MergedCellValues.Restart });
             }
+        }
 
+        var cellStyle = cellElement.GetAttribute("style");
+        if (cellStyle != null)
+        {
+            var declarations = StyleParser.Parse(cellStyle);
+            tcPr = ApplyCellStyles(declarations, tcPr);
+        }
+
+        // HTML bgcolor attribute
+        var bgColorAttr = cellElement.GetAttribute("bgcolor");
+        if (bgColorAttr != null)
+        {
+            var parsed = ColorParser.Parse(bgColorAttr);
+            if (parsed != null)
+            {
+                tcPr ??= new TableCellProperties();
+                tcPr.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = parsed });
+            }
+        }
+
+        // HTML width attribute
+        var widthAttr = cellElement.GetAttribute("width");
+        if (widthAttr != null)
+        {
+            var twips = StyleParser.ParseLengthToTwips(widthAttr);
+            if (twips != null)
+            {
+                tcPr ??= new TableCellProperties();
+                tcPr.Append(new TableCellWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+        }
+
+        if (tcPr != null)
+        {
             tc.Append(tcPr);
         }
 
@@ -774,6 +853,180 @@ static class WordContentBuilder
         }
 
         return tc;
+    }
+
+    static TableCellProperties ApplyCellStyles(Dictionary<string, string> declarations, TableCellProperties? tcPr)
+    {
+        tcPr ??= new TableCellProperties();
+
+        // Cell width
+        if (declarations.TryGetValue("width", out var cellWidth))
+        {
+            var twips = StyleParser.ParseLengthToTwips(cellWidth);
+            if (twips != null)
+            {
+                tcPr.Append(new TableCellWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+        }
+
+        // Background color
+        if (declarations.TryGetValue("background-color", out var bgColor) ||
+            declarations.TryGetValue("background", out bgColor))
+        {
+            var parsed = ColorParser.Parse(bgColor);
+            if (parsed != null)
+            {
+                tcPr.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = parsed });
+            }
+        }
+
+        // Vertical alignment
+        if (declarations.TryGetValue("vertical-align", out var vAlign))
+        {
+            var val = vAlign.Trim().ToLowerInvariant() switch
+            {
+                "top" => TableVerticalAlignmentValues.Top,
+                "middle" => TableVerticalAlignmentValues.Center,
+                "bottom" => TableVerticalAlignmentValues.Bottom,
+                _ => (TableVerticalAlignmentValues?)null
+            };
+            if (val != null)
+            {
+                tcPr.Append(new TableCellVerticalAlignment { Val = val.Value });
+            }
+        }
+
+        // Cell padding
+        var hasPadding = false;
+        int? padTop = null, padRight = null, padBottom = null, padLeft = null;
+
+        if (declarations.TryGetValue("padding", out var padShorthand))
+        {
+            var (t, r, b, l) = StyleParser.ParseMarginShorthand(padShorthand);
+            padTop = t;
+            padRight = r;
+            padBottom = b;
+            padLeft = l;
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-top", out var pt))
+        {
+            padTop = StyleParser.ParseLengthToTwips(pt);
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-right", out var pr))
+        {
+            padRight = StyleParser.ParseLengthToTwips(pr);
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-bottom", out var pb))
+        {
+            padBottom = StyleParser.ParseLengthToTwips(pb);
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-left", out var pl))
+        {
+            padLeft = StyleParser.ParseLengthToTwips(pl);
+            hasPadding = true;
+        }
+
+        if (hasPadding)
+        {
+            var margin = new TableCellMargin();
+            if (padTop != null)
+            {
+                margin.Append(new TopMargin { Width = padTop.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            if (padLeft != null)
+            {
+                margin.Append(new StartMargin { Width = padLeft.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            if (padBottom != null)
+            {
+                margin.Append(new BottomMargin { Width = padBottom.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            if (padRight != null)
+            {
+                margin.Append(new EndMargin { Width = padRight.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            tcPr.Append(margin);
+        }
+
+        return tcPr;
+    }
+
+    static void ApplyTableCellPadding(Dictionary<string, string> declarations, TableProperties tblPr)
+    {
+        var hasPadding = false;
+        int? padTop = null, padRight = null, padBottom = null, padLeft = null;
+
+        if (declarations.TryGetValue("padding", out var padShorthand))
+        {
+            var (t, r, b, l) = StyleParser.ParseMarginShorthand(padShorthand);
+            padTop = t;
+            padRight = r;
+            padBottom = b;
+            padLeft = l;
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-top", out var pt))
+        {
+            padTop = StyleParser.ParseLengthToTwips(pt);
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-right", out var pr))
+        {
+            padRight = StyleParser.ParseLengthToTwips(pr);
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-bottom", out var pb))
+        {
+            padBottom = StyleParser.ParseLengthToTwips(pb);
+            hasPadding = true;
+        }
+
+        if (declarations.TryGetValue("padding-left", out var pl))
+        {
+            padLeft = StyleParser.ParseLengthToTwips(pl);
+            hasPadding = true;
+        }
+
+        if (hasPadding)
+        {
+            var margin = new TableCellMarginDefault();
+            if (padTop != null)
+            {
+                margin.Append(new TopMargin { Width = padTop.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            if (padLeft != null)
+            {
+                margin.Append(new StartMargin { Width = padLeft.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            if (padBottom != null)
+            {
+                margin.Append(new BottomMargin { Width = padBottom.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            if (padRight != null)
+            {
+                margin.Append(new EndMargin { Width = padRight.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            }
+
+            tblPr.Append(margin);
+        }
     }
 
     static List<IElement> GetTableRows(IElement tableElement)

@@ -1,0 +1,3 @@
+﻿{
+  Text: Wide via attr	Narrow via attr
+}
