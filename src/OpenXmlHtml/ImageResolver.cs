@@ -1,5 +1,3 @@
-namespace OpenXmlHtml;
-
 static class ImageResolver
 {
     static readonly HttpClient sharedClient = new();

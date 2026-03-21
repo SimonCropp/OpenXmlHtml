@@ -1,5 +1,3 @@
-namespace OpenXmlHtml;
-
 enum StyleType
 {
     Paragraph,

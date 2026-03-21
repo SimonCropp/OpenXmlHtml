@@ -1,5 +1,3 @@
-namespace OpenXmlHtml;
-
 static class WordNumberingBuilder
 {
     internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart mainPart)

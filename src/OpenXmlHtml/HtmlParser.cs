@@ -1,5 +1,3 @@
-namespace OpenXmlHtml;
-
 static class HtmlSegmentParser
 {
     static readonly HtmlParser parser = new();
