@@ -190,6 +190,71 @@ public class WordSamples
     }
 
     [Test]
+    public Task HeadersAndFooters()
+    {
+        #region HeadersAndFooters
+
+        using var headerStream = new MemoryStream();
+        using var headerDoc = WordprocessingDocument.Create(
+            headerStream, WordprocessingDocumentType.Document);
+        var headerMainPart = headerDoc.AddMainDocumentPart();
+        headerMainPart.Document = new(new Body());
+
+        WordHtmlConverter.AppendHtml(
+            headerMainPart.Document.Body!,
+            "<p>Document content</p>",
+            headerMainPart);
+
+        WordHtmlConverter.SetHeader(headerMainPart,
+            """<p style="text-align: center"><b>Company Name</b></p>""");
+
+        WordHtmlConverter.SetFooter(headerMainPart,
+            """<p style="text-align: center; font-size: 9pt; color: gray">Confidential</p>""");
+
+        #endregion
+
+        headerDoc.Dispose();
+        headerStream.Position = 0;
+        return Verify(headerStream, "docx");
+    }
+
+    [Test]
+    public Task StyleMapping()
+    {
+        using var styleStream = new MemoryStream();
+        using var styleDoc = WordprocessingDocument.Create(
+            styleStream, WordprocessingDocumentType.Document);
+        var styleMainPart = styleDoc.AddMainDocumentPart();
+
+        var stylesPart = styleMainPart.AddNewPart<StyleDefinitionsPart>();
+        stylesPart.Styles = new Styles(
+            new Style { StyleId = "Quote", Type = StyleValues.Paragraph },
+            new Style { StyleId = "Emphasis", Type = StyleValues.Character });
+
+        var styleBody = new Body();
+        styleMainPart.Document = new Document(styleBody);
+
+        #region StyleMapping
+
+        // CSS class names are matched against Word styles in the document.
+        // Paragraph styles apply via ParagraphStyleId,
+        // character styles apply via RunStyle.
+        WordHtmlConverter.AppendHtml(
+            styleBody,
+            """
+            <p class="Quote">This uses the Quote paragraph style</p>
+            <p>Normal text with <span class="Emphasis">emphasized</span> word</p>
+            """,
+            styleMainPart);
+
+        #endregion
+
+        styleDoc.Dispose();
+        styleStream.Position = 0;
+        return Verify(styleStream, "docx");
+    }
+
+    [Test]
     public async Task ConvertFileToDocx()
     {
         var htmlPath = await TempFile.CreateText("<h1>Hello</h1><p>World</p>");

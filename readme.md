@@ -199,7 +199,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L198-L202' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L263-L267' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -207,16 +207,28 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
 Set document headers and footers from HTML:
 
+<!-- snippet: HeadersAndFooters -->
+<a id='snippet-HeadersAndFooters'></a>
 ```cs
-using var stream = new MemoryStream();
-using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-var mainPart = document.AddMainDocumentPart();
-mainPart.Document = new Document(new Body());
+using var headerStream = new MemoryStream();
+using var headerDoc = WordprocessingDocument.Create(
+    headerStream, WordprocessingDocumentType.Document);
+var headerMainPart = headerDoc.AddMainDocumentPart();
+headerMainPart.Document = new(new Body());
 
-WordHtmlConverter.AppendHtml(mainPart.Document.Body!, "<p>Document content</p>", mainPart);
-WordHtmlConverter.SetHeader(mainPart, """<p style="text-align: center"><b>Company Name</b></p>""");
-WordHtmlConverter.SetFooter(mainPart, """<p style="text-align: center; font-size: 9pt; color: gray">Confidential</p>""");
+WordHtmlConverter.AppendHtml(
+    headerMainPart.Document.Body!,
+    "<p>Document content</p>",
+    headerMainPart);
+
+WordHtmlConverter.SetHeader(headerMainPart,
+    """<p style="text-align: center"><b>Company Name</b></p>""");
+
+WordHtmlConverter.SetFooter(headerMainPart,
+    """<p style="text-align: center; font-size: 9pt; color: gray">Confidential</p>""");
 ```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L195-L214' title='Snippet source file'>snippet source</a> | <a href='#snippet-HeadersAndFooters' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 Headers and footers support all the same HTML elements and CSS properties as the document body (tables, formatting, images, etc.). Overloads accepting `HtmlConvertSettings` are also available.
 
@@ -263,13 +275,22 @@ All conversion methods (`ToParagraphs`, `ToElements`, `AppendHtml`, `ConvertToDo
 
 When converting with a `MainDocumentPart` that has a `StyleDefinitionsPart`, CSS class names are matched against Word style definitions:
 
-```html
-<!-- Applies "Quote" paragraph style if defined in the document -->
-<p class="Quote">This uses the Quote paragraph style</p>
-
-<!-- Applies "Emphasis" character style if defined in the document -->
-<p>Normal text with <span class="Emphasis">emphasized</span> word</p>
+<!-- snippet: StyleMapping -->
+<a id='snippet-StyleMapping'></a>
+```cs
+// CSS class names are matched against Word styles in the document.
+// Paragraph styles apply via ParagraphStyleId,
+// character styles apply via RunStyle.
+WordHtmlConverter.AppendHtml(
+    styleBody,
+    """
+    <p class="Quote">This uses the Quote paragraph style</p>
+    <p>Normal text with <span class="Emphasis">emphasized</span> word</p>
+    """,
+    styleMainPart);
 ```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L237-L250' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
  * Paragraph styles (`w:type="paragraph"`) are applied via `ParagraphStyleId`
  * Character styles (`w:type="character"`) are applied via `RunStyle`
