@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>OpenXmlHtml.Benchmarks.WordBenchmarks-20260322-004300</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.19045.7058/22H2/2022Update)
+Intel Core i9-9880H CPU 2.30GHz, 1 CPU, 16 logical and 8 physical cores
+.NET SDK 10.0.200
+  [Host]     : .NET 10.0.4 (10.0.426.12010), X64 RyuJIT AVX2
+  DefaultJob : .NET 10.0.4 (10.0.426.12010), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method                </th><th>Mean  </th><th>Error</th><th>StdDev</th><th>Gen0</th><th>Gen1</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>ToParagraphs_SimpleInline</td><td>35.49 &mu;s</td><td>0.400 &mu;s</td><td>0.355 &mu;s</td><td>2.1973</td><td>-</td><td>18.57 KB</td>
+</tr><tr><td>ToParagraphs_RichParagraphs</td><td>101.55 &mu;s</td><td>1.031 &mu;s</td><td>0.964 &mu;s</td><td>5.1270</td><td>0.2441</td><td>43.23 KB</td>
+</tr><tr><td>ToElements_SimpleInline</td><td>35.30 &mu;s</td><td>0.319 &mu;s</td><td>0.298 &mu;s</td><td>2.1362</td><td>0.0610</td><td>17.92 KB</td>
+</tr><tr><td>ToElements_RichParagraphs</td><td>118.52 &mu;s</td><td>1.794 &mu;s</td><td>1.591 &mu;s</td><td>4.8828</td><td>-</td><td>47.77 KB</td>
+</tr><tr><td>ToElements_NestedList</td><td>107.05 &mu;s</td><td>0.721 &mu;s</td><td>0.602 &mu;s</td><td>5.1270</td><td>0.2441</td><td>42.15 KB</td>
+</tr><tr><td>ToElements_Table</td><td>165.39 &mu;s</td><td>1.660 &mu;s</td><td>1.471 &mu;s</td><td>6.8359</td><td>-</td><td>56.23 KB</td>
+</tr><tr><td>ToElements_NestedTable</td><td>77.73 &mu;s</td><td>1.125 &mu;s</td><td>1.052 &mu;s</td><td>4.1504</td><td>0.2441</td><td>34.3 KB</td>
+</tr><tr><td>ConvertToDocx_RichParagraphs</td><td>605.09 &mu;s</td><td>1.770 &mu;s</td><td>1.655 &mu;s</td><td>11.7188</td><td>-</td><td>120.54 KB</td>
+</tr><tr><td>ConvertToDocx_Table</td><td>564.70 &mu;s</td><td>10.541 &mu;s</td><td>18.183 &mu;s</td><td>11.7188</td><td>-</td><td>121.12 KB</td>
+</tr><tr><td>ConvertToDocx_NestedList</td><td>1,192.03 &mu;s</td><td>20.208 &mu;s</td><td>16.874 &mu;s</td><td>31.2500</td><td>7.8125</td><td>288.45 KB</td>
+</tr><tr><td>ConvertToDocx_LargeDocument</td><td>26,223.70 &mu;s</td><td>458.169 &mu;s</td><td>579.437 &mu;s</td><td>571.4286</td><td>428.5714</td><td>5968.05 KB</td>
+</tr><tr><td>AppendHtml_RichParagraphs</td><td>601.20 &mu;s</td><td>8.991 &mu;s</td><td>10.354 &mu;s</td><td>11.7188</td><td>-</td><td>120.54 KB</td>
+</tr><tr><td>AppendHtml_LargeDocument</td><td>25,477.86 &mu;s</td><td>495.970 &mu;s</td><td>1,415.030 &mu;s</td><td>600.0000</td><td>400.0000</td><td>5967.59 KB</td>
+</tr></tbody></table>
+</body>
+</html>
