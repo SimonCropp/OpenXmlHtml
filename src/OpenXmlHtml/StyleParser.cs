@@ -62,17 +62,42 @@ static class StyleParser
             return raw;
         }
 
-        return span.ToString().ToLowerInvariant() switch
+        if (span.Equals("xx-small", StringComparison.OrdinalIgnoreCase))
         {
-            "xx-small" => 7,
-            "x-small" => 8,
-            "small" => 10,
-            "medium" => 12,
-            "large" => 14,
-            "x-large" => 18,
-            "xx-large" => 24,
-            _ => null
-        };
+            return 7;
+        }
+
+        if (span.Equals("x-small", StringComparison.OrdinalIgnoreCase))
+        {
+            return 8;
+        }
+
+        if (span.Equals("small", StringComparison.OrdinalIgnoreCase))
+        {
+            return 10;
+        }
+
+        if (span.Equals("medium", StringComparison.OrdinalIgnoreCase))
+        {
+            return 12;
+        }
+
+        if (span.Equals("large", StringComparison.OrdinalIgnoreCase))
+        {
+            return 14;
+        }
+
+        if (span.Equals("x-large", StringComparison.OrdinalIgnoreCase))
+        {
+            return 18;
+        }
+
+        if (span.Equals("xx-large", StringComparison.OrdinalIgnoreCase))
+        {
+            return 24;
+        }
+
+        return null;
     }
 
     internal static int? ParseLengthToTwips(string value)
@@ -141,15 +166,31 @@ static class StyleParser
         };
     }
 
-    internal static JustificationValues? ParseTextAlign(string value) =>
-        value.Trim().ToLowerInvariant() switch
+    internal static JustificationValues? ParseTextAlign(string value)
+    {
+        var span = value.AsSpan().Trim();
+        if (span.Equals("left", StringComparison.OrdinalIgnoreCase))
         {
-            "left" => JustificationValues.Left,
-            "center" => JustificationValues.Center,
-            "right" => JustificationValues.Right,
-            "justify" => JustificationValues.Both,
-            _ => null
-        };
+            return JustificationValues.Left;
+        }
+
+        if (span.Equals("center", StringComparison.OrdinalIgnoreCase))
+        {
+            return JustificationValues.Center;
+        }
+
+        if (span.Equals("right", StringComparison.OrdinalIgnoreCase))
+        {
+            return JustificationValues.Right;
+        }
+
+        if (span.Equals("justify", StringComparison.OrdinalIgnoreCase))
+        {
+            return JustificationValues.Both;
+        }
+
+        return null;
+    }
 
     static readonly HashSet<string> borderStyles = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -168,19 +209,7 @@ static class StyleParser
         {
             if (borderStyles.Contains(part))
             {
-                style = part.ToLowerInvariant() switch
-                {
-                    "solid" => BorderValues.Single,
-                    "dotted" => BorderValues.Dotted,
-                    "dashed" => BorderValues.Dashed,
-                    "double" => BorderValues.Double,
-                    "none" or "hidden" => BorderValues.None,
-                    "groove" => BorderValues.ThreeDEngrave,
-                    "ridge" => BorderValues.ThreeDEmboss,
-                    "inset" => BorderValues.Inset,
-                    "outset" => BorderValues.Outset,
-                    _ => BorderValues.Single
-                };
+                style = ParseBorderStyle(part);
             }
             else if (widthEighths == null)
             {
@@ -221,20 +250,76 @@ static class StyleParser
         return new(widthEighths ?? 4, style ?? BorderValues.Single, color);
     }
 
-    static int? ParseBorderWidth(string value)
+    static BorderValues ParseBorderStyle(string part)
     {
-        var lower = value.Trim().ToLowerInvariant();
-        switch (lower)
+        var span = part.AsSpan();
+        if (span.Equals("solid", StringComparison.OrdinalIgnoreCase))
         {
-            case "thin":
-                return 4;
-            case "medium":
-                return 12;
-            case "thick":
-                return 18;
+            return BorderValues.Single;
         }
 
-        var span = lower.AsSpan();
+        if (span.Equals("dotted", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.Dotted;
+        }
+
+        if (span.Equals("dashed", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.Dashed;
+        }
+
+        if (span.Equals("double", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.Double;
+        }
+
+        if (span.Equals("none", StringComparison.OrdinalIgnoreCase) ||
+            span.Equals("hidden", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.None;
+        }
+
+        if (span.Equals("groove", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.ThreeDEngrave;
+        }
+
+        if (span.Equals("ridge", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.ThreeDEmboss;
+        }
+
+        if (span.Equals("inset", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.Inset;
+        }
+
+        if (span.Equals("outset", StringComparison.OrdinalIgnoreCase))
+        {
+            return BorderValues.Outset;
+        }
+
+        return BorderValues.Single;
+    }
+
+    static int? ParseBorderWidth(string value)
+    {
+        var span = value.AsSpan().Trim();
+
+        if (span.Equals("thin", StringComparison.OrdinalIgnoreCase))
+        {
+            return 4;
+        }
+
+        if (span.Equals("medium", StringComparison.OrdinalIgnoreCase))
+        {
+            return 12;
+        }
+
+        if (span.Equals("thick", StringComparison.OrdinalIgnoreCase))
+        {
+            return 18;
+        }
 
         // 1pt = 8 eighths
         if (TryParseSuffix(span, "pt", out var pt))
@@ -248,7 +333,7 @@ static class StyleParser
             return Math.Max(1, (int)Math.Round(px * 6));
         }
 
-        if (double.TryParse(lower, NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
+        if (double.TryParse(span.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
         {
             return raw == 0 ? 0 : Math.Max(1, (int)Math.Round(raw * 6));
         }

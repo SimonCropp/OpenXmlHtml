@@ -190,7 +190,10 @@ static class HtmlSegmentParser
         }
     }
 
-    internal static void ApplyElementFormatting(IElement element, string tag, ref FormatState format)
+    internal static void ApplyElementFormatting(IElement element, string tag, ref FormatState format) =>
+        ApplyElementFormatting(element, tag, ref format, out _);
+
+    internal static void ApplyElementFormatting(IElement element, string tag, ref FormatState format, out Dictionary<string, string>? declarations)
     {
         switch (tag)
         {
@@ -253,18 +256,19 @@ static class HtmlSegmentParser
             format.FontSizePt = size;
         }
 
-        ApplyInlineStyle(element, ref format);
+        ApplyInlineStyle(element, ref format, out declarations);
     }
 
-    static void ApplyInlineStyle(IElement element, ref FormatState format)
+    static void ApplyInlineStyle(IElement element, ref FormatState format, out Dictionary<string, string>? declarations)
     {
         var style = element.GetAttribute("style");
         if (style == null)
         {
+            declarations = null;
             return;
         }
 
-        var declarations = StyleParser.Parse(style);
+        declarations = StyleParser.Parse(style);
 
         if (declarations.TryGetValue("font-weight", out var fontWeight))
         {
@@ -298,14 +302,23 @@ static class HtmlSegmentParser
         if (declarations.TryGetValue("text-decoration-style", out var decorationStyle) &&
             format.UnderlineStyle != null)
         {
-            format.UnderlineStyle = decorationStyle.Trim().ToLowerInvariant() switch
+            var ds = decorationStyle.AsSpan().Trim();
+            if (ds.Equals("dotted", StringComparison.OrdinalIgnoreCase))
             {
-                "dotted" => UnderlineValues.Dotted,
-                "dashed" => UnderlineValues.Dash,
-                "wavy" => UnderlineValues.Wave,
-                "double" => UnderlineValues.Double,
-                _ => format.UnderlineStyle
-            };
+                format.UnderlineStyle = UnderlineValues.Dotted;
+            }
+            else if (ds.Equals("dashed", StringComparison.OrdinalIgnoreCase))
+            {
+                format.UnderlineStyle = UnderlineValues.Dash;
+            }
+            else if (ds.Equals("wavy", StringComparison.OrdinalIgnoreCase))
+            {
+                format.UnderlineStyle = UnderlineValues.Wave;
+            }
+            else if (ds.Equals("double", StringComparison.OrdinalIgnoreCase))
+            {
+                format.UnderlineStyle = UnderlineValues.Double;
+            }
         }
 
         if (declarations.TryGetValue("color", out var color))
@@ -351,11 +364,19 @@ static class HtmlSegmentParser
 
         if (declarations.TryGetValue("text-transform", out var textTransform))
         {
-            format.TextTransform = textTransform.Trim().ToLowerInvariant() switch
+            var tt = textTransform.AsSpan().Trim();
+            if (tt.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
             {
-                "uppercase" or "lowercase" or "capitalize" => textTransform.Trim().ToLowerInvariant(),
-                _ => null
-            };
+                format.TextTransform = "uppercase";
+            }
+            else if (tt.Equals("lowercase", StringComparison.OrdinalIgnoreCase))
+            {
+                format.TextTransform = "lowercase";
+            }
+            else if (tt.Equals("capitalize", StringComparison.OrdinalIgnoreCase))
+            {
+                format.TextTransform = "capitalize";
+            }
         }
 
         if (declarations.TryGetValue("border", out var borderVal))

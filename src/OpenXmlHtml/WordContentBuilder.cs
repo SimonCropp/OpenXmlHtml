@@ -86,7 +86,7 @@ static class WordContentBuilder
     {
         var tag = element.LocalName;
         var newFormat = format;
-        HtmlSegmentParser.ApplyElementFormatting(element, tag, ref newFormat);
+        HtmlSegmentParser.ApplyElementFormatting(element, tag, ref newFormat, out var styleDeclarations);
 
         switch (tag)
         {
@@ -368,10 +368,9 @@ static class WordContentBuilder
 
         if (isBlock)
         {
-            var style = element.GetAttribute("style");
-            if (style != null)
+            if (styleDeclarations != null)
             {
-                var declarations = StyleParser.Parse(style);
+                var declarations = styleDeclarations;
                 pageBreakBefore = declarations.TryGetValue("page-break-before", out var pbb) && pbb == "always";
                 pageBreakAfter = declarations.TryGetValue("page-break-after", out var pba) && pba == "always";
 
@@ -449,12 +448,12 @@ static class WordContentBuilder
 
                 if (declarations.TryGetValue("writing-mode", out var writingMode))
                 {
-                    pf.WritingMode = writingMode.Trim().ToLowerInvariant() switch
-                    {
-                        "vertical-rl" or "tb-rl" => TextDirectionValues.TopToBottomRightToLeft,
-                        "vertical-lr" or "tb-lr" => TextDirectionValues.BottomToTopLeftToRight,
-                        _ => null
-                    };
+                    var wm = writingMode.AsSpan().Trim();
+                    pf.WritingMode = wm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
+                        ? TextDirectionValues.TopToBottomRightToLeft
+                        : wm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
+                        ? TextDirectionValues.BottomToTopLeftToRight
+                        : null;
                 }
 
                 if (declarations.TryGetValue("direction", out var direction) &&
@@ -538,17 +537,19 @@ static class WordContentBuilder
 
         // Add bookmark for elements with id attribute
         var elementId = element.GetAttribute("id") ?? element.GetAttribute("name");
+        string? bookmarkId = null;
         if (elementId != null && isBlock)
         {
             context.BookmarkId++;
-            context.CurrentRuns.Add(new BookmarkStart { Id = context.BookmarkId.ToString(), Name = elementId });
+            bookmarkId = context.BookmarkId.ToString();
+            context.CurrentRuns.Add(new BookmarkStart { Id = bookmarkId, Name = elementId });
         }
 
         ProcessChildren(element, newFormat, elements, context, inPre);
 
-        if (elementId != null && isBlock)
+        if (bookmarkId != null)
         {
-            context.CurrentRuns.Add(new BookmarkEnd { Id = context.BookmarkId.ToString() });
+            context.CurrentRuns.Add(new BookmarkEnd { Id = bookmarkId });
         }
 
         if (isBlock)
@@ -891,11 +892,12 @@ static class WordContentBuilder
             var twips = StyleParser.ParseLengthToTwips(cellPaddingAttr);
             if (twips != null)
             {
+                var w = twips.Value.ToString();
                 var margin = new TableCellMarginDefault(
-                    new TopMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new StartMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new BottomMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new EndMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                    new TopMargin { Width = w, Type = TableWidthUnitValues.Dxa },
+                    new StartMargin { Width = w, Type = TableWidthUnitValues.Dxa },
+                    new BottomMargin { Width = w, Type = TableWidthUnitValues.Dxa },
+                    new EndMargin { Width = w, Type = TableWidthUnitValues.Dxa });
                 tblPr.Append(margin);
             }
         }
@@ -1109,13 +1111,11 @@ static class WordContentBuilder
         // Vertical alignment
         if (declarations.TryGetValue("vertical-align", out var vAlign))
         {
-            var val = vAlign.Trim().ToLowerInvariant() switch
-            {
-                "top" => TableVerticalAlignmentValues.Top,
-                "middle" => TableVerticalAlignmentValues.Center,
-                "bottom" => TableVerticalAlignmentValues.Bottom,
-                _ => (TableVerticalAlignmentValues?)null
-            };
+            var va = vAlign.AsSpan().Trim();
+            var val = va.Equals("top", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Top
+                : va.Equals("middle", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Center
+                : va.Equals("bottom", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Bottom
+                : (TableVerticalAlignmentValues?)null;
             if (val != null)
             {
                 tcPr.Append(new TableCellVerticalAlignment { Val = val.Value });
@@ -1125,12 +1125,12 @@ static class WordContentBuilder
         // Writing mode on cell
         if (declarations.TryGetValue("writing-mode", out var cellWritingMode))
         {
-            var cellTextDir = cellWritingMode.Trim().ToLowerInvariant() switch
-            {
-                "vertical-rl" or "tb-rl" => TextDirectionValues.TopToBottomRightToLeft,
-                "vertical-lr" or "tb-lr" => TextDirectionValues.BottomToTopLeftToRight,
-                _ => (TextDirectionValues?)null
-            };
+            var cwm = cellWritingMode.AsSpan().Trim();
+            var cellTextDir = cwm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
+                ? TextDirectionValues.TopToBottomRightToLeft
+                : cwm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
+                ? TextDirectionValues.BottomToTopLeftToRight
+                : (TextDirectionValues?)null;
             if (cellTextDir != null)
             {
                 tcPr.Append(new TextDirection { Val = cellTextDir.Value });
