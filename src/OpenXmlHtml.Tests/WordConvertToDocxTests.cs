@@ -229,6 +229,37 @@ public class WordConvertToDocxTests
     }
 
     [Test]
+    public Task InlineSvg()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <p>Before SVG</p>
+            <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="red"/>
+            </svg>
+            <p>After SVG</p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
+    public Task SvgDataUri()
+    {
+        var svg = Convert.ToBase64String("""<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="blue"/></svg>"""u8.ToArray());
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            $"""
+            <p><img src="data:image/svg+xml;base64,{svg}" width="80" height="80"></p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
     public Task FromStream()
     {
         var htmlBytes = "<p>Hello <b>World</b></p>"u8.ToArray();

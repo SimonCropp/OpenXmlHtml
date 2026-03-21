@@ -78,7 +78,12 @@ static class HtmlSegmentParser
                 return;
             }
             case "svg":
+            {
+                var imageFormat = format.Copy();
+                imageFormat.Image = ParseSvgElement(element);
+                segments.Add(new("\uFFFC", imageFormat));
                 return;
+            }
         }
 
         var isBlock = IsBlockElement(tag);
@@ -479,5 +484,74 @@ static class HtmlSegmentParser
         }
 
         return new(bytes, contentType, width, height);
+    }
+
+    internal static ImageData ParseSvgElement(IElement element)
+    {
+        var svgHtml = element.OuterHtml;
+
+        // Ensure SVG namespace is present for standalone SVG rendering
+        if (!svgHtml.Contains("xmlns="))
+        {
+            svgHtml = svgHtml.Replace("<svg", """<svg xmlns="http://www.w3.org/2000/svg" """);
+        }
+
+        // Convert HTML-style empty elements to self-closing XML form (Word requires valid XML SVG)
+        svgHtml = System.Text.RegularExpressions.Regex.Replace(
+            svgHtml, @"<([\w:-]+)(\s[^>]*)?>(\s*)</\1>", "<$1$2 />");
+
+        var svgBytes = Encoding.UTF8.GetBytes(svgHtml);
+
+        var width = ParseSvgDimension(element.GetAttribute("width"));
+        var height = ParseSvgDimension(element.GetAttribute("height"));
+
+        if (width == null || height == null)
+        {
+            var viewBox = element.GetAttribute("viewBox");
+            if (viewBox != null)
+            {
+                var dims = ParseViewBox(viewBox);
+                width ??= dims.Width;
+                height ??= dims.Height;
+            }
+        }
+
+        return new(svgBytes, "image/svg+xml", width, height);
+    }
+
+    static int? ParseSvgDimension(string? value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        value = value.Trim();
+        if (value.EndsWith("px", StringComparison.OrdinalIgnoreCase))
+        {
+            value = value.Substring(0, value.Length - 2);
+        }
+
+        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
+        {
+            return (int)Math.Round(result);
+        }
+
+        return null;
+    }
+
+    static readonly char[] viewBoxSeparators = [' ', ','];
+
+    static (int? Width, int? Height) ParseViewBox(string viewBox)
+    {
+        var parts = viewBox.Split(viewBoxSeparators, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 4 &&
+            double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var w) &&
+            double.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out var h))
+        {
+            return ((int)Math.Round(w), (int)Math.Round(h));
+        }
+
+        return (null, null);
     }
 }

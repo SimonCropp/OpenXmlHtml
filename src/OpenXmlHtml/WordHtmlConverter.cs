@@ -216,8 +216,17 @@ public static class WordHtmlConverter
         return props;
     }
 
+    // Small PNG used as fallback for SVG images in older Word versions
+    static readonly byte[] fallbackPng = Convert.FromBase64String(
+        "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==");
+
     internal static Run BuildImageRun(MainDocumentPart mainPart, ImageData image, int imageIndex)
     {
+        if (image.ContentType == "image/svg+xml")
+        {
+            return BuildSvgImageRun(mainPart, image, imageIndex);
+        }
+
         var imagePartType = GetImagePartType(image.ContentType);
         var relationshipId = $"rImage{imageIndex}";
         var imagePart = mainPart.AddImagePart(imagePartType, relationshipId);
@@ -229,7 +238,60 @@ public static class WordHtmlConverter
         var widthEmu = (long)(image.WidthPx ?? 100) * 9525;
         var heightEmu = (long)(image.HeightPx ?? 100) * 9525;
 
-        var drawing = new Drawing(
+        var drawing = BuildImageDrawing(
+            new()
+            {
+                Embed = relationshipId
+            },
+            widthEmu,
+            heightEmu);
+
+        var run = new Run();
+        run.Append(drawing);
+        return run;
+    }
+
+    static Run BuildSvgImageRun(MainDocumentPart mainPart, ImageData image, int imageIndex)
+    {
+        // Add PNG fallback for older Word versions
+        var pngRelId = $"rImage{imageIndex}";
+        var pngPart = mainPart.AddImagePart("image/png", pngRelId);
+        using (var ms = new MemoryStream(fallbackPng))
+        {
+            pngPart.FeedData(ms);
+        }
+
+        // Add SVG image part
+        var svgRelId = $"rImage{imageIndex}s";
+        var svgPart = mainPart.AddImagePart("image/svg+xml", svgRelId);
+        using (var ms = new MemoryStream(image.Bytes))
+        {
+            svgPart.FeedData(ms);
+        }
+
+        var widthEmu = (long)(image.WidthPx ?? 100) * 9525;
+        var heightEmu = (long)(image.HeightPx ?? 100) * 9525;
+
+        // Blip references PNG fallback, with SVG extension for Word 2016+
+        var blip = new A.Blip { Embed = pngRelId };
+        var svgBlipElement = new OpenXmlUnknownElement("asvg", "svgBlip", "http://schemas.microsoft.com/office/drawing/2016/SVG/main");
+        svgBlipElement.SetAttribute(new("r", "embed", "http://schemas.openxmlformats.org/officeDocument/2006/relationships", svgRelId));
+        var ext = new OpenXmlUnknownElement("a", "ext", "http://schemas.openxmlformats.org/drawingml/2006/main");
+        ext.SetAttribute(new("", "uri", "", "{96DAC541-7B7A-43D3-8B79-37D633B846F1}"));
+        ext.Append(svgBlipElement);
+        var extList = new OpenXmlUnknownElement("a", "extLst", "http://schemas.openxmlformats.org/drawingml/2006/main");
+        extList.Append(ext);
+        blip.Append(extList);
+
+        var drawing = BuildImageDrawing(blip, widthEmu, heightEmu);
+
+        var run = new Run();
+        run.Append(drawing);
+        return run;
+    }
+
+    static Drawing BuildImageDrawing(A.Blip blip, long widthEmu, long heightEmu) =>
+        new(
             new DW.Inline(
                 new DW.Extent { Cx = widthEmu, Cy = heightEmu },
                 new DW.DocProperties { Id = 1U, Name = "Image" },
@@ -240,7 +302,7 @@ public static class WordHtmlConverter
                                 new PIC.NonVisualDrawingProperties { Id = 0U, Name = "Image" },
                                 new PIC.NonVisualPictureDrawingProperties()),
                             new PIC.BlipFill(
-                                new A.Blip { Embed = relationshipId },
+                                blip,
                                 new A.Stretch(new A.FillRectangle())),
                             new PIC.ShapeProperties(
                                 new A.Transform2D(
@@ -256,11 +318,6 @@ public static class WordHtmlConverter
                 DistanceFromLeft = 0U,
                 DistanceFromRight = 0U
             });
-
-        var run = new Run();
-        run.Append(drawing);
-        return run;
-    }
 
     static string GetImagePartType(string contentType) =>
         contentType.ToLowerInvariant() switch

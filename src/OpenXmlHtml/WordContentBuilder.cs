@@ -18,7 +18,7 @@ static class WordContentBuilder
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
         var ctx = new WordBuildContext { MainPart = mainPart };
-        ProcessChildren(body, new FormatState(), elements, ctx, false);
+        ProcessChildren(body, new(), elements, ctx, false);
         FlushParagraph(elements, ctx);
         TrimTrailingEmptyParagraphs(elements);
 
@@ -95,7 +95,16 @@ static class WordContentBuilder
                 return;
             }
             case "svg":
+            {
+                if (ctx.MainPart != null)
+                {
+                    var imageData = HtmlSegmentParser.ParseSvgElement(element);
+                    ctx.ImageIndex++;
+                    ctx.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(ctx.MainPart, imageData, ctx.ImageIndex));
+                }
+
                 return;
+            }
             case "col":
                 return;
             case "table":

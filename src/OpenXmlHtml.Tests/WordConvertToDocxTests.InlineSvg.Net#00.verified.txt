@@ -1,0 +1,6 @@
+﻿{
+  Text:
+Before SVG
+  
+After SVG
+}
