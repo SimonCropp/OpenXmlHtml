@@ -203,13 +203,13 @@ static class HtmlSegmentParser
                 format.Italic = true;
                 break;
             case "u" or "ins":
-                format.Underline = true;
+                format.UnderlineStyle ??= UnderlineValues.Single;
                 break;
             case "s" or "strike" or "del":
                 format.Strikethrough = true;
                 break;
             case "a":
-                format.Underline = true;
+                format.UnderlineStyle ??= UnderlineValues.Single;
                 format.Color ??= "0563C1";
                 format.LinkUrl = element.GetAttribute("href");
                 break;
@@ -288,13 +288,26 @@ static class HtmlSegmentParser
         {
             if (textDecoration.Contains("underline", StringComparison.OrdinalIgnoreCase))
             {
-                format.Underline = true;
+                format.UnderlineStyle ??= UnderlineValues.Single;
             }
 
             if (textDecoration.Contains("line-through", StringComparison.OrdinalIgnoreCase))
             {
                 format.Strikethrough = true;
             }
+        }
+
+        if (declarations.TryGetValue("text-decoration-style", out var decorationStyle) &&
+            format.UnderlineStyle != null)
+        {
+            format.UnderlineStyle = decorationStyle.Trim().ToLowerInvariant() switch
+            {
+                "dotted" => UnderlineValues.Dotted,
+                "dashed" => UnderlineValues.Dash,
+                "wavy" => UnderlineValues.Wave,
+                "double" => UnderlineValues.Double,
+                _ => format.UnderlineStyle
+            };
         }
 
         if (declarations.TryGetValue("color", out var color))

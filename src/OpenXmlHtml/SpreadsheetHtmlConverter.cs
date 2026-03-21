@@ -247,7 +247,7 @@ public static class SpreadsheetHtmlConverter
             props.Append(new SpreadsheetItalic());
         }
 
-        if (format.Underline)
+        if (format.UnderlineStyle != null)
         {
             props.Append(new SpreadsheetUnderline());
         }

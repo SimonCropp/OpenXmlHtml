@@ -2,7 +2,7 @@ class FormatState
 {
     internal bool Bold { get; set; }
     internal bool Italic { get; set; }
-    internal bool Underline { get; set; }
+    internal UnderlineValues? UnderlineStyle { get; set; }
     internal bool Strikethrough { get; set; }
     internal string? Color { get; set; }
     internal double? FontSizePt { get; set; }
@@ -20,7 +20,7 @@ class FormatState
         {
             Bold = Bold,
             Italic = Italic,
-            Underline = Underline,
+            UnderlineStyle = UnderlineStyle,
             Strikethrough = Strikethrough,
             Color = Color,
             FontSizePt = FontSizePt,
@@ -37,7 +37,7 @@ class FormatState
     internal bool HasFormatting =>
         Bold ||
         Italic ||
-        Underline ||
+        UnderlineStyle != null ||
         Strikethrough ||
         Superscript ||
         Subscript ||

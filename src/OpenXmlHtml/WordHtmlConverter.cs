@@ -240,9 +240,9 @@ public static class WordHtmlConverter
             props.Append(new Italic());
         }
 
-        if (format.Underline)
+        if (format.UnderlineStyle != null)
         {
-            props.Append(new Underline { Val = UnderlineValues.Single });
+            props.Append(new Underline { Val = format.UnderlineStyle });
         }
 
         if (format.Strikethrough)

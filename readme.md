@@ -330,6 +330,7 @@ Inline `style` attributes are supported:
  * `font-weight: bold` (or 700-900)
  * `font-style: italic`
  * `text-decoration: underline`, `text-decoration: line-through`
+ * `text-decoration-style` - Underline variant: `dotted`, `dashed`, `wavy`, `double` (Word)
  * `color` - Text color (hex, named, rgb())
  * `font-size` - Font size (pt, px, em, keywords)
  * `font-family` - Font family

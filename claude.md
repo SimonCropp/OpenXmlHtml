@@ -75,6 +75,7 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordEdgeCaseTests` | Whitespace collapsing, malformed HTML, unclosed tags, unknown tags, image alt fallback |
 | `WordParagraphSpacingTests` | `margin`, `text-indent`, `text-align`, `line-height` |
 | `WordBackgroundColorTests` | `background-color` on runs/paragraphs, `background` shorthand, `<mark>` element |
+| `WordUnderlineTests` | `text-decoration-style` variants (dotted, dashed, wavy, double), `<u>`/`<ins>` tags, spreadsheet underline |
 | `WordStyleMappingTests` | CSS `class` → Word paragraph/character style mapping |
 | `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
 | `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |
@@ -87,10 +88,12 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `ColorParserTests` | Hex/named/RGB color parsing |
 | `Spreadsheet*Tests` | Mirror of Word tests for spreadsheet-supported features |
 
-### Adding tests for new features
+### Test requirements
+
+**Every new feature and bug fix must have a dedicated test.** Do not rely on combo tests or incidental coverage. The test should be named after the specific feature or bug (e.g., `SmallCapsTag`, `BorderShorthand`, `NestedListNumberingRestart`).
 
 1. Find the appropriate test file from the table above (or create a new `Word<Feature>Tests.cs`)
-2. Add a test method named after the feature (e.g., `SmallCapsTag`, `BorderShorthand`)
+2. Add a test method named after the feature
 3. For features requiring `MainDocumentPart` (styles, numbering, images), use `ConvertToDocx` or `AppendHtml` with a `MainDocumentPart`
 4. For simple formatting, `ToParagraphs` is sufficient
 5. Run test → copy `.received.*` to `.verified.*` → run again to confirm
