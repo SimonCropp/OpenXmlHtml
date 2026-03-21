@@ -203,6 +203,24 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 <!-- endSnippet -->
 
 
+### Headers and Footers
+
+Set document headers and footers from HTML:
+
+```cs
+using var stream = new MemoryStream();
+using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+var mainPart = document.AddMainDocumentPart();
+mainPart.Document = new Document(new Body());
+
+WordHtmlConverter.AppendHtml(mainPart.Document.Body!, "<p>Document content</p>", mainPart);
+WordHtmlConverter.SetHeader(mainPart, """<p style="text-align: center"><b>Company Name</b></p>""");
+WordHtmlConverter.SetFooter(mainPart, """<p style="text-align: center; font-size: 9pt; color: gray">Confidential</p>""");
+```
+
+Headers and footers support all the same HTML elements and CSS properties as the document body (tables, formatting, images, etc.). Overloads accepting `HtmlConvertSettings` are also available.
+
+
 ### Remote Images
 
 By default, only base64 data URI images are embedded. External images (HTTP/HTTPS URLs, local files) require explicit opt-in via `HtmlConvertSettings` and `ImagePolicy`:
@@ -363,6 +381,7 @@ The `class` attribute maps CSS class names to Word styles defined in the documen
  * Hex: `#RGB`, `#RRGGBB`, `#RRGGBBAA`
  * Named: `red`, `blue`, `green`, `darkred`, `steelblue`, etc. (60+ colors)
  * RGB: `rgb(255, 0, 0)`
+ * RGBA: `rgba(255, 0, 0, 0.5)` (alpha channel is parsed but not applied — Word doesn't support color transparency)
 
 
 ## Icon

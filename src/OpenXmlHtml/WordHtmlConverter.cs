@@ -200,6 +200,92 @@ public static class WordHtmlConverter
         ConvertToDocx(html, stream, settings);
     }
 
+    /// <summary>
+    /// Sets the default header of a Word document from HTML content.
+    /// </summary>
+    public static void SetHeader(MainDocumentPart mainPart, string html)
+    {
+        var headerPart = mainPart.AddNewPart<HeaderPart>();
+        var header = new Header();
+        foreach (var element in WordContentBuilder.Build(html, mainPart))
+        {
+            header.Append(element);
+        }
+
+        headerPart.Header = header;
+        EnsureHeaderFooterReference(mainPart,
+            new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) });
+    }
+
+    /// <summary>
+    /// Sets the default header of a Word document from HTML content, with settings controlling remote image resolution.
+    /// </summary>
+    public static void SetHeader(MainDocumentPart mainPart, string html, HtmlConvertSettings settings)
+    {
+        var headerPart = mainPart.AddNewPart<HeaderPart>();
+        var header = new Header();
+        foreach (var element in WordContentBuilder.Build(html, mainPart, settings))
+        {
+            header.Append(element);
+        }
+
+        headerPart.Header = header;
+        EnsureHeaderFooterReference(mainPart,
+            new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) });
+    }
+
+    /// <summary>
+    /// Sets the default footer of a Word document from HTML content.
+    /// </summary>
+    public static void SetFooter(MainDocumentPart mainPart, string html)
+    {
+        var footerPart = mainPart.AddNewPart<FooterPart>();
+        var footer = new Footer();
+        foreach (var element in WordContentBuilder.Build(html, mainPart))
+        {
+            footer.Append(element);
+        }
+
+        footerPart.Footer = footer;
+        EnsureHeaderFooterReference(mainPart,
+            new FooterReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(footerPart) });
+    }
+
+    /// <summary>
+    /// Sets the default footer of a Word document from HTML content, with settings controlling remote image resolution.
+    /// </summary>
+    public static void SetFooter(MainDocumentPart mainPart, string html, HtmlConvertSettings settings)
+    {
+        var footerPart = mainPart.AddNewPart<FooterPart>();
+        var footer = new Footer();
+        foreach (var element in WordContentBuilder.Build(html, mainPart, settings))
+        {
+            footer.Append(element);
+        }
+
+        footerPart.Footer = footer;
+        EnsureHeaderFooterReference(mainPart,
+            new FooterReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(footerPart) });
+    }
+
+    static void EnsureHeaderFooterReference(MainDocumentPart mainPart, OpenXmlElement reference)
+    {
+        var body = mainPart.Document?.Body;
+        if (body == null)
+        {
+            return;
+        }
+
+        var sectionProps = body.GetFirstChild<SectionProperties>();
+        if (sectionProps == null)
+        {
+            sectionProps = new SectionProperties();
+            body.Append(sectionProps);
+        }
+
+        sectionProps.Append(reference);
+    }
+
     internal static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)
     {
         var paragraph = new Paragraph();

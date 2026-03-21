@@ -82,9 +82,15 @@ static class ColorParser
                     hex[2].ToString(), hex[2].ToString()).ToUpperInvariant();
             }
 
-            if (hex.Length is 6 or 8)
+            if (hex.Length == 6)
             {
                 return hex.ToString().ToUpperInvariant();
+            }
+
+            if (hex.Length == 8)
+            {
+                // #RRGGBBAA — strip alpha, keep RGB
+                return hex[..6].ToString().ToUpperInvariant();
             }
 
             return null;
@@ -122,9 +128,17 @@ static class ColorParser
             return null;
         }
 
+        // For rgba(r,g,b,a), extract only r,g,b — ignore alpha
+        var bSpan = rest[(secondComma + 1)..];
+        var thirdComma = bSpan.IndexOf(',');
+        if (thirdComma >= 0)
+        {
+            bSpan = bSpan[..thirdComma];
+        }
+
         if (!int.TryParse(inner[..firstComma].Trim().ToString(), out var r) ||
             !int.TryParse(rest[..secondComma].Trim().ToString(), out var g) ||
-            !int.TryParse(rest[(secondComma + 1)..].Trim().ToString(), out var b))
+            !int.TryParse(bSpan.Trim().ToString(), out var b))
         {
             return null;
         }

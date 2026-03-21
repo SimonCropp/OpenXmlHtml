@@ -81,12 +81,13 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
 | `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |
 | `WordConvertToDocxTests` | Full docx output: images, SVG, footnotes, page breaks, CSS styles, lists, tables |
+| `WordHeaderFooterTests` | `SetHeader`/`SetFooter` with plain and formatted HTML, tables in headers |
 | `WordConvertFileTests` | `ConvertFileToDocx` file I/O |
 | `WordIntegrationTests` | `AppendHtml`, `ToParagraphs` rich document scenarios |
 | `WordStyleComboTests` | Single large docx exercising all features together |
 | `ImagePolicyTests` | `ImagePolicy` unit tests (Deny/AllowAll/SafeDomains/SafeDirectories/Filter) |
 | `StyleParserTests` | CSS parsing, `ParseFontSize`, `ParseLengthToTwips` |
-| `ColorParserTests` | Hex/named/RGB color parsing |
+| `ColorParserTests` | Hex/named/RGB/RGBA color parsing |
 | `Spreadsheet*Tests` | Mirror of Word tests for spreadsheet-supported features |
 
 ### Test requirements
