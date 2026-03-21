@@ -69,31 +69,22 @@ static class WordNumberingBuilder
             abstractNum.Append(level);
         }
 
-        // Insert before any NumberingInstance elements
-        var firstInstance = numbering.GetFirstChild<NumberingInstance>();
-        if (firstInstance != null)
-        {
-            numbering.InsertBefore(abstractNum, firstInstance);
-        }
-        else
-        {
-            numbering.Append(abstractNum);
-        }
-
+        InsertAbstractNum(numbering, abstractNum);
         return abstractNumId;
     }
 
-    internal static int CreateDecimalAbstractNum(Numbering numbering, int abstractNumId)
+    internal static int CreateOrderedAbstractNum(Numbering numbering, int abstractNumId, NumberFormatValues format)
     {
         var abstractNum = new AbstractNum { AbstractNumberId = abstractNumId };
         abstractNum.Append(new MultiLevelType { Val = MultiLevelValues.HybridMultilevel });
 
+        var suffix = format == NumberFormatValues.Decimal ? "." : ")";
         for (var i = 0; i < 9; i++)
         {
             var level = new Level(
                 new StartNumberingValue { Val = 1 },
-                new NumberingFormat { Val = NumberFormatValues.Decimal },
-                new LevelText { Val = $"%{i + 1}." },
+                new NumberingFormat { Val = format },
+                new LevelText { Val = $"%{i + 1}{suffix}" },
                 new LevelJustification { Val = LevelJustificationValues.Left },
                 new ParagraphProperties(
                     new Indentation
@@ -107,6 +98,45 @@ static class WordNumberingBuilder
             abstractNum.Append(level);
         }
 
+        InsertAbstractNum(numbering, abstractNum);
+        return abstractNumId;
+    }
+
+    internal static int AddNumberingInstance(Numbering numbering, int numId, int abstractNumId, int? startOverride = null)
+    {
+        var instance = new NumberingInstance(
+            new AbstractNumId { Val = abstractNumId })
+        {
+            NumberID = numId
+        };
+
+        if (startOverride != null)
+        {
+            instance.Append(
+                new LevelOverride(
+                    new StartOverrideNumberingValue { Val = startOverride.Value })
+                {
+                    LevelIndex = 0
+                });
+        }
+
+        numbering.Append(instance);
+        return numId;
+    }
+
+    internal static NumberFormatValues ParseListStyleType(string? type, string? cssListStyle, bool isOrdered) =>
+        (cssListStyle?.Trim().ToLowerInvariant() ?? type?.Trim().ToLowerInvariant()) switch
+        {
+            "a" or "lower-alpha" or "lower-latin" => NumberFormatValues.LowerLetter,
+            "A" or "upper-alpha" or "upper-latin" => NumberFormatValues.UpperLetter,
+            "i" or "lower-roman" => NumberFormatValues.LowerRoman,
+            "I" or "upper-roman" => NumberFormatValues.UpperRoman,
+            "1" or "decimal" => NumberFormatValues.Decimal,
+            _ => isOrdered ? NumberFormatValues.Decimal : NumberFormatValues.Bullet
+        };
+
+    static void InsertAbstractNum(Numbering numbering, AbstractNum abstractNum)
+    {
         var firstInstance = numbering.GetFirstChild<NumberingInstance>();
         if (firstInstance != null)
         {
@@ -116,18 +146,5 @@ static class WordNumberingBuilder
         {
             numbering.Append(abstractNum);
         }
-
-        return abstractNumId;
-    }
-
-    internal static int AddNumberingInstance(Numbering numbering, int numId, int abstractNumId)
-    {
-        numbering.Append(
-            new NumberingInstance(
-                new AbstractNumId { Val = abstractNumId })
-            {
-                NumberID = numId
-            });
-        return numId;
     }
 }

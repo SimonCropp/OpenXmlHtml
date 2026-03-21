@@ -15,7 +15,6 @@ class WordBuildContext
     internal ParagraphFormatState? ParagraphFormat;
     internal Stack<(int NumId, int Ilvl, bool IsOrdered)> ListStack = new();
     internal int? BulletAbstractNumId;
-    internal int? DecimalAbstractNumId;
     internal int NextNumId;
     internal int? ListNumId;
     internal int? ListIlvl;
@@ -146,18 +145,16 @@ static class WordContentBuilder
                     var isOrdered = tag == "ol";
                     var part = WordNumberingBuilder.EnsureNumberingPart(ctx.MainPart);
                     var numbering = part.Numbering!;
-                    int abstractNumId;
-                    if (isOrdered)
-                    {
-                        if (ctx.DecimalAbstractNumId == null)
-                        {
-                            var id = WordNumberingBuilder.GetNextId(numbering);
-                            ctx.DecimalAbstractNumId = WordNumberingBuilder.CreateDecimalAbstractNum(numbering, id);
-                        }
 
-                        abstractNumId = ctx.DecimalAbstractNumId.Value;
-                    }
-                    else
+                    // Determine list format from type attribute or list-style-type CSS
+                    var typeAttr = element.GetAttribute("type");
+                    var listStyleCss = element.GetAttribute("style") is { } listStyle
+                        ? StyleParser.Parse(listStyle).GetValueOrDefault("list-style-type")
+                        : null;
+                    var format2 = WordNumberingBuilder.ParseListStyleType(typeAttr, listStyleCss, isOrdered);
+
+                    int abstractNumId;
+                    if (format2 == NumberFormatValues.Bullet)
                     {
                         if (ctx.BulletAbstractNumId == null)
                         {
@@ -167,9 +164,23 @@ static class WordContentBuilder
 
                         abstractNumId = ctx.BulletAbstractNumId.Value;
                     }
+                    else
+                    {
+                        // Each ordered format type gets its own abstract num
+                        var id = WordNumberingBuilder.GetNextId(numbering);
+                        abstractNumId = WordNumberingBuilder.CreateOrderedAbstractNum(numbering, id, format2);
+                    }
+
+                    // Parse start attribute for ordered lists
+                    int? startOverride = null;
+                    var startAttr = element.GetAttribute("start");
+                    if (startAttr != null && int.TryParse(startAttr, out var startVal) && startVal != 1)
+                    {
+                        startOverride = startVal;
+                    }
 
                     var numId = WordNumberingBuilder.GetNextId(numbering);
-                    WordNumberingBuilder.AddNumberingInstance(numbering, numId, abstractNumId);
+                    WordNumberingBuilder.AddNumberingInstance(numbering, numId, abstractNumId, startOverride);
                     var ilvl = ctx.ListStack.Count > 0 ? ctx.ListStack.Peek().Ilvl + 1 : 0;
                     ctx.ListStack.Push((numId, ilvl, isOrdered));
                     ProcessChildren(element, newFormat, elements, ctx, inPre);
@@ -391,6 +402,22 @@ static class WordContentBuilder
                     {
                         pf.LineHeightTwips = StyleParser.ParseLengthToTwips(lh);
                     }
+                }
+
+                if (declarations.TryGetValue("writing-mode", out var writingMode))
+                {
+                    pf.WritingMode = writingMode.Trim().ToLowerInvariant() switch
+                    {
+                        "vertical-rl" or "tb-rl" => TextDirectionValues.TopToBottomRightToLeft,
+                        "vertical-lr" or "tb-lr" => TextDirectionValues.BottomToTopLeftToRight,
+                        _ => null
+                    };
+                }
+
+                if (declarations.TryGetValue("direction", out var direction) &&
+                    direction.Trim().Equals("rtl", StringComparison.OrdinalIgnoreCase))
+                {
+                    pf.WritingMode ??= TextDirectionValues.TopToBottomRightToLeft;
                 }
 
                 if (declarations.TryGetValue("border", out var borderAll))
@@ -635,6 +662,12 @@ static class WordContentBuilder
             props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = pf.BackgroundColor });
         }
 
+        if (pf.WritingMode != null)
+        {
+            props.Append(new BiDi());
+            props.Append(new TextDirection { Val = pf.WritingMode.Value });
+        }
+
         if (pf.BorderTop != null || pf.BorderRight != null || pf.BorderBottom != null || pf.BorderLeft != null)
         {
             var borders = new ParagraphBorders();
@@ -811,6 +844,18 @@ static class WordContentBuilder
         foreach (var row in rows)
         {
             var tr = new TableRow();
+
+            // Row height from style or height attribute
+            var rowHeight = row.GetAttribute("style") is { } rowStyle
+                ? StyleParser.ParseLengthToTwips(StyleParser.Parse(rowStyle).GetValueOrDefault("height") ?? "")
+                : null;
+            rowHeight ??= row.GetAttribute("height") is { } rh ? StyleParser.ParseLengthToTwips(rh) : null;
+            if (rowHeight != null)
+            {
+                tr.Append(new TableRowProperties(
+                    new TableRowHeight { Val = (uint)rowHeight.Value, HeightType = HeightRuleValues.AtLeast }));
+            }
+
             var cells = GetCells(row);
             var cellIndex = 0;
             var colIndex = 0;
@@ -935,7 +980,6 @@ static class WordContentBuilder
             Settings = parentCtx.Settings,
             StyleMap = parentCtx.StyleMap,
             BulletAbstractNumId = parentCtx.BulletAbstractNumId,
-            DecimalAbstractNumId = parentCtx.DecimalAbstractNumId,
             NextNumId = parentCtx.NextNumId
         };
         ProcessChildren(cellElement, cellFormat, cellElements, cellCtx, false);
@@ -943,7 +987,6 @@ static class WordContentBuilder
         parentCtx.ImageIndex = cellCtx.ImageIndex;
         parentCtx.NextNumId = cellCtx.NextNumId;
         parentCtx.BulletAbstractNumId = cellCtx.BulletAbstractNumId;
-        parentCtx.DecimalAbstractNumId = cellCtx.DecimalAbstractNumId;
 
         if (cellElements.Count == 0)
         {
@@ -998,6 +1041,21 @@ static class WordContentBuilder
             if (val != null)
             {
                 tcPr.Append(new TableCellVerticalAlignment { Val = val.Value });
+            }
+        }
+
+        // Writing mode on cell
+        if (declarations.TryGetValue("writing-mode", out var cellWritingMode))
+        {
+            var cellTextDir = cellWritingMode.Trim().ToLowerInvariant() switch
+            {
+                "vertical-rl" or "tb-rl" => TextDirectionValues.TopToBottomRightToLeft,
+                "vertical-lr" or "tb-lr" => TextDirectionValues.BottomToTopLeftToRight,
+                _ => (TextDirectionValues?)null
+            };
+            if (cellTextDir != null)
+            {
+                tcPr.Append(new TextDirection { Val = cellTextDir.Value });
             }
         }
 

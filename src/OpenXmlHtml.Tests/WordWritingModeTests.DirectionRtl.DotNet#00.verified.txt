@@ -1,0 +1,3 @@
+﻿{
+  Text: Right-to-left direction text
+}

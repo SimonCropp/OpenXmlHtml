@@ -1,0 +1,3 @@
+﻿{
+  Text: Vertical left-to-right text
+}

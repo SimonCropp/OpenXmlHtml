@@ -1,0 +1,6 @@
+﻿{
+  Text:
+First
+Second
+Third
+}

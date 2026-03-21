@@ -9,6 +9,7 @@ class ParagraphFormatState
     internal double? LineHeightMultiple { get; set; }
     internal JustificationValues? TextAlign { get; set; }
     internal string? BackgroundColor { get; set; }
+    internal TextDirectionValues? WritingMode { get; set; }
     internal BorderInfo? BorderTop { get; set; }
     internal BorderInfo? BorderRight { get; set; }
     internal BorderInfo? BorderBottom { get; set; }
@@ -24,6 +25,7 @@ class ParagraphFormatState
         LineHeightMultiple != null ||
         TextAlign != null ||
         BackgroundColor != null ||
+        WritingMode != null ||
         BorderTop != null ||
         BorderRight != null ||
         BorderBottom != null ||

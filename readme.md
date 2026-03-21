@@ -330,6 +330,9 @@ WordHtmlConverter.AppendHtml(
    * Word (via `ToElements`/`ConvertToDocx`): real `NumberingDefinitionsPart` with `ListParagraph` style — proper bullets and numbering rendered by Word, supporting nested lists and separate numbering sequences
    * Word (via `ToParagraphs`): text prefix fallback (●/○/■ for bullets, 1./2./3. for ordered)
    * Spreadsheet: text prefix bullets and numbers
+ * `type` attribute on `<ol>`: `1` (decimal), `a` (lower-alpha), `A` (upper-alpha), `i` (lower-roman), `I` (upper-roman) (Word)
+ * `start` attribute on `<ol>`: starting number (e.g., `<ol start="5">`) (Word)
+ * `list-style-type` CSS: `decimal`, `lower-alpha`/`lower-latin`, `upper-alpha`/`upper-latin`, `lower-roman`, `upper-roman` (Word)
 
 
 ### Tables
@@ -346,6 +349,7 @@ WordHtmlConverter.AppendHtml(
  * Nested tables supported (Word)
  * Cell CSS: `padding`, `width`, `background-color`, `vertical-align` (top/middle/bottom) (Word)
  * Table CSS: `width`, `background-color`, `padding` (default cell padding) (Word)
+ * Row CSS: `height` or HTML `height` attribute on `<tr>` (Word)
 
 
 ### Inline / Other
@@ -388,6 +392,8 @@ Inline `style` attributes are supported:
  * `text-indent` - First line indent or hanging indent (Word)
  * `line-height` - Line spacing: numeric multiple (1.5), percentage (150%), or fixed length (18pt) (Word)
  * `background-color` - Background shading on runs and paragraphs (Word); also on table cells
+ * `writing-mode` - Text direction: `vertical-rl`, `vertical-lr` (Word, on paragraphs and table cells)
+ * `direction: rtl` - Right-to-left text direction (Word)
 
 CSS length units supported: `pt`, `px`, `em`, `in`, `cm`, `mm`.
 
@@ -400,7 +406,7 @@ The `class` attribute maps CSS class names to Word styles defined in the documen
 ### Color Formats
 
  * Hex: `#RGB`, `#RRGGBB`, `#RRGGBBAA`
- * Named: `red`, `blue`, `green`, `darkred`, `steelblue`, etc. (60+ colors)
+ * Named: all 148 CSS named colors (`red`, `blue`, `cornflowerblue`, `rebeccapurple`, etc.)
  * RGB: `rgb(255, 0, 0)`
  * RGBA: `rgba(255, 0, 0, 0.5)` (alpha channel is parsed but not applied — Word doesn't support color transparency)
 

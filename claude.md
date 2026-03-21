@@ -79,6 +79,9 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordBorderTests` | `border` on runs/paragraphs/cells/tables, per-side borders, `border: none`, `border="0"`, all style variants |
 | `WordStyleMappingTests` | CSS `class` → Word paragraph/character style mapping |
 | `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
+| `WordListStyleTests` | `type` attribute (a/A/i/I), `start` attribute, `list-style-type` CSS, mixed list types |
+| `WordWritingModeTests` | `writing-mode` (vertical-rl, vertical-lr), `direction: rtl`, vertical text in cells |
+| `WordRowHeightTests` | `height` CSS and HTML attribute on `<tr>` |
 | `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |
 | `WordConvertToDocxTests` | Full docx output: images, SVG, footnotes, page breaks, CSS styles, lists, tables |
 | `WordHeaderFooterTests` | `SetHeader`/`SetFooter` with plain and formatted HTML, tables in headers |
@@ -87,7 +90,7 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordStyleComboTests` | Single large docx exercising all features together |
 | `ImagePolicyTests` | `ImagePolicy` unit tests (Deny/AllowAll/SafeDomains/SafeDirectories/Filter) |
 | `StyleParserTests` | CSS parsing, `ParseFontSize`, `ParseLengthToTwips` |
-| `ColorParserTests` | Hex/named/RGB/RGBA color parsing |
+| `ColorParserTests` | Hex/named (148 CSS colors)/RGB/RGBA color parsing |
 | `Spreadsheet*Tests` | Mirror of Word tests for spreadsheet-supported features |
 
 ### Test requirements
