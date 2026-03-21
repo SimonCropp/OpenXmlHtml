@@ -280,6 +280,17 @@ public static class WordHtmlConverter
             props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = format.BackgroundColor });
         }
 
+        if (format.Border != null && format.Border.Style != BorderValues.None)
+        {
+            props.Append(new Border
+            {
+                Val = format.Border.Style,
+                Size = (uint)format.Border.SizeEighths,
+                Space = 1,
+                Color = format.Border.Color ?? "auto"
+            });
+        }
+
         return props;
     }
 

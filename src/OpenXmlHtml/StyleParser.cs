@@ -151,6 +151,111 @@ static class StyleParser
             _ => null
         };
 
+    static readonly HashSet<string> borderStyles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "solid", "dotted", "dashed", "double", "none", "hidden",
+        "groove", "ridge", "inset", "outset"
+    };
+
+    internal static BorderInfo? ParseBorder(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        int? widthEighths = null;
+        BorderValues? style = null;
+        string? color = null;
+
+        foreach (var part in parts)
+        {
+            if (borderStyles.Contains(part))
+            {
+                style = part.ToLowerInvariant() switch
+                {
+                    "solid" => BorderValues.Single,
+                    "dotted" => BorderValues.Dotted,
+                    "dashed" => BorderValues.Dashed,
+                    "double" => BorderValues.Double,
+                    "none" or "hidden" => BorderValues.None,
+                    "groove" => BorderValues.ThreeDEngrave,
+                    "ridge" => BorderValues.ThreeDEmboss,
+                    "inset" => BorderValues.Inset,
+                    "outset" => BorderValues.Outset,
+                    _ => BorderValues.Single
+                };
+            }
+            else if (widthEighths == null)
+            {
+                var w = ParseBorderWidth(part);
+                if (w != null)
+                {
+                    widthEighths = w;
+                    continue;
+                }
+
+                // Not a width, try as color
+                var parsed = ColorParser.Parse(part);
+                if (parsed != null)
+                {
+                    color = parsed;
+                }
+            }
+            else
+            {
+                var parsed = ColorParser.Parse(part);
+                if (parsed != null)
+                {
+                    color = parsed;
+                }
+            }
+        }
+
+        if (style == null && widthEighths == null && color == null)
+        {
+            return null;
+        }
+
+        if (style == BorderValues.None)
+        {
+            return new(0, BorderValues.None, null);
+        }
+
+        return new(widthEighths ?? 4, style ?? BorderValues.Single, color);
+    }
+
+    static int? ParseBorderWidth(string value)
+    {
+        var lower = value.Trim().ToLowerInvariant();
+        switch (lower)
+        {
+            case "thin":
+                return 4;
+            case "medium":
+                return 12;
+            case "thick":
+                return 18;
+        }
+
+        var span = lower.AsSpan();
+
+        // 1pt = 8 eighths
+        if (TryParseSuffix(span, "pt", out var pt))
+        {
+            return Math.Max(1, (int)Math.Round(pt * 8));
+        }
+
+        // 1px ≈ 0.75pt = 6 eighths
+        if (TryParseSuffix(span, "px", out var px))
+        {
+            return Math.Max(1, (int)Math.Round(px * 6));
+        }
+
+        if (double.TryParse(lower, NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
+        {
+            return raw == 0 ? 0 : Math.Max(1, (int)Math.Round(raw * 6));
+        }
+
+        return null;
+    }
+
     static bool TryParseSuffix(ReadOnlySpan<char> span, string suffix, out double result)
     {
         if (span.EndsWith(suffix.AsSpan(), StringComparison.OrdinalIgnoreCase))

@@ -1,0 +1,3 @@
+﻿{
+  Text: No borders via HTML attr	border="0"
+}

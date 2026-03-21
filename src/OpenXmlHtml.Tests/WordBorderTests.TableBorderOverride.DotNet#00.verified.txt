@@ -1,0 +1,3 @@
+﻿{
+  Text: Dashed red table border	Inherited by all cells
+}

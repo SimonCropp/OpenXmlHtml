@@ -76,6 +76,7 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordParagraphSpacingTests` | `margin`, `text-indent`, `text-align`, `line-height` |
 | `WordBackgroundColorTests` | `background-color` on runs/paragraphs, `background` shorthand, `<mark>` element |
 | `WordUnderlineTests` | `text-decoration-style` variants (dotted, dashed, wavy, double), `<u>`/`<ins>` tags, spreadsheet underline |
+| `WordBorderTests` | `border` on runs/paragraphs/cells/tables, per-side borders, `border: none`, `border="0"`, all style variants |
 | `WordStyleMappingTests` | CSS `class` → Word paragraph/character style mapping |
 | `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
 | `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |

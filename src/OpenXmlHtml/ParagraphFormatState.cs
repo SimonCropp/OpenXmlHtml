@@ -9,6 +9,10 @@ class ParagraphFormatState
     internal double? LineHeightMultiple { get; set; }
     internal JustificationValues? TextAlign { get; set; }
     internal string? BackgroundColor { get; set; }
+    internal BorderInfo? BorderTop { get; set; }
+    internal BorderInfo? BorderRight { get; set; }
+    internal BorderInfo? BorderBottom { get; set; }
+    internal BorderInfo? BorderLeft { get; set; }
 
     internal bool HasProperties =>
         MarginTopTwips != null ||
@@ -19,5 +23,9 @@ class ParagraphFormatState
         LineHeightTwips != null ||
         LineHeightMultiple != null ||
         TextAlign != null ||
-        BackgroundColor != null;
+        BackgroundColor != null ||
+        BorderTop != null ||
+        BorderRight != null ||
+        BorderBottom != null ||
+        BorderLeft != null;
 }

@@ -331,6 +331,11 @@ Inline `style` attributes are supported:
  * `font-style: italic`
  * `text-decoration: underline`, `text-decoration: line-through`
  * `text-decoration-style` - Underline variant: `dotted`, `dashed`, `wavy`, `double` (Word)
+ * `border` - Border on runs, paragraphs, table cells, and tables (Word)
+   * Shorthand: `border: 1px solid black`
+   * Per-side: `border-top`, `border-right`, `border-bottom`, `border-left`
+   * Styles: `solid`, `dotted`, `dashed`, `double`, `groove`, `ridge`, `inset`, `outset`, `none`
+   * Table: `border: none` or HTML `border="0"` removes default table borders
  * `color` - Text color (hex, named, rgb())
  * `font-size` - Font size (pt, px, em, keywords)
  * `font-family` - Font family

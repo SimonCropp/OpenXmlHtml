@@ -393,6 +393,35 @@ static class WordContentBuilder
                     }
                 }
 
+                if (declarations.TryGetValue("border", out var borderAll))
+                {
+                    var bi = StyleParser.ParseBorder(borderAll);
+                    pf.BorderTop ??= bi;
+                    pf.BorderRight ??= bi;
+                    pf.BorderBottom ??= bi;
+                    pf.BorderLeft ??= bi;
+                }
+
+                if (declarations.TryGetValue("border-top", out var bt))
+                {
+                    pf.BorderTop = StyleParser.ParseBorder(bt);
+                }
+
+                if (declarations.TryGetValue("border-right", out var br2))
+                {
+                    pf.BorderRight = StyleParser.ParseBorder(br2);
+                }
+
+                if (declarations.TryGetValue("border-bottom", out var bb))
+                {
+                    pf.BorderBottom = StyleParser.ParseBorder(bb);
+                }
+
+                if (declarations.TryGetValue("border-left", out var bl))
+                {
+                    pf.BorderLeft = StyleParser.ParseBorder(bl);
+                }
+
                 if (pf.HasProperties)
                 {
                     ctx.ParagraphFormat = pf;
@@ -605,6 +634,32 @@ static class WordContentBuilder
         {
             props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = pf.BackgroundColor });
         }
+
+        if (pf.BorderTop != null || pf.BorderRight != null || pf.BorderBottom != null || pf.BorderLeft != null)
+        {
+            var borders = new ParagraphBorders();
+            if (pf.BorderTop != null && pf.BorderTop.Style != BorderValues.None)
+            {
+                borders.Append(new TopBorder { Val = pf.BorderTop.Style, Size = (uint)pf.BorderTop.SizeEighths, Space = 1, Color = pf.BorderTop.Color ?? "auto" });
+            }
+
+            if (pf.BorderLeft != null && pf.BorderLeft.Style != BorderValues.None)
+            {
+                borders.Append(new LeftBorder { Val = pf.BorderLeft.Style, Size = (uint)pf.BorderLeft.SizeEighths, Space = 1, Color = pf.BorderLeft.Color ?? "auto" });
+            }
+
+            if (pf.BorderBottom != null && pf.BorderBottom.Style != BorderValues.None)
+            {
+                borders.Append(new BottomBorder { Val = pf.BorderBottom.Style, Size = (uint)pf.BorderBottom.SizeEighths, Space = 1, Color = pf.BorderBottom.Color ?? "auto" });
+            }
+
+            if (pf.BorderRight != null && pf.BorderRight.Style != BorderValues.None)
+            {
+                borders.Append(new RightBorder { Val = pf.BorderRight.Style, Size = (uint)pf.BorderRight.SizeEighths, Space = 1, Color = pf.BorderRight.Color ?? "auto" });
+            }
+
+            props.Append(borders);
+        }
     }
 
     static void ForceFlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)
@@ -652,21 +707,56 @@ static class WordContentBuilder
         var columnCount = GetColumnCount(rows);
         var table = new Table();
 
-        var tblPr = new TableProperties(
-            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
-            new TableBorders(
-                new TopBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                new LeftBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                new BottomBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                new RightBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Space = 0, Color = "auto" }));
+        // Default border: single thin line
+        var defaultBorder = new BorderInfo(4, BorderValues.Single, "auto");
+
+        // HTML border attribute: border="0" removes borders
+        var borderAttr = tableElement.GetAttribute("border");
+        if (borderAttr == "0")
+        {
+            defaultBorder = new(0, BorderValues.None, null);
+        }
 
         var tableStyle = tableElement.GetAttribute("style");
+        Dictionary<string, string>? declarations = null;
         if (tableStyle != null)
         {
-            var declarations = StyleParser.Parse(tableStyle);
+            declarations = StyleParser.Parse(tableStyle);
 
+            if (declarations.TryGetValue("border", out var tableBorderCss))
+            {
+                defaultBorder = StyleParser.ParseBorder(tableBorderCss) ?? defaultBorder;
+            }
+        }
+
+        TableBorders tableBorders;
+        if (defaultBorder.Style == BorderValues.None)
+        {
+            tableBorders = new TableBorders(
+                new TopBorder { Val = BorderValues.None, Size = 0, Space = 0 },
+                new LeftBorder { Val = BorderValues.None, Size = 0, Space = 0 },
+                new BottomBorder { Val = BorderValues.None, Size = 0, Space = 0 },
+                new RightBorder { Val = BorderValues.None, Size = 0, Space = 0 },
+                new InsideHorizontalBorder { Val = BorderValues.None, Size = 0, Space = 0 },
+                new InsideVerticalBorder { Val = BorderValues.None, Size = 0, Space = 0 });
+        }
+        else
+        {
+            tableBorders = new TableBorders(
+                new TopBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
+                new LeftBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
+                new BottomBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
+                new RightBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
+                new InsideHorizontalBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
+                new InsideVerticalBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" });
+        }
+
+        var tblPr = new TableProperties(
+            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
+            tableBorders);
+
+        if (declarations != null)
+        {
             if (declarations.TryGetValue("width", out var tableWidth))
             {
                 var twips = StyleParser.ParseLengthToTwips(tableWidth);
@@ -973,6 +1063,44 @@ static class WordContentBuilder
             }
 
             tcPr.Append(margin);
+        }
+
+        // Cell borders
+        BorderInfo? cellBorderAll = null;
+        if (declarations.TryGetValue("border", out var cellBorderVal))
+        {
+            cellBorderAll = StyleParser.ParseBorder(cellBorderVal);
+        }
+
+        var cbt = declarations.TryGetValue("border-top", out var cbtVal) ? StyleParser.ParseBorder(cbtVal) : cellBorderAll;
+        var cbr = declarations.TryGetValue("border-right", out var cbrVal) ? StyleParser.ParseBorder(cbrVal) : cellBorderAll;
+        var cbb = declarations.TryGetValue("border-bottom", out var cbbVal) ? StyleParser.ParseBorder(cbbVal) : cellBorderAll;
+        var cbl = declarations.TryGetValue("border-left", out var cblVal) ? StyleParser.ParseBorder(cblVal) : cellBorderAll;
+
+        if (cbt != null || cbr != null || cbb != null || cbl != null)
+        {
+            var cellBorders = new TableCellBorders();
+            if (cbt != null && cbt.Style != BorderValues.None)
+            {
+                cellBorders.Append(new TopBorder { Val = cbt.Style, Size = (uint)cbt.SizeEighths, Space = 0, Color = cbt.Color ?? "auto" });
+            }
+
+            if (cbl != null && cbl.Style != BorderValues.None)
+            {
+                cellBorders.Append(new LeftBorder { Val = cbl.Style, Size = (uint)cbl.SizeEighths, Space = 0, Color = cbl.Color ?? "auto" });
+            }
+
+            if (cbb != null && cbb.Style != BorderValues.None)
+            {
+                cellBorders.Append(new BottomBorder { Val = cbb.Style, Size = (uint)cbb.SizeEighths, Space = 0, Color = cbb.Color ?? "auto" });
+            }
+
+            if (cbr != null && cbr.Style != BorderValues.None)
+            {
+                cellBorders.Append(new RightBorder { Val = cbr.Style, Size = (uint)cbr.SizeEighths, Space = 0, Color = cbr.Color ?? "auto" });
+            }
+
+            tcPr.Append(cellBorders);
         }
 
         return tcPr;

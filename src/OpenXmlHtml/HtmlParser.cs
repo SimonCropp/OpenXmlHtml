@@ -343,6 +343,11 @@ static class HtmlSegmentParser
             }
         }
 
+        if (declarations.TryGetValue("border", out var borderVal))
+        {
+            format.Border = StyleParser.ParseBorder(borderVal);
+        }
+
         if (declarations.TryGetValue("vertical-align", out var verticalAlign))
         {
             switch (verticalAlign)
