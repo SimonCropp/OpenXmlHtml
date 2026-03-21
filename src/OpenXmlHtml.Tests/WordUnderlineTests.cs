@@ -61,7 +61,7 @@ public class WordUnderlineTests
     {
         using var stream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx(
-            """<p><u>Tag underline</u> and <ins>ins underline</ins></p>""",
+            "<p><u>Tag underline</u> and <ins>ins underline</ins></p>",
             stream);
         stream.Position = 0;
         return Verify(stream, "docx");

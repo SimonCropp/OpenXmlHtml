@@ -6,7 +6,7 @@ using System.Net.Http;
 public class WordRemoteImageTests
 {
     // 2x2 red PNG
-    static readonly byte[] PngBytes = Convert.FromBase64String(
+    public static readonly byte[] PngBytes = Convert.FromBase64String(
         "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==");
 
     static HttpClient CreateFakeClient() =>
@@ -92,7 +92,7 @@ public class WordRemoteImageTests
         try
         {
             var imagePath = Path.Combine(tempDir, "test.png");
-            File.WriteAllBytes(imagePath, PngBytes);
+            await File.WriteAllBytesAsync(imagePath, PngBytes);
 
             var settings = new HtmlConvertSettings
             {
@@ -134,7 +134,7 @@ public class WordRemoteImageTests
     {
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
-            CancellationToken cancellationToken)
+            Cancel cancel)
         {
             var content = new ByteArrayContent(PngBytes);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
