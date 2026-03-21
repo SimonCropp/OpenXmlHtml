@@ -1070,6 +1070,12 @@ static class WordContentBuilder
             {
                 tc.Append(el);
             }
+
+            // OOXML requires every cell to end with a paragraph
+            if (cellElements[^1] is not Paragraph)
+            {
+                tc.Append(new Paragraph());
+            }
         }
 
         return tc;

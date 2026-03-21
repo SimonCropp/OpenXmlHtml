@@ -103,14 +103,16 @@ static class ImageResolver
 
         int? width = null;
         var widthAttr = element.GetAttribute("width");
-        if (widthAttr != null && int.TryParse(widthAttr, out var w))
+        if (widthAttr != null &&
+            int.TryParse(widthAttr, out var w))
         {
             width = w;
         }
 
         int? height = null;
         var heightAttr = element.GetAttribute("height");
-        if (heightAttr != null && int.TryParse(heightAttr, out var h))
+        if (heightAttr != null &&
+            int.TryParse(heightAttr, out var h))
         {
             height = h;
         }
@@ -119,5 +121,5 @@ static class ImageResolver
     }
 
     static string GuessContentType(string path) =>
-        extensionToContentType.TryGetValue(Path.GetExtension(path), out var ct) ? ct : "image/png";
+        extensionToContentType.GetValueOrDefault(Path.GetExtension(path), "image/png");
 }

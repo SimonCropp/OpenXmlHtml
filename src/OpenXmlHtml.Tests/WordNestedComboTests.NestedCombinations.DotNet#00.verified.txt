@@ -1,0 +1,75 @@
+﻿{
+  Text:
+Nested Tables
+List Inside Table
+Table Inside List
+Item with embedded table: 
+Normal item after table
+Links Inside Formatting
+Deeply Nested Formatting
+Bold inside italic inside strikethrough
+Superscript underlined
+Bold red 16pt span
+Bold italic highlighted
+Bold code
+Formatting Inside Table Cells
+Deeply Nested Lists
+Level 1 bullet 
+Level 2 bullet 
+Level 3 bullet
+Bold level 3
+Level 1 ordered 
+Level 2 ordered 
+Level 3 ordered
+Mixed List Types
+Ordered item 
+Unordered child 
+Back to ordered
+Formatting Inside Lists
+Bold item with italic and code
+Styled span item
+Item with abbr
+Highlighted and small
+Rich Blockquote
+Important: This blockquote contains formatting, , and code.
+Bullet inside blockquote
+Another bullet
+Preformatted With Formatting
+Line 1: plain
+Line 2: bold in pre
+Line 3: colored in pre
+Bold and italic in heading
+Code in heading
+Rich Definition List
+HTML
+A markup language. See .
+CSS
+Style sheets for visual presentation.
+Paragraph Styling Combos
+ Indented, justified, 1.8 line-height with bold, italic, and navy Georgia span inside a bordered background div. 
+Styled Table
+Nested Table With Formatting
+Complex Link Content
+Quotation Combos
+She said “hello world” emphatically.
+Bold with “quoted” text
+Figure With Rich Caption
+Figure 1: A chart showing growth over time
+Section A
+———
+Section B
+ Contact John Doe at  
+Click to expand
+Hidden content with italic and .
+Outer cell 1	
+Outer cell 2	Plain text
+Feature	Details
+Languages	C#F#VB.NET
+Steps	Install SDKCreate projectBuild and run
+Name	Value
+Alpha	100
+Bold cell	Italic cell	
+Styled span	Code cell	Highlighted
+Bold italic underline	Super/sub	Deleted Inserted
+Centered boldWith small text below	List inside styled cell in list in cell
+}
