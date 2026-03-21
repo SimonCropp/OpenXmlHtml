@@ -32,12 +32,28 @@ Tests use [Verify](https://github.com/VerifyTests/Verify) with NUnit. When test 
 
 ## Architecture
 
-**Pipeline**: HTML string → AngleSharp DOM → `List<TextSegment>` → OpenXml elements
+Two code paths exist for Word output:
 
-- `HtmlSegmentParser` (internal) — Parses HTML via AngleSharp into flat `TextSegment(string Text, FormatState Format)` list. Handles block elements (newline separators), inline formatting, tables (tab-separated cells), lists (bullet/numbered prefixes), links (URL appended), whitespace collapsing, and `<pre>` preservation.
+**Flat segment path** (`ToParagraphs`): HTML → AngleSharp DOM → `List<TextSegment>` → `Paragraph`/`Run` elements. Simple, no `MainDocumentPart` required, but no tables, headings styles, numbering, or style mapping.
+
+**DOM-based path** (`ToElements`/`AppendHtml`/`ConvertToDocx`): HTML → AngleSharp DOM → `WordContentBuilder.Build` → `List<OpenXmlElement>`. Full-featured: tables, heading styles, real list numbering, CSS class→style mapping, paragraph spacing, images, footnotes, bookmarks.
+
+### Key internal classes
+
+- `HtmlSegmentParser` — Parses HTML via AngleSharp into flat `TextSegment(string Text, FormatState Format)` list. Used by both `ToParagraphs` (flat path) and `SpreadsheetHtmlConverter`.
+- `WordContentBuilder` — DOM-based Word builder. Walks the AngleSharp DOM tree via `ProcessElement`/`ProcessChildren`, accumulates runs in `WordBuildContext`, flushes paragraphs with full styling (heading styles, list numbering, CSS class styles, paragraph spacing).
+- `ImageResolver` — Resolves `<img>` sources: `data:` URIs (always allowed), HTTP/HTTPS URLs (checked against `HtmlConvertSettings.WebImages` policy), local files (checked against `LocalImages` policy). Returns `ImageData` or null (alt text fallback).
+- `WordNumberingBuilder` — Creates `NumberingDefinitionsPart` with bullet/decimal abstract numbering definitions. Each `<ul>`/`<ol>` gets its own numbering instance; nested lists increment `ilvl`.
+- `WordStyleLookup` — Reads `StyleDefinitionsPart` to build a map from CSS class names to Word paragraph/character style IDs (case-insensitive).
+- `ParagraphFormatState` — Holds paragraph-level CSS properties (margins, text-indent, line-height, text-align) parsed from inline `style` attributes, applied at paragraph flush time.
+
+### Public API classes
+
+- `WordHtmlConverter` (public) — All Word conversion entry points. `ToParagraphs` uses flat segments; everything else delegates to `WordContentBuilder`. All methods have overloads accepting `HtmlConvertSettings`.
 - `SpreadsheetHtmlConverter` (public) — Converts segments to `InlineString` with spreadsheet `Run` elements for xlsx cells.
-- `WordHtmlConverter` (public) — Converts segments to `Paragraph`/`Run` elements for docx. Splits on `\n` segments to create paragraph boundaries. Also provides `ConvertToDocx` (string or stream) and `ConvertFileToDocx`.
-- `ColorParser`, `StyleParser` (internal) — Parse CSS colors (hex/named/rgb) and inline style attributes using `ReadOnlySpan<char>` for minimal allocations.
+- `ImagePolicy` (public) — Controls which image sources are allowed: `Deny()`, `AllowAll()`, `SafeDomains(...)`, `SafeDirectories(...)`, `Filter(predicate)`.
+- `HtmlConvertSettings` (public) — Settings for image resolution: `WebImages`/`LocalImages` policies, optional `HttpClient`.
+- `ColorParser`, `StyleParser` (internal) — Parse CSS colors (hex/named/rgb), inline style attributes, and CSS lengths (pt/px/em/in/cm/mm → twips).
 
 ## Key Conventions
 

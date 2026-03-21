@@ -10,6 +10,15 @@ class WordBuildContext
     internal int BookmarkId;
     internal MainDocumentPart? MainPart;
     internal HtmlConvertSettings? Settings;
+    internal Dictionary<string, StyleType>? StyleMap;
+    internal string? ParagraphStyleId;
+    internal ParagraphFormatState? ParagraphFormat;
+    internal Stack<(int NumId, int Ilvl, bool IsOrdered)> ListStack = new();
+    internal int? BulletAbstractNumId;
+    internal int? DecimalAbstractNumId;
+    internal int NextNumId;
+    internal int? ListNumId;
+    internal int? ListIlvl;
 }
 
 static class WordContentBuilder
@@ -21,7 +30,21 @@ static class WordContentBuilder
         var document = parser.ParseDocument($"<body>{html}</body>");
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
-        var ctx = new WordBuildContext { MainPart = mainPart, Settings = settings };
+        var ctx = new WordBuildContext
+        {
+            MainPart = mainPart,
+            Settings = settings,
+            StyleMap = WordStyleLookup.BuildStyleMap(mainPart)
+        };
+        if (mainPart?.NumberingDefinitionsPart?.Numbering is { } existingNumbering)
+        {
+            ctx.NextNumId = WordNumberingBuilder.GetNextId(existingNumbering);
+        }
+        else
+        {
+            ctx.NextNumId = 1;
+        }
+
         ProcessChildren(body, new(), elements, ctx, false);
         FlushParagraph(elements, ctx);
         TrimTrailingEmptyParagraphs(elements);
@@ -115,40 +138,95 @@ static class WordContentBuilder
                 FlushParagraph(elements, ctx);
                 BuildTable(element, format, elements, ctx);
                 return;
-            case "li":
+            case "ul" or "ol":
             {
                 FlushParagraph(elements, ctx);
-                var parent = element.ParentElement?.LocalName;
-                var depth = HtmlSegmentParser.GetListDepth(element);
-                ctx.ListDepth = depth;
-
-                if (parent == "ol")
+                if (ctx.MainPart != null)
                 {
-                    var index = 1;
-                    foreach (var sibling in element.ParentElement!.Children)
+                    var isOrdered = tag == "ol";
+                    var part = WordNumberingBuilder.EnsureNumberingPart(ctx.MainPart);
+                    var numbering = part.Numbering!;
+                    int abstractNumId;
+                    if (isOrdered)
                     {
-                        if (sibling == element)
+                        if (ctx.DecimalAbstractNumId == null)
                         {
-                            break;
+                            var id = WordNumberingBuilder.GetNextId(numbering);
+                            ctx.DecimalAbstractNumId = WordNumberingBuilder.CreateDecimalAbstractNum(numbering, id);
                         }
 
-                        if (sibling.LocalName == "li")
+                        abstractNumId = ctx.DecimalAbstractNumId.Value;
+                    }
+                    else
+                    {
+                        if (ctx.BulletAbstractNumId == null)
                         {
-                            index++;
+                            var id = WordNumberingBuilder.GetNextId(numbering);
+                            ctx.BulletAbstractNumId = WordNumberingBuilder.CreateBulletAbstractNum(numbering, id);
                         }
+
+                        abstractNumId = ctx.BulletAbstractNumId.Value;
                     }
 
-                    AddTextRun($"{index}. ", newFormat, ctx);
+                    var numId = WordNumberingBuilder.GetNextId(numbering);
+                    WordNumberingBuilder.AddNumberingInstance(numbering, numId, abstractNumId);
+                    var ilvl = ctx.ListStack.Count > 0 ? ctx.ListStack.Peek().Ilvl + 1 : 0;
+                    ctx.ListStack.Push((numId, ilvl, isOrdered));
+                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    ctx.ListStack.Pop();
                 }
                 else
                 {
-                    var bullet = depth switch
+                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                }
+
+                FlushParagraph(elements, ctx);
+                return;
+            }
+            case "li":
+            {
+                FlushParagraph(elements, ctx);
+                if (ctx.ListStack.Count > 0)
+                {
+                    var (numId, ilvl, _) = ctx.ListStack.Peek();
+                    ctx.ListNumId = numId;
+                    ctx.ListIlvl = ilvl;
+                }
+                else
+                {
+                    // Fallback: text prefix when no MainDocumentPart
+                    var parent = element.ParentElement?.LocalName;
+                    var depth = HtmlSegmentParser.GetListDepth(element);
+                    ctx.ListDepth = depth;
+
+                    if (parent == "ol")
                     {
-                        0 => "\u25CF",
-                        1 => "\u25CB",
-                        _ => "\u25A0"
-                    };
-                    AddTextRun($"{bullet} ", newFormat, ctx);
+                        var index = 1;
+                        foreach (var sibling in element.ParentElement!.Children)
+                        {
+                            if (sibling == element)
+                            {
+                                break;
+                            }
+
+                            if (sibling.LocalName == "li")
+                            {
+                                index++;
+                            }
+                        }
+
+                        AddTextRun($"{index}. ", newFormat, ctx);
+                    }
+                    else
+                    {
+                        var bullet = depth switch
+                        {
+                            0 => "\u25CF",
+                            1 => "\u25CB",
+                            _ => "\u25A0"
+                        };
+                        AddTextRun($"{bullet} ", newFormat, ctx);
+                    }
                 }
 
                 ProcessChildren(element, newFormat, elements, ctx, inPre);
@@ -242,6 +320,73 @@ static class WordContentBuilder
                 var declarations = StyleParser.Parse(style);
                 pageBreakBefore = declarations.TryGetValue("page-break-before", out var pbb) && pbb == "always";
                 pageBreakAfter = declarations.TryGetValue("page-break-after", out var pba) && pba == "always";
+
+                // Paragraph spacing and alignment
+                var pf = new ParagraphFormatState();
+                if (declarations.TryGetValue("margin", out var marginShorthand))
+                {
+                    var (t, r, b, l) = StyleParser.ParseMarginShorthand(marginShorthand);
+                    pf.MarginTopTwips ??= t;
+                    pf.MarginRightTwips ??= r;
+                    pf.MarginBottomTwips ??= b;
+                    pf.MarginLeftTwips ??= l;
+                }
+
+                if (declarations.TryGetValue("margin-top", out var mt))
+                {
+                    pf.MarginTopTwips = StyleParser.ParseLengthToTwips(mt);
+                }
+
+                if (declarations.TryGetValue("margin-bottom", out var mb))
+                {
+                    pf.MarginBottomTwips = StyleParser.ParseLengthToTwips(mb);
+                }
+
+                if (declarations.TryGetValue("margin-left", out var ml))
+                {
+                    pf.MarginLeftTwips = StyleParser.ParseLengthToTwips(ml);
+                }
+
+                if (declarations.TryGetValue("margin-right", out var mr))
+                {
+                    pf.MarginRightTwips = StyleParser.ParseLengthToTwips(mr);
+                }
+
+                if (declarations.TryGetValue("text-indent", out var ti))
+                {
+                    pf.TextIndentTwips = StyleParser.ParseLengthToTwips(ti);
+                }
+
+                if (declarations.TryGetValue("text-align", out var ta))
+                {
+                    pf.TextAlign = StyleParser.ParseTextAlign(ta);
+                }
+
+                if (declarations.TryGetValue("line-height", out var lh))
+                {
+                    var lhSpan = lh.AsSpan().Trim();
+                    if (lhSpan.EndsWith("%".AsSpan()))
+                    {
+                        if (double.TryParse(lhSpan[..^1].ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var pct))
+                        {
+                            pf.LineHeightMultiple = pct / 100.0;
+                        }
+                    }
+                    else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple) &&
+                             !lh.Contains("pt") && !lh.Contains("px") && !lh.Contains("em"))
+                    {
+                        pf.LineHeightMultiple = multiple;
+                    }
+                    else
+                    {
+                        pf.LineHeightTwips = StyleParser.ParseLengthToTwips(lh);
+                    }
+                }
+
+                if (pf.HasProperties)
+                {
+                    ctx.ParagraphFormat = pf;
+                }
             }
 
             FlushParagraph(elements, ctx);
@@ -251,10 +396,34 @@ static class WordContentBuilder
                 ctx.HeadingLevel = tag[1] - '0';
             }
 
+            // CSS class → Word style mapping
+            if (ctx.StyleMap != null && element.ClassList.Length > 0)
+            {
+                var (paraStyle, runStyle) = WordStyleLookup.LookupClasses(element, ctx.StyleMap);
+                if (paraStyle != null)
+                {
+                    ctx.ParagraphStyleId = paraStyle;
+                }
+
+                if (runStyle != null)
+                {
+                    newFormat.RunStyleId = runStyle;
+                }
+            }
+
             if (pageBreakBefore)
             {
                 elements.Add(new Paragraph(
                     new ParagraphProperties(new PageBreakBefore())));
+            }
+        }
+        else if (ctx.StyleMap != null && element.ClassList.Length > 0)
+        {
+            // Inline elements: check for character style
+            var (_, runStyle) = WordStyleLookup.LookupClasses(element, ctx.StyleMap);
+            if (runStyle != null)
+            {
+                newFormat.RunStyleId = runStyle;
             }
         }
 
@@ -307,20 +476,120 @@ static class WordContentBuilder
         if (ctx.CurrentRuns.Count == 0)
         {
             ctx.HeadingLevel = 0;
+            ctx.ParagraphStyleId = null;
+            ctx.ParagraphFormat = null;
+            ctx.ListNumId = null;
+            ctx.ListIlvl = null;
             return;
         }
 
-        var paragraph = WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListDepth);
+        var paragraph = WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListNumId != null ? 0 : ctx.ListDepth);
+
+        // Apply paragraph style: heading > CSS class > default
         if (ctx.HeadingLevel > 0)
         {
             paragraph.ParagraphProperties ??= new();
             paragraph.ParagraphProperties.ParagraphStyleId = new() { Val = $"Heading{ctx.HeadingLevel}" };
+        }
+        else if (ctx.ParagraphStyleId != null)
+        {
+            paragraph.ParagraphProperties ??= new();
+            paragraph.ParagraphProperties.ParagraphStyleId = new() { Val = ctx.ParagraphStyleId };
+        }
+
+        // Apply real Word numbering
+        if (ctx.ListNumId != null)
+        {
+            paragraph.ParagraphProperties ??= new();
+            paragraph.ParagraphProperties.ParagraphStyleId ??= new() { Val = "ListParagraph" };
+            paragraph.ParagraphProperties.Append(
+                new NumberingProperties(
+                    new NumberingLevelReference { Val = ctx.ListIlvl ?? 0 },
+                    new NumberingId { Val = ctx.ListNumId.Value }));
+        }
+
+        // Apply paragraph format (CSS margins, alignment, line-height)
+        if (ctx.ParagraphFormat is { HasProperties: true })
+        {
+            paragraph.ParagraphProperties ??= new();
+            ApplyParagraphFormat(paragraph.ParagraphProperties, ctx.ParagraphFormat);
         }
 
         elements.Add(paragraph);
         ctx.CurrentRuns = [];
         ctx.ListDepth = 0;
         ctx.HeadingLevel = 0;
+        ctx.ParagraphStyleId = null;
+        ctx.ParagraphFormat = null;
+        ctx.ListNumId = null;
+        ctx.ListIlvl = null;
+    }
+
+    static void ApplyParagraphFormat(ParagraphProperties props, ParagraphFormatState pf)
+    {
+        if (pf.MarginTopTwips != null || pf.MarginBottomTwips != null ||
+            pf.LineHeightMultiple != null || pf.LineHeightTwips != null)
+        {
+            var spacing = new SpacingBetweenLines();
+            if (pf.MarginTopTwips != null)
+            {
+                spacing.Before = pf.MarginTopTwips.Value.ToString();
+            }
+
+            if (pf.MarginBottomTwips != null)
+            {
+                spacing.After = pf.MarginBottomTwips.Value.ToString();
+            }
+
+            if (pf.LineHeightMultiple != null)
+            {
+                spacing.Line = ((int)(pf.LineHeightMultiple.Value * 240)).ToString();
+                spacing.LineRule = LineSpacingRuleValues.Auto;
+            }
+            else if (pf.LineHeightTwips != null)
+            {
+                spacing.Line = pf.LineHeightTwips.Value.ToString();
+                spacing.LineRule = LineSpacingRuleValues.Exact;
+            }
+
+            props.Append(spacing);
+        }
+
+        if (pf.MarginLeftTwips != null || pf.MarginRightTwips != null || pf.TextIndentTwips != null)
+        {
+            var indent = props.GetFirstChild<Indentation>() ?? new Indentation();
+            if (props.GetFirstChild<Indentation>() == null)
+            {
+                props.Append(indent);
+            }
+
+            if (pf.MarginLeftTwips != null)
+            {
+                indent.Left = pf.MarginLeftTwips.Value.ToString();
+            }
+
+            if (pf.MarginRightTwips != null)
+            {
+                indent.Right = pf.MarginRightTwips.Value.ToString();
+            }
+
+            if (pf.TextIndentTwips != null)
+            {
+                if (pf.TextIndentTwips.Value >= 0)
+                {
+                    indent.FirstLine = pf.TextIndentTwips.Value.ToString();
+                }
+                else
+                {
+                    indent.Hanging = (-pf.TextIndentTwips.Value).ToString();
+                }
+            }
+        }
+
+        if (pf.TextAlign != null)
+        {
+            props.Append(new Justification { Val = pf.TextAlign.Value });
+        }
     }
 
     static void ForceFlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)
@@ -475,10 +744,22 @@ static class WordContentBuilder
         HtmlSegmentParser.ApplyElementFormatting(cellElement, cellElement.LocalName, cellFormat);
 
         var cellElements = new List<OpenXmlElement>();
-        var cellCtx = new WordBuildContext { MainPart = parentCtx.MainPart, ImageIndex = parentCtx.ImageIndex, Settings = parentCtx.Settings };
+        var cellCtx = new WordBuildContext
+        {
+            MainPart = parentCtx.MainPart,
+            ImageIndex = parentCtx.ImageIndex,
+            Settings = parentCtx.Settings,
+            StyleMap = parentCtx.StyleMap,
+            BulletAbstractNumId = parentCtx.BulletAbstractNumId,
+            DecimalAbstractNumId = parentCtx.DecimalAbstractNumId,
+            NextNumId = parentCtx.NextNumId
+        };
         ProcessChildren(cellElement, cellFormat, cellElements, cellCtx, false);
         FlushParagraph(cellElements, cellCtx);
         parentCtx.ImageIndex = cellCtx.ImageIndex;
+        parentCtx.NextNumId = cellCtx.NextNumId;
+        parentCtx.BulletAbstractNumId = cellCtx.BulletAbstractNumId;
+        parentCtx.DecimalAbstractNumId = cellCtx.DecimalAbstractNumId;
 
         if (cellElements.Count == 0)
         {

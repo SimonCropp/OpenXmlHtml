@@ -225,6 +225,11 @@ public static class WordHtmlConverter
     {
         var props = new RunProperties();
 
+        if (format.RunStyleId != null)
+        {
+            props.Append(new RunStyle { Val = format.RunStyleId });
+        }
+
         if (format.Bold)
         {
             props.Append(new Bold());

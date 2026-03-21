@@ -203,6 +203,62 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 <!-- endSnippet -->
 
 
+### Remote Images
+
+By default, only base64 data URI images are embedded. External images (HTTP/HTTPS URLs, local files) require explicit opt-in via `HtmlConvertSettings` and `ImagePolicy`:
+
+<!-- snippet: RemoteImageSettings -->
+<a id='snippet-RemoteImageSettings'></a>
+```cs
+// Configure which image sources are allowed
+var settings = new HtmlConvertSettings
+{
+    WebImages = ImagePolicy.SafeDomains("cdn.example.com"),
+    LocalImages = ImagePolicy.SafeDirectories(@"C:\Reports\Images")
+};
+
+// Pass settings to any conversion method
+using var settingsStream = new MemoryStream();
+WordHtmlConverter.ConvertToDocx(
+    """
+    <h1>Report</h1>
+    <p><img src="https://cdn.example.com/logo.png" alt="Logo"></p>
+    """,
+    settingsStream,
+    settings);
+```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L167-L186' title='Snippet source file'>snippet source</a> | <a href='#snippet-RemoteImageSettings' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Available policies:
+
+ * `ImagePolicy.Deny()` — Default. Rejects all remote/local images.
+ * `ImagePolicy.AllowAll()` — Allows any source.
+ * `ImagePolicy.SafeDomains("example.com", ...)` — Allows web images from specified domains (exact or subdomain match).
+ * `ImagePolicy.SafeDirectories(@"C:\Images", ...)` — Allows local images from specified directories (path traversal protected).
+ * `ImagePolicy.Filter(src => ...)` — Custom predicate.
+
+All conversion methods (`ToParagraphs`, `ToElements`, `AppendHtml`, `ConvertToDocx`, `ConvertFileToDocx`) and their spreadsheet equivalents accept an `HtmlConvertSettings` parameter. A custom `HttpClient` can be provided via `HtmlConvertSettings.HttpClient`.
+
+
+### CSS Class to Word Style Mapping
+
+When converting with a `MainDocumentPart` that has a `StyleDefinitionsPart`, CSS class names are matched against Word style definitions:
+
+```html
+<!-- Applies "Quote" paragraph style if defined in the document -->
+<p class="Quote">This uses the Quote paragraph style</p>
+
+<!-- Applies "Emphasis" character style if defined in the document -->
+<p>Normal text with <span class="Emphasis">emphasized</span> word</p>
+```
+
+ * Paragraph styles (`w:type="paragraph"`) are applied via `ParagraphStyleId`
+ * Character styles (`w:type="character"`) are applied via `RunStyle`
+ * Style lookup is case-insensitive
+ * Heading styles (`Heading1`–`Heading6`) take precedence over CSS class styles
+
+
 ## Supported HTML Elements
 
 ### Text Formatting
@@ -232,6 +288,9 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ### Lists
 
  * `ul`, `ol`, `li` - Unordered (bullet) and ordered (numbered) lists
+   * Word (via `ToElements`/`ConvertToDocx`): real `NumberingDefinitionsPart` with `ListParagraph` style — proper bullets and numbering rendered by Word, supporting nested lists and separate numbering sequences
+   * Word (via `ToParagraphs`): text prefix fallback (●/○/■ for bullets, 1./2./3. for ordered)
+   * Spreadsheet: text prefix bullets and numbers
 
 
 ### Tables
@@ -253,7 +312,7 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
  * `time` - Time element
  * `abbr`, `acronym` - Abbreviations (Word: `title` attribute creates footnote)
  * `q` - Inline quotation (smart quotes)
- * `img` - Image (base64 data URIs embedded in Word, alt text fallback)
+ * `img` - Image (base64 data URIs always embedded; HTTP/local images via `HtmlConvertSettings`; alt text fallback)
  * `figure`, `figcaption` - Figure and caption
  * `svg` - Inline SVG (embedded as image in Word with PNG fallback)
  * `dl`, `dt`, `dd` - Definition list (dt is bold)
@@ -272,6 +331,19 @@ Inline `style` attributes are supported:
  * `vertical-align: super`, `vertical-align: sub`
  * `page-break-before: always` - Page break before element (Word)
  * `page-break-after: always` - Page break after element (Word)
+ * `text-align` - Paragraph alignment: left, center, right, justify (Word)
+ * `margin` - Paragraph spacing and indentation (Word, supports shorthand and individual sides)
+ * `margin-top`, `margin-bottom` - Paragraph spacing before/after (Word)
+ * `margin-left`, `margin-right` - Paragraph indentation (Word)
+ * `text-indent` - First line indent or hanging indent (Word)
+ * `line-height` - Line spacing: numeric multiple (1.5), percentage (150%), or fixed length (18pt) (Word)
+
+CSS length units supported: `pt`, `px`, `em`, `in`, `cm`, `mm`.
+
+
+### CSS Class Attribute
+
+The `class` attribute maps CSS class names to Word styles defined in the document's `StyleDefinitionsPart`. See [CSS Class to Word Style Mapping](#css-class-to-word-style-mapping) above.
 
 
 ### Color Formats

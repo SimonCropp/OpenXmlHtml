@@ -1,0 +1,39 @@
+﻿Annual Report 2024
+Executive Summary
+ This report covers the fiscal year 2024 performance across all divisions. Revenue grew by 15% year-over-year, driven primarily by our cloud services division. 
+Source: Q4 2024 Financial Statements
+Key Metrics
+Quarterly Revenue (in millions)
+Strategic Priorities
+Cloud expansion — migrate remaining on-prem clients 
+Target: 95% cloud adoption by Q2 2025
+Investment: $2.5M in infrastructure
+ 
+AI integration — embed ML capabilities 
+Natural language processing
+Predictive analytics
+ 
+Legacy system retirement Completed in Q3
+Risk Factors
+ Market volatility and regulatory changes remain the primary concerns for the upcoming fiscal year. 
+This section uses combined CSS: justified text, custom margins on all sides, and 150% line spacing. It demonstrates that multiple paragraph-level CSS properties can be applied simultaneously alongside inline formatting.
+Team Contacts
+Engineering
+Contact eng@example.com (mailto:eng@example.com)
+Sales
+Contact sales@example.com (mailto:sales@example.com)
+———
+ Confidential — Internal Use Only 
+Appendix A: Raw Data
+Q1: 12300000
+Q2: 14100000
+Q3: 13800000
+Q4: 16200000
+ 1 All figures are in USD. See  for methodology. 
+Appendix: Methodology
+Revenue figures are calculated using “accrual basis accounting” as defined by GAAP.
+Quarter	Revenue	Growth
+Q1	$12.3M	+8%
+Q2	$14.1M	+12%
+Q3	$13.8M	-2%
+Q4	$16.2M	+17%

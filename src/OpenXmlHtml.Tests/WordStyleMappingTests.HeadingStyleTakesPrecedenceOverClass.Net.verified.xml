@@ -1,0 +1,1 @@
+﻿<w:body xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:rPr><w:b /></w:rPr><w:t xml:space="preserve">Heading should use Heading1 not CustomStyle</w:t></w:r></w:p></w:body>

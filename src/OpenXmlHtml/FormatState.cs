@@ -12,6 +12,7 @@ class FormatState
     internal ImageData? Image { get; set; }
     internal int ListDepth { get; set; }
     internal string? LinkUrl { get; set; }
+    internal string? RunStyleId { get; set; }
 
     internal FormatState Copy() =>
         new()
@@ -27,7 +28,8 @@ class FormatState
             Subscript = Subscript,
             Image = Image,
             ListDepth = ListDepth,
-            LinkUrl = LinkUrl
+            LinkUrl = LinkUrl,
+            RunStyleId = RunStyleId
         };
 
     internal bool HasFormatting =>
@@ -39,5 +41,6 @@ class FormatState
         Subscript ||
         Color != null ||
         FontSizePt != null ||
-        FontFamily != null;
+        FontFamily != null ||
+        RunStyleId != null;
 }

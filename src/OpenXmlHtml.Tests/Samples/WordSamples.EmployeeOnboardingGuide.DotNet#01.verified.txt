@@ -4,10 +4,10 @@ Human Resources Department
 Welcome to Contoso Ltd
 We're excited to have you join the team! Below you'll find everything you need to get started on your first day.
 Checklist
-1. Sign employment agreement
-2. Complete tax forms (https://hr.contoso.com/tax)
-3. Collect your badge and laptop from IT
-4. Read the code of conduct
+Sign employment agreement
+Complete tax forms (https://hr.contoso.com/tax)
+Collect your badge and laptop from IT
+Read the code of conduct
 Key Contacts
 Department Contacts
 Important Policies
