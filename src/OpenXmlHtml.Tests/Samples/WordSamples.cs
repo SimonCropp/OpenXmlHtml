@@ -162,6 +162,34 @@ public class WordSamples
     }
 
     [Test]
+    public Task RemoteImageSettings()
+    {
+        #region RemoteImageSettings
+
+        // Configure which image sources are allowed
+        var settings = new HtmlConvertSettings
+        {
+            WebImages = ImagePolicy.SafeDomains("cdn.example.com"),
+            LocalImages = ImagePolicy.SafeDirectories(@"C:\Reports\Images")
+        };
+
+        // Pass settings to any conversion method
+        using var settingsStream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <h1>Report</h1>
+            <p><img src="https://cdn.example.com/logo.png" alt="Logo"></p>
+            """,
+            settingsStream,
+            settings);
+
+        #endregion
+
+        settingsStream.Position = 0;
+        return Verify(settingsStream, "docx");
+    }
+
+    [Test]
     public async Task ConvertFileToDocx()
     {
         var htmlPath = await TempFile.CreateText("<h1>Hello</h1><p>World</p>");

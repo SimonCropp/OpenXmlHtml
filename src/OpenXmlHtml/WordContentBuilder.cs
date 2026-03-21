@@ -9,18 +9,19 @@ class WordBuildContext
     internal int FootnoteIndex;
     internal int BookmarkId;
     internal MainDocumentPart? MainPart;
+    internal HtmlConvertSettings? Settings;
 }
 
 static class WordContentBuilder
 {
     static readonly HtmlParser parser = new();
 
-    internal static List<OpenXmlElement> Build(string html, MainDocumentPart? mainPart)
+    internal static List<OpenXmlElement> Build(string html, MainDocumentPart? mainPart, HtmlConvertSettings? settings = null)
     {
         var document = parser.ParseDocument($"<body>{html}</body>");
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
-        var ctx = new WordBuildContext { MainPart = mainPart };
+        var ctx = new WordBuildContext { MainPart = mainPart, Settings = settings };
         ProcessChildren(body, new(), elements, ctx, false);
         FlushParagraph(elements, ctx);
         TrimTrailingEmptyParagraphs(elements);
@@ -76,7 +77,7 @@ static class WordContentBuilder
                 return;
             case "img":
             {
-                var imageData = HtmlSegmentParser.ParseImageSrc(element);
+                var imageData = ImageResolver.Resolve(element, ctx.Settings);
                 if (imageData != null)
                 {
                     if (ctx.MainPart != null)
@@ -474,7 +475,7 @@ static class WordContentBuilder
         HtmlSegmentParser.ApplyElementFormatting(cellElement, cellElement.LocalName, cellFormat);
 
         var cellElements = new List<OpenXmlElement>();
-        var cellCtx = new WordBuildContext { MainPart = parentCtx.MainPart, ImageIndex = parentCtx.ImageIndex };
+        var cellCtx = new WordBuildContext { MainPart = parentCtx.MainPart, ImageIndex = parentCtx.ImageIndex, Settings = parentCtx.Settings };
         ProcessChildren(cellElement, cellFormat, cellElements, cellCtx, false);
         FlushParagraph(cellElements, cellCtx);
         parentCtx.ImageIndex = cellCtx.ImageIndex;

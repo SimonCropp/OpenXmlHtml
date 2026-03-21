@@ -1,4 +1,7 @@
 global using System.Globalization;
+#if NETFRAMEWORK
+global using System.Net.Http;
+#endif
 global using AngleSharp.Dom;
 global using AngleSharp.Html.Parser;
 global using DocumentFormat.OpenXml;

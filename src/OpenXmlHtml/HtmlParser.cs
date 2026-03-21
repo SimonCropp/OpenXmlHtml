@@ -4,18 +4,21 @@ static class HtmlSegmentParser
 {
     static readonly HtmlParser parser = new();
 
-    internal static List<TextSegment> Parse(string html)
+    internal static List<TextSegment> Parse(string html) =>
+        Parse(html, null);
+
+    internal static List<TextSegment> Parse(string html, HtmlConvertSettings? settings)
     {
         var document = parser.ParseDocument($"<body>{html}</body>");
         var body = document.Body!;
         var segments = new List<TextSegment>();
         var format = new FormatState();
-        ProcessNode(body, format, segments, false);
+        ProcessNode(body, format, segments, false, settings);
         TrimTrailingNewlines(segments);
         return segments;
     }
 
-    static void ProcessNode(INode node, FormatState format, List<TextSegment> segments, bool inPre)
+    static void ProcessNode(INode node, FormatState format, List<TextSegment> segments, bool inPre, HtmlConvertSettings? settings)
     {
         foreach (var child in node.ChildNodes)
         {
@@ -34,13 +37,13 @@ static class HtmlSegmentParser
                     break;
                 }
                 case IElement element:
-                    ProcessElement(element, format, segments, inPre);
+                    ProcessElement(element, format, segments, inPre, settings);
                     break;
             }
         }
     }
 
-    static void ProcessElement(IElement element, FormatState format, List<TextSegment> segments, bool inPre)
+    static void ProcessElement(IElement element, FormatState format, List<TextSegment> segments, bool inPre, HtmlConvertSettings? settings)
     {
         var tag = element.LocalName;
         var newFormat = format.Copy();
@@ -58,7 +61,7 @@ static class HtmlSegmentParser
                 return;
             case "img":
             {
-                var imageData = ParseImageSrc(element);
+                var imageData = ImageResolver.Resolve(element, settings);
                 if (imageData != null)
                 {
                     var imageFormat = format.Copy();
@@ -130,13 +133,13 @@ static class HtmlSegmentParser
                     segments.Add(new($"{indent}{bullet} ", bulletFormat));
                 }
 
-                ProcessNode(element, newFormat, segments, inPre);
+                ProcessNode(element, newFormat, segments, inPre, settings);
                 EnsureNewline(segments, format);
                 return;
             }
             case "a":
             {
-                ProcessNode(element, newFormat, segments, inPre);
+                ProcessNode(element, newFormat, segments, inPre, settings);
                 var href = element.GetAttribute("href");
                 if (!string.IsNullOrEmpty(href))
                 {
@@ -152,13 +155,13 @@ static class HtmlSegmentParser
             case "q":
             {
                 segments.Add(new("\u201C", format.Copy()));
-                ProcessNode(element, newFormat, segments, inPre);
+                ProcessNode(element, newFormat, segments, inPre, settings);
                 segments.Add(new("\u201D", format.Copy()));
                 return;
             }
             case "td" or "th":
             {
-                ProcessNode(element, newFormat, segments, inPre);
+                ProcessNode(element, newFormat, segments, inPre, settings);
                 var nextSibling = element.NextElementSibling;
                 if (nextSibling is { LocalName: "td" or "th" })
                 {
@@ -169,17 +172,17 @@ static class HtmlSegmentParser
             }
             case "tr":
             {
-                ProcessNode(element, newFormat, segments, inPre);
+                ProcessNode(element, newFormat, segments, inPre, settings);
                 EnsureNewline(segments, format);
                 return;
             }
             case "col":
                 return;
             case "pre":
-                ProcessNode(element, newFormat, segments, true);
+                ProcessNode(element, newFormat, segments, true, settings);
                 break;
             default:
-                ProcessNode(element, newFormat, segments, inPre);
+                ProcessNode(element, newFormat, segments, inPre, settings);
                 break;
         }
 

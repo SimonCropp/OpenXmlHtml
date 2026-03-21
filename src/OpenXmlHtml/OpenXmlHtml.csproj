@@ -9,4 +9,7 @@
     <PackageReference Include="System.Memory" />
     <PackageReference Include="ProjectDefaults" PrivateAssets="all" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
 </Project>

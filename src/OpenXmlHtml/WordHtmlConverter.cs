@@ -18,9 +18,17 @@ public static class WordHtmlConverter
     /// <summary>
     /// Converts HTML to a list of Paragraph elements, embedding images into the given MainDocumentPart.
     /// </summary>
-    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? mainPart)
+    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? mainPart) =>
+        ToParagraphsCore(HtmlSegmentParser.Parse(html), mainPart);
+
+    /// <summary>
+    /// Converts HTML to a list of Paragraph elements, with settings controlling remote image resolution.
+    /// </summary>
+    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? mainPart, HtmlConvertSettings settings) =>
+        ToParagraphsCore(HtmlSegmentParser.Parse(html, settings), mainPart);
+
+    static List<Paragraph> ToParagraphsCore(List<TextSegment> segments, MainDocumentPart? mainPart)
     {
-        var segments = HtmlSegmentParser.Parse(html);
         var paragraphs = new List<Paragraph>();
         var currentRuns = new List<OpenXmlElement>();
         var imageIndex = 0;
@@ -95,6 +103,12 @@ public static class WordHtmlConverter
         WordContentBuilder.Build(html, mainPart);
 
     /// <summary>
+    /// Converts HTML to a list of OpenXml elements, with settings controlling remote image resolution.
+    /// </summary>
+    public static List<OpenXmlElement> ToElements(string html, MainDocumentPart? mainPart, HtmlConvertSettings settings) =>
+        WordContentBuilder.Build(html, mainPart, settings);
+
+    /// <summary>
     /// Appends HTML content as paragraphs to a Word document body.
     /// </summary>
     public static void AppendHtml(Body body, string html) =>
@@ -106,6 +120,17 @@ public static class WordHtmlConverter
     public static void AppendHtml(Body body, string html, MainDocumentPart? mainPart)
     {
         foreach (var element in ToElements(html, mainPart))
+        {
+            body.Append(element);
+        }
+    }
+
+    /// <summary>
+    /// Appends HTML content to a Word document body, with settings controlling remote image resolution.
+    /// </summary>
+    public static void AppendHtml(Body body, string html, MainDocumentPart? mainPart, HtmlConvertSettings settings)
+    {
+        foreach (var element in ToElements(html, mainPart, settings))
         {
             body.Append(element);
         }
@@ -141,6 +166,38 @@ public static class WordHtmlConverter
         var html = File.ReadAllText(htmlPath);
         using var stream = File.Create(docxPath);
         ConvertToDocx(html, stream);
+    }
+
+    /// <summary>
+    /// Converts an HTML string to a docx file, with settings controlling remote image resolution.
+    /// </summary>
+    public static void ConvertToDocx(string html, Stream stream, HtmlConvertSettings settings)
+    {
+        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+        var mainPart = document.AddMainDocumentPart();
+        var body = new Body();
+        AppendHtml(body, html, mainPart, settings);
+        mainPart.Document = new(body);
+    }
+
+    /// <summary>
+    /// Converts HTML from a stream to a docx file, with settings controlling remote image resolution.
+    /// </summary>
+    public static void ConvertToDocx(Stream htmlStream, Stream docxStream, HtmlConvertSettings settings)
+    {
+        using var reader = new StreamReader(htmlStream);
+        var html = reader.ReadToEnd();
+        ConvertToDocx(html, docxStream, settings);
+    }
+
+    /// <summary>
+    /// Converts an HTML file to a docx file, with settings controlling remote image resolution.
+    /// </summary>
+    public static void ConvertFileToDocx(string htmlPath, string docxPath, HtmlConvertSettings settings)
+    {
+        var html = File.ReadAllText(htmlPath);
+        using var stream = File.Create(docxPath);
+        ConvertToDocx(html, stream, settings);
     }
 
     internal static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)

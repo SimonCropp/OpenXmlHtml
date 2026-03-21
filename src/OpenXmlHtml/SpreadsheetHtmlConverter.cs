@@ -45,6 +45,44 @@ public static class SpreadsheetHtmlConverter
         }
     }
 
+    /// <summary>
+    /// Converts an HTML string to an InlineString, with settings controlling remote image resolution.
+    /// </summary>
+    public static InlineString ToInlineString(string html, HtmlConvertSettings settings) =>
+        ToInlineString(HtmlSegmentParser.Parse(html, settings));
+
+    /// <summary>
+    /// Sets the value of a spreadsheet cell from HTML content, with settings controlling remote image resolution.
+    /// </summary>
+    public static void SetCellHtml(SpreadsheetCell cell, string html, HtmlConvertSettings settings)
+    {
+        cell.DataType = CellValues.InlineString;
+        cell.InlineString = ToInlineString(html, settings);
+    }
+
+    /// <summary>
+    /// Sets the value of a spreadsheet cell from HTML content, with settings controlling remote image resolution, applying wrap text and hyperlinks.
+    /// </summary>
+    public static void SetCellHtml(SpreadsheetCell cell, string html, WorksheetPart worksheetPart, HtmlConvertSettings settings)
+    {
+        var segments = HtmlSegmentParser.Parse(html, settings);
+        cell.DataType = CellValues.InlineString;
+        cell.InlineString = ToInlineString(segments);
+
+        var workbookPart = ((SpreadsheetDocument) worksheetPart.OpenXmlPackage).WorkbookPart!;
+
+        if (HasNewlines(cell.InlineString))
+        {
+            cell.StyleIndex = EnsureWrapTextStyle(workbookPart);
+        }
+
+        var linkUrl = GetSingleLinkUrl(segments);
+        if (linkUrl != null && cell.CellReference?.Value != null)
+        {
+            ApplyHyperlink(worksheetPart, cell.CellReference!, linkUrl);
+        }
+    }
+
     static InlineString ToInlineString(List<TextSegment> segments)
     {
         var inlineString = new InlineString();
