@@ -172,21 +172,43 @@ static class ColorParser
 
             if (hex.Length == 3)
             {
-                return string.Concat(
-                    hex[0].ToString(), hex[0].ToString(),
-                    hex[1].ToString(), hex[1].ToString(),
-                    hex[2].ToString(), hex[2].ToString()).ToUpperInvariant();
+                return string.Create(6, hex.ToString(), static (buf, h) =>
+                {
+                    buf[0] = buf[1] = char.ToUpperInvariant(h[0]);
+                    buf[2] = buf[3] = char.ToUpperInvariant(h[1]);
+                    buf[4] = buf[5] = char.ToUpperInvariant(h[2]);
+                });
             }
 
             if (hex.Length == 6)
             {
+#if NETFRAMEWORK
                 return hex.ToString().ToUpperInvariant();
+#else
+                return string.Create(6, hex.ToString(), static (buf, h) =>
+                {
+                    for (var i = 0; i < 6; i++)
+                    {
+                        buf[i] = char.ToUpperInvariant(h[i]);
+                    }
+                });
+#endif
             }
 
             if (hex.Length == 8)
             {
                 // #RRGGBBAA — strip alpha, keep RGB
+#if NETFRAMEWORK
                 return hex[..6].ToString().ToUpperInvariant();
+#else
+                return string.Create(6, hex[..6].ToString(), static (buf, h) =>
+                {
+                    for (var i = 0; i < 6; i++)
+                    {
+                        buf[i] = char.ToUpperInvariant(h[i]);
+                    }
+                });
+#endif
             }
 
             return null;

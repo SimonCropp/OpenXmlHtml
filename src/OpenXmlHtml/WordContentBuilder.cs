@@ -27,7 +27,7 @@ static class WordContentBuilder
 
     internal static List<OpenXmlElement> Build(string html, MainDocumentPart? mainPart, HtmlConvertSettings? settings = null)
     {
-        var document = parser.ParseDocument($"<body>{html}</body>");
+        var document = parser.ParseDocument(string.Concat("<body>", html, "</body>"));
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
         var ctx = new WordBuildContext
@@ -82,31 +82,31 @@ static class WordContentBuilder
         }
     }
 
-    static void ProcessElement(IElement element, FormatState format, List<OpenXmlElement> elements, WordBuildContext ctx, bool inPre)
+    static void ProcessElement(IElement element, FormatState format, List<OpenXmlElement> elements, WordBuildContext context, bool inPre)
     {
         var tag = element.LocalName;
-        var newFormat = format.Copy();
-        HtmlSegmentParser.ApplyElementFormatting(element, tag, newFormat);
+        var newFormat = format;
+        HtmlSegmentParser.ApplyElementFormatting(element, tag, ref newFormat, out var styleDeclarations);
 
         switch (tag)
         {
             case "br":
-                ForceFlushParagraph(elements, ctx);
+                ForceFlushParagraph(elements, context);
                 return;
             case "hr":
-                FlushParagraph(elements, ctx);
-                AddTextRun("\u2014\u2014\u2014", format, ctx);
-                FlushParagraph(elements, ctx);
+                FlushParagraph(elements, context);
+                AddTextRun("\u2014\u2014\u2014", format, context);
+                FlushParagraph(elements, context);
                 return;
             case "img":
             {
-                var imageData = ImageResolver.Resolve(element, ctx.Settings);
+                var imageData = ImageResolver.Resolve(element, context.Settings);
                 if (imageData != null)
                 {
-                    if (ctx.MainPart != null)
+                    if (context.MainPart != null)
                     {
-                        ctx.ImageIndex++;
-                        ctx.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(ctx.MainPart, imageData, ctx.ImageIndex));
+                        context.ImageIndex++;
+                        context.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(context.MainPart, imageData, context.ImageIndex));
                     }
                 }
                 else
@@ -115,7 +115,7 @@ static class WordContentBuilder
                     if (!string.IsNullOrEmpty(alt))
                     {
                         // ReSharper disable once RedundantSuppressNullableWarningExpression
-                        AddTextRun(alt!, format, ctx);
+                        AddTextRun(alt!, format, context);
                     }
                 }
 
@@ -123,11 +123,11 @@ static class WordContentBuilder
             }
             case "svg":
             {
-                if (ctx.MainPart != null)
+                if (context.MainPart != null)
                 {
                     var imageData = HtmlSegmentParser.ParseSvgElement(element);
-                    ctx.ImageIndex++;
-                    ctx.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(ctx.MainPart, imageData, ctx.ImageIndex));
+                    context.ImageIndex++;
+                    context.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(context.MainPart, imageData, context.ImageIndex));
                 }
 
                 return;
@@ -135,17 +135,17 @@ static class WordContentBuilder
             case "col":
                 return;
             case "table":
-                FlushParagraph(elements, ctx);
-                BuildTable(element, format, elements, ctx);
+                FlushParagraph(elements, context);
+                BuildTable(element, format, elements, context);
                 return;
             case "ul" or "ol":
             {
-                FlushParagraph(elements, ctx);
+                FlushParagraph(elements, context);
                 var isReversed = tag == "ol" && element.HasAttribute("reversed");
-                if (ctx.MainPart != null && !isReversed)
+                if (context.MainPart != null && !isReversed)
                 {
                     var isOrdered = tag == "ol";
-                    var part = WordNumberingBuilder.EnsureNumberingPart(ctx.MainPart);
+                    var part = WordNumberingBuilder.EnsureNumberingPart(context.MainPart);
                     var numbering = part.Numbering!;
 
                     // Determine list format from type attribute or list-style-type CSS
@@ -158,13 +158,13 @@ static class WordContentBuilder
                     int abstractNumId;
                     if (format2 == NumberFormatValues.Bullet)
                     {
-                        if (ctx.BulletAbstractNumId == null)
+                        if (context.BulletAbstractNumId == null)
                         {
                             var id = WordNumberingBuilder.GetNextId(numbering);
-                            ctx.BulletAbstractNumId = WordNumberingBuilder.CreateBulletAbstractNum(numbering, id);
+                            context.BulletAbstractNumId = WordNumberingBuilder.CreateBulletAbstractNum(numbering, id);
                         }
 
-                        abstractNumId = ctx.BulletAbstractNumId.Value;
+                        abstractNumId = context.BulletAbstractNumId.Value;
                     }
                     else
                     {
@@ -183,10 +183,10 @@ static class WordContentBuilder
 
                     var numId = WordNumberingBuilder.GetNextId(numbering);
                     WordNumberingBuilder.AddNumberingInstance(numbering, numId, abstractNumId, startOverride);
-                    var ilvl = ctx.ListStack.Count > 0 ? ctx.ListStack.Peek().Ilvl + 1 : 0;
-                    ctx.ListStack.Push((numId, ilvl, isOrdered));
-                    ProcessChildren(element, newFormat, elements, ctx, inPre);
-                    ctx.ListStack.Pop();
+                    var ilvl = context.ListStack.Count > 0 ? context.ListStack.Peek().Ilvl + 1 : 0;
+                    context.ListStack.Push((numId, ilvl, isOrdered));
+                    ProcessChildren(element, newFormat, elements, context, inPre);
+                    context.ListStack.Pop();
                 }
                 else
                 {
@@ -203,31 +203,31 @@ static class WordContentBuilder
                         }
 
                         var startAttr2 = element.GetAttribute("start");
-                        ctx.ReversedStart = startAttr2 != null && int.TryParse(startAttr2, out var s) ? s : liCount;
+                        context.ReversedStart = startAttr2 != null && int.TryParse(startAttr2, out var s) ? s : liCount;
                     }
 
-                    ProcessChildren(element, newFormat, elements, ctx, inPre);
-                    ctx.ReversedStart = null;
+                    ProcessChildren(element, newFormat, elements, context, inPre);
+                    context.ReversedStart = null;
                 }
 
-                FlushParagraph(elements, ctx);
+                FlushParagraph(elements, context);
                 return;
             }
             case "li":
             {
-                FlushParagraph(elements, ctx);
-                if (ctx.ListStack.Count > 0)
+                FlushParagraph(elements, context);
+                if (context.ListStack.Count > 0)
                 {
-                    var (numId, ilvl, _) = ctx.ListStack.Peek();
-                    ctx.ListNumId = numId;
-                    ctx.ListIlvl = ilvl;
+                    var (numId, ilvl, _) = context.ListStack.Peek();
+                    context.ListNumId = numId;
+                    context.ListIlvl = ilvl;
                 }
                 else
                 {
                     // Fallback: text prefix when no MainDocumentPart
                     var parent = element.ParentElement?.LocalName;
                     var depth = HtmlSegmentParser.GetListDepth(element);
-                    ctx.ListDepth = depth;
+                    context.ListDepth = depth;
 
                     if (parent == "ol")
                     {
@@ -245,13 +245,13 @@ static class WordContentBuilder
                             }
                         }
 
-                        if (ctx.ReversedStart != null)
+                        if (context.ReversedStart != null)
                         {
                             // Reversed: count down from start
-                            index = ctx.ReversedStart.Value - (index - 1);
+                            index = context.ReversedStart.Value - (index - 1);
                         }
 
-                        AddTextRun($"{index}. ", newFormat, ctx);
+                        AddTextRun($"{index}. ", newFormat, context);
                     }
                     else
                     {
@@ -261,12 +261,12 @@ static class WordContentBuilder
                             1 => "\u25CB",
                             _ => "\u25A0"
                         };
-                        AddTextRun($"{bullet} ", newFormat, ctx);
+                        AddTextRun($"{bullet} ", newFormat, context);
                     }
                 }
 
-                ProcessChildren(element, newFormat, elements, ctx, inPre);
-                FlushParagraph(elements, ctx);
+                ProcessChildren(element, newFormat, elements, context, inPre);
+                FlushParagraph(elements, context);
                 return;
             }
             case "a":
@@ -275,45 +275,45 @@ static class WordContentBuilder
                 if (href != null && href.StartsWith('#') && href.Length > 1)
                 {
                     // Internal anchor link → Word hyperlink to bookmark
-                    var runsBefore = ctx.CurrentRuns.Count;
-                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    var runsBefore = context.CurrentRuns.Count;
+                    ProcessChildren(element, newFormat, elements, context, inPre);
                     var hyperlink = new Hyperlink { Anchor = href[1..] };
                     // Move newly added runs into the hyperlink
-                    while (ctx.CurrentRuns.Count > runsBefore)
+                    while (context.CurrentRuns.Count > runsBefore)
                     {
-                        var run = ctx.CurrentRuns[runsBefore];
-                        ctx.CurrentRuns.RemoveAt(runsBefore);
+                        var run = context.CurrentRuns[runsBefore];
+                        context.CurrentRuns.RemoveAt(runsBefore);
                         hyperlink.Append(run);
                     }
 
-                    ctx.CurrentRuns.Add(hyperlink);
+                    context.CurrentRuns.Add(hyperlink);
                 }
-                else if (!string.IsNullOrEmpty(href) && ctx.MainPart != null &&
+                else if (!string.IsNullOrEmpty(href) && context.MainPart != null &&
                          Uri.TryCreate(href, UriKind.Absolute, out var uri))
                 {
                     // External hyperlink with relationship
-                    var runsBefore = ctx.CurrentRuns.Count;
-                    ProcessChildren(element, newFormat, elements, ctx, inPre);
-                    var rel = ctx.MainPart.AddHyperlinkRelationship(uri, true);
+                    var runsBefore = context.CurrentRuns.Count;
+                    ProcessChildren(element, newFormat, elements, context, inPre);
+                    var rel = context.MainPart.AddHyperlinkRelationship(uri, true);
                     var hyperlink = new Hyperlink { Id = rel.Id };
-                    while (ctx.CurrentRuns.Count > runsBefore)
+                    while (context.CurrentRuns.Count > runsBefore)
                     {
-                        var run = ctx.CurrentRuns[runsBefore];
-                        ctx.CurrentRuns.RemoveAt(runsBefore);
+                        var run = context.CurrentRuns[runsBefore];
+                        context.CurrentRuns.RemoveAt(runsBefore);
                         hyperlink.Append(run);
                     }
 
-                    ctx.CurrentRuns.Add(hyperlink);
+                    context.CurrentRuns.Add(hyperlink);
                 }
                 else
                 {
-                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    ProcessChildren(element, newFormat, elements, context, inPre);
                     if (!string.IsNullOrEmpty(href))
                     {
                         var linkText = element.TextContent.Trim();
                         if (linkText != href)
                         {
-                            AddTextRun($" ({href})", format, ctx);
+                            AddTextRun($" ({href})", format, context);
                         }
                     }
                 }
@@ -322,25 +322,26 @@ static class WordContentBuilder
             }
             case "q":
             {
-                AddTextRun("\u201C", format, ctx);
-                ProcessChildren(element, newFormat, elements, ctx, inPre);
-                AddTextRun("\u201D", format, ctx);
+                AddTextRun("\u201C", format, context);
+                ProcessChildren(element, newFormat, elements, context, inPre);
+                AddTextRun("\u201D", format, context);
                 return;
             }
             case "pre":
             {
-                FlushParagraph(elements, ctx);
-                ProcessChildren(element, newFormat, elements, ctx, true);
-                FlushParagraph(elements, ctx);
+                FlushParagraph(elements, context);
+                ProcessChildren(element, newFormat, elements, context, true);
+                FlushParagraph(elements, context);
                 return;
             }
             case "abbr" or "acronym":
             {
-                ProcessChildren(element, newFormat, elements, ctx, inPre);
+                ProcessChildren(element, newFormat, elements, context, inPre);
                 var title = element.GetAttribute("title");
-                if (!string.IsNullOrEmpty(title) && ctx.MainPart != null)
+                if (!string.IsNullOrEmpty(title) &&
+                    context.MainPart != null)
                 {
-                    ctx.CurrentRuns.Add(BuildFootnoteRun(ctx, title!));
+                    context.CurrentRuns.Add(BuildFootnoteRun(context, title!));
                 }
 
                 return;
@@ -351,12 +352,12 @@ static class WordContentBuilder
         if (tag == "blockquote")
         {
             var cite = element.GetAttribute("cite");
-            if (!string.IsNullOrEmpty(cite) && ctx.MainPart != null)
+            if (!string.IsNullOrEmpty(cite) && context.MainPart != null)
             {
-                FlushParagraph(elements, ctx);
-                ProcessChildren(element, newFormat, elements, ctx, inPre);
-                ctx.CurrentRuns.Add(BuildFootnoteRun(ctx, cite!));
-                FlushParagraph(elements, ctx);
+                FlushParagraph(elements, context);
+                ProcessChildren(element, newFormat, elements, context, inPre);
+                context.CurrentRuns.Add(BuildFootnoteRun(context, cite!));
+                FlushParagraph(elements, context);
                 return;
             }
         }
@@ -367,10 +368,9 @@ static class WordContentBuilder
 
         if (isBlock)
         {
-            var style = element.GetAttribute("style");
-            if (style != null)
+            if (styleDeclarations != null)
             {
-                var declarations = StyleParser.Parse(style);
+                var declarations = styleDeclarations;
                 pageBreakBefore = declarations.TryGetValue("page-break-before", out var pbb) && pbb == "always";
                 pageBreakAfter = declarations.TryGetValue("page-break-after", out var pba) && pba == "always";
 
@@ -448,12 +448,12 @@ static class WordContentBuilder
 
                 if (declarations.TryGetValue("writing-mode", out var writingMode))
                 {
-                    pf.WritingMode = writingMode.Trim().ToLowerInvariant() switch
-                    {
-                        "vertical-rl" or "tb-rl" => TextDirectionValues.TopToBottomRightToLeft,
-                        "vertical-lr" or "tb-lr" => TextDirectionValues.BottomToTopLeftToRight,
-                        _ => null
-                    };
+                    var wm = writingMode.AsSpan().Trim();
+                    pf.WritingMode = wm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
+                        ? TextDirectionValues.TopToBottomRightToLeft
+                        : wm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
+                        ? TextDirectionValues.BottomToTopLeftToRight
+                        : null;
                 }
 
                 if (declarations.TryGetValue("direction", out var direction) &&
@@ -493,24 +493,24 @@ static class WordContentBuilder
 
                 if (pf.HasProperties)
                 {
-                    ctx.ParagraphFormat = pf;
+                    context.ParagraphFormat = pf;
                 }
             }
 
-            FlushParagraph(elements, ctx);
+            FlushParagraph(elements, context);
 
             if (tag is "h1" or "h2" or "h3" or "h4" or "h5" or "h6")
             {
-                ctx.HeadingLevel = tag[1] - '0';
+                context.HeadingLevel = tag[1] - '0';
             }
 
             // CSS class → Word style mapping
-            if (ctx.StyleMap != null && element.ClassList.Length > 0)
+            if (context.StyleMap != null && element.ClassList.Length > 0)
             {
-                var (paraStyle, runStyle) = WordStyleLookup.LookupClasses(element, ctx.StyleMap);
+                var (paraStyle, runStyle) = WordStyleLookup.LookupClasses(element, context.StyleMap);
                 if (paraStyle != null)
                 {
-                    ctx.ParagraphStyleId = paraStyle;
+                    context.ParagraphStyleId = paraStyle;
                 }
 
                 if (runStyle != null)
@@ -525,10 +525,10 @@ static class WordContentBuilder
                     new ParagraphProperties(new PageBreakBefore())));
             }
         }
-        else if (ctx.StyleMap != null && element.ClassList.Length > 0)
+        else if (context.StyleMap != null && element.ClassList.Length > 0)
         {
             // Inline elements: check for character style
-            var (_, runStyle) = WordStyleLookup.LookupClasses(element, ctx.StyleMap);
+            var (_, runStyle) = WordStyleLookup.LookupClasses(element, context.StyleMap);
             if (runStyle != null)
             {
                 newFormat.RunStyleId = runStyle;
@@ -537,22 +537,24 @@ static class WordContentBuilder
 
         // Add bookmark for elements with id attribute
         var elementId = element.GetAttribute("id") ?? element.GetAttribute("name");
+        string? bookmarkId = null;
         if (elementId != null && isBlock)
         {
-            ctx.BookmarkId++;
-            ctx.CurrentRuns.Add(new BookmarkStart { Id = ctx.BookmarkId.ToString(), Name = elementId });
+            context.BookmarkId++;
+            bookmarkId = context.BookmarkId.ToString();
+            context.CurrentRuns.Add(new BookmarkStart { Id = bookmarkId, Name = elementId });
         }
 
-        ProcessChildren(element, newFormat, elements, ctx, inPre);
+        ProcessChildren(element, newFormat, elements, context, inPre);
 
-        if (elementId != null && isBlock)
+        if (bookmarkId != null)
         {
-            ctx.CurrentRuns.Add(new BookmarkEnd { Id = ctx.BookmarkId.ToString() });
+            context.CurrentRuns.Add(new BookmarkEnd { Id = bookmarkId });
         }
 
         if (isBlock)
         {
-            FlushParagraph(elements, ctx);
+            FlushParagraph(elements, context);
 
             if (pageBreakAfter)
             {
@@ -653,7 +655,7 @@ static class WordContentBuilder
         }
 
         elements.Add(paragraph);
-        ctx.CurrentRuns = [];
+        ctx.CurrentRuns.Clear();
         ctx.ListDepth = 0;
         ctx.HeadingLevel = 0;
         ctx.ParagraphStyleId = null;
@@ -769,7 +771,7 @@ static class WordContentBuilder
     static void ForceFlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)
     {
         elements.Add(WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListDepth));
-        ctx.CurrentRuns = [];
+        ctx.CurrentRuns.Clear();
         ctx.ListDepth = 0;
     }
 
@@ -796,8 +798,8 @@ static class WordContentBuilder
 
         if (caption != null)
         {
-            var captionFormat = format.Copy();
-            HtmlSegmentParser.ApplyElementFormatting(caption, "caption", captionFormat);
+            var captionFormat = format;
+            HtmlSegmentParser.ApplyElementFormatting(caption, "caption", ref captionFormat);
             ProcessChildren(caption, captionFormat, elements, ctx, false);
             FlushParagraph(elements, ctx);
         }
@@ -890,11 +892,12 @@ static class WordContentBuilder
             var twips = StyleParser.ParseLengthToTwips(cellPaddingAttr);
             if (twips != null)
             {
+                var w = twips.Value.ToString();
                 var margin = new TableCellMarginDefault(
-                    new TopMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new StartMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new BottomMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new EndMargin { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                    new TopMargin { Width = w, Type = TableWidthUnitValues.Dxa },
+                    new StartMargin { Width = w, Type = TableWidthUnitValues.Dxa },
+                    new BottomMargin { Width = w, Type = TableWidthUnitValues.Dxa },
+                    new EndMargin { Width = w, Type = TableWidthUnitValues.Dxa });
                 tblPr.Append(margin);
             }
         }
@@ -1040,8 +1043,8 @@ static class WordContentBuilder
             tc.Append(tcPr);
         }
 
-        var cellFormat = format.Copy();
-        HtmlSegmentParser.ApplyElementFormatting(cellElement, cellElement.LocalName, cellFormat);
+        var cellFormat = format;
+        HtmlSegmentParser.ApplyElementFormatting(cellElement, cellElement.LocalName, ref cellFormat);
 
         var cellElements = new List<OpenXmlElement>();
         var cellCtx = new WordBuildContext
@@ -1068,6 +1071,12 @@ static class WordContentBuilder
             foreach (var el in cellElements)
             {
                 tc.Append(el);
+            }
+
+            // OOXML requires every cell to end with a paragraph
+            if (cellElements[^1] is not Paragraph)
+            {
+                tc.Append(new Paragraph());
             }
         }
 
@@ -1102,13 +1111,11 @@ static class WordContentBuilder
         // Vertical alignment
         if (declarations.TryGetValue("vertical-align", out var vAlign))
         {
-            var val = vAlign.Trim().ToLowerInvariant() switch
-            {
-                "top" => TableVerticalAlignmentValues.Top,
-                "middle" => TableVerticalAlignmentValues.Center,
-                "bottom" => TableVerticalAlignmentValues.Bottom,
-                _ => (TableVerticalAlignmentValues?)null
-            };
+            var va = vAlign.AsSpan().Trim();
+            var val = va.Equals("top", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Top
+                : va.Equals("middle", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Center
+                : va.Equals("bottom", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Bottom
+                : (TableVerticalAlignmentValues?)null;
             if (val != null)
             {
                 tcPr.Append(new TableCellVerticalAlignment { Val = val.Value });
@@ -1118,12 +1125,12 @@ static class WordContentBuilder
         // Writing mode on cell
         if (declarations.TryGetValue("writing-mode", out var cellWritingMode))
         {
-            var cellTextDir = cellWritingMode.Trim().ToLowerInvariant() switch
-            {
-                "vertical-rl" or "tb-rl" => TextDirectionValues.TopToBottomRightToLeft,
-                "vertical-lr" or "tb-lr" => TextDirectionValues.BottomToTopLeftToRight,
-                _ => (TextDirectionValues?)null
-            };
+            var cwm = cellWritingMode.AsSpan().Trim();
+            var cellTextDir = cwm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
+                ? TextDirectionValues.TopToBottomRightToLeft
+                : cwm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
+                ? TextDirectionValues.BottomToTopLeftToRight
+                : (TextDirectionValues?)null;
             if (cellTextDir != null)
             {
                 tcPr.Append(new TextDirection { Val = cellTextDir.Value });

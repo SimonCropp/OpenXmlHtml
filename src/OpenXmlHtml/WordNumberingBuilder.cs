@@ -1,7 +1,6 @@
-namespace OpenXmlHtml;
-
 static class WordNumberingBuilder
 {
+    static readonly string[] levelIndents = ["720", "1440", "2160", "2880", "3600", "4320", "5040", "5760", "6480"];
     internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart mainPart)
     {
         var part = mainPart.NumberingDefinitionsPart;
@@ -54,7 +53,7 @@ static class WordNumberingBuilder
                 new ParagraphProperties(
                     new Indentation
                     {
-                        Left = ((i + 1) * 720).ToString(),
+                        Left = levelIndents[i],
                         Hanging = "360"
                     }),
                 new NumberingSymbolRunProperties(
@@ -89,7 +88,7 @@ static class WordNumberingBuilder
                 new ParagraphProperties(
                     new Indentation
                     {
-                        Left = ((i + 1) * 720).ToString(),
+                        Left = levelIndents[i],
                         Hanging = "360"
                     }))
             {
@@ -124,16 +123,43 @@ static class WordNumberingBuilder
         return numId;
     }
 
-    internal static NumberFormatValues ParseListStyleType(string? type, string? cssListStyle, bool isOrdered) =>
-        (cssListStyle?.Trim().ToLowerInvariant() ?? type?.Trim().ToLowerInvariant()) switch
+    internal static NumberFormatValues ParseListStyleType(string? type, string? cssListStyle, bool isOrdered)
+    {
+        var val = (cssListStyle ?? type).AsSpan().Trim();
+        if (val.Equals("a", StringComparison.Ordinal) ||
+            val.Equals("lower-alpha", StringComparison.OrdinalIgnoreCase) ||
+            val.Equals("lower-latin", StringComparison.OrdinalIgnoreCase))
         {
-            "a" or "lower-alpha" or "lower-latin" => NumberFormatValues.LowerLetter,
-            "A" or "upper-alpha" or "upper-latin" => NumberFormatValues.UpperLetter,
-            "i" or "lower-roman" => NumberFormatValues.LowerRoman,
-            "I" or "upper-roman" => NumberFormatValues.UpperRoman,
-            "1" or "decimal" => NumberFormatValues.Decimal,
-            _ => isOrdered ? NumberFormatValues.Decimal : NumberFormatValues.Bullet
-        };
+            return NumberFormatValues.LowerLetter;
+        }
+
+        if (val.Equals("A", StringComparison.Ordinal) ||
+            val.Equals("upper-alpha", StringComparison.OrdinalIgnoreCase) ||
+            val.Equals("upper-latin", StringComparison.OrdinalIgnoreCase))
+        {
+            return NumberFormatValues.UpperLetter;
+        }
+
+        if (val.Equals("i", StringComparison.Ordinal) ||
+            val.Equals("lower-roman", StringComparison.OrdinalIgnoreCase))
+        {
+            return NumberFormatValues.LowerRoman;
+        }
+
+        if (val.Equals("I", StringComparison.Ordinal) ||
+            val.Equals("upper-roman", StringComparison.OrdinalIgnoreCase))
+        {
+            return NumberFormatValues.UpperRoman;
+        }
+
+        if (val.Equals("1", StringComparison.Ordinal) ||
+            val.Equals("decimal", StringComparison.OrdinalIgnoreCase))
+        {
+            return NumberFormatValues.Decimal;
+        }
+
+        return isOrdered ? NumberFormatValues.Decimal : NumberFormatValues.Bullet;
+    }
 
     static void InsertAbstractNum(Numbering numbering, AbstractNum abstractNum)
     {

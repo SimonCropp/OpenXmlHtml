@@ -7,6 +7,7 @@ global using AngleSharp.Html.Parser;
 global using DocumentFormat.OpenXml;
 global using DocumentFormat.OpenXml.Packaging;
 global using DocumentFormat.OpenXml.Wordprocessing;
+global using OpenXmlHtml;
 global using SpreadsheetCell = DocumentFormat.OpenXml.Spreadsheet.Cell;
 global using SpreadsheetRun = DocumentFormat.OpenXml.Spreadsheet.Run;
 global using SpreadsheetRunProperties = DocumentFormat.OpenXml.Spreadsheet.RunProperties;

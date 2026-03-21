@@ -160,9 +160,18 @@ public static class SpreadsheetHtmlConverter
             });
     }
 
-    static bool HasNewlines(InlineString inlineString) =>
-        inlineString.Descendants<SpreadsheetText>()
-            .Any(_ => _.Text.Contains('\n'));
+    static bool HasNewlines(InlineString inlineString)
+    {
+        foreach (var text in inlineString.Descendants<SpreadsheetText>())
+        {
+            if (text.Text.Contains('\n'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     static uint EnsureWrapTextStyle(WorkbookPart workbookPart)
     {
@@ -262,7 +271,7 @@ public static class SpreadsheetHtmlConverter
             props.Append(
                 new SpreadsheetColor
                 {
-                    Rgb = "FF" + format.Color
+                    Rgb = string.Concat("FF", format.Color)
                 });
         }
 

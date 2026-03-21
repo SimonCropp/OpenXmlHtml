@@ -11,4 +11,5 @@
     <File Path="nuget.config" />
   </Folder>
   <Project Path="OpenXmlHtml.Tests\OpenXmlHtml.Tests.csproj" />
+  <Project Path="OpenXmlHtml.Benchmarks\OpenXmlHtml.Benchmarks.csproj" />
 </Solution>

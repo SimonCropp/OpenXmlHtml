@@ -68,7 +68,7 @@ public class WordBackgroundColorTests
     {
         using var stream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx(
-            """<p>Please review the <mark>important section</mark> before proceeding.</p>""",
+            "<p>Please review the <mark>important section</mark> before proceeding.</p>",
             stream);
         stream.Position = 0;
         return Verify(stream, "docx");
@@ -79,7 +79,7 @@ public class WordBackgroundColorTests
     {
         using var stream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx(
-            """<p>This has <b><mark>bold highlighted</mark></b> and <i><mark>italic highlighted</mark></i> text.</p>""",
+            "<p>This has <b><mark>bold highlighted</mark></b> and <i><mark>italic highlighted</mark></i> text.</p>",
             stream);
         stream.Position = 0;
         return Verify(stream, "docx");
