@@ -222,7 +222,7 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ### Block Elements
 
  * `p`, `div` - Paragraphs / divisions
- * `h1` - `h6` - Headings (bold)
+ * `h1` - `h6` - Headings (Word: Heading1-Heading6 paragraph styles; Spreadsheet: bold)
  * `blockquote` - Block quotation
  * `pre` - Preformatted text (whitespace preserved)
  * `hr` - Horizontal rule
@@ -236,10 +236,13 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
 ### Tables
 
- * `table`, `tr`, `td`, `th` - Table structure (tab-separated cells, newline-separated rows)
+ * `table`, `tr`, `td`, `th` - Table structure
+   * Word: real `Table`/`TableRow`/`TableCell` elements with borders
+   * Spreadsheet: tab-separated cells, newline-separated rows
+ * `colspan`, `rowspan` - Cell spanning (Word)
  * `thead`, `tbody`, `tfoot` - Table sections
  * `caption` - Table caption (bold)
- * `col` - Column element (ignored)
+ * Nested tables supported (Word)
 
 
 ### Inline / Other
@@ -250,9 +253,9 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
  * `time` - Time element
  * `abbr`, `acronym` - Abbreviations
  * `q` - Inline quotation (smart quotes)
- * `img` - Image (alt text extracted)
+ * `img` - Image (base64 data URIs embedded in Word, alt text fallback)
  * `figure`, `figcaption` - Figure and caption
- * `svg` - SVG (skipped)
+ * `svg` - Inline SVG (embedded as image in Word with PNG fallback)
  * `dl`, `dt`, `dd` - Definition list (dt is bold)
 
 
@@ -267,6 +270,8 @@ Inline `style` attributes are supported:
  * `font-size` - Font size (pt, px, em, keywords)
  * `font-family` - Font family
  * `vertical-align: super`, `vertical-align: sub`
+ * `page-break-before: always` - Page break before element (Word)
+ * `page-break-after: always` - Page break after element (Word)
 
 
 ### Color Formats

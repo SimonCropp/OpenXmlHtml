@@ -5,6 +5,7 @@ class WordBuildContext
     internal List<OpenXmlElement> CurrentRuns = [];
     internal int ImageIndex;
     internal int ListDepth;
+    internal int HeadingLevel;
     internal MainDocumentPart? MainPart;
 }
 
@@ -198,6 +199,11 @@ static class WordContentBuilder
 
             FlushParagraph(elements, ctx);
 
+            if (tag is "h1" or "h2" or "h3" or "h4" or "h5" or "h6")
+            {
+                ctx.HeadingLevel = tag[1] - '0';
+            }
+
             if (pageBreakBefore)
             {
                 elements.Add(new Paragraph(
@@ -240,12 +246,21 @@ static class WordContentBuilder
     {
         if (ctx.CurrentRuns.Count == 0)
         {
+            ctx.HeadingLevel = 0;
             return;
         }
 
-        elements.Add(WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListDepth));
+        var paragraph = WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListDepth);
+        if (ctx.HeadingLevel > 0)
+        {
+            paragraph.ParagraphProperties ??= new();
+            paragraph.ParagraphProperties.ParagraphStyleId = new() { Val = $"Heading{ctx.HeadingLevel}" };
+        }
+
+        elements.Add(paragraph);
         ctx.CurrentRuns = [];
         ctx.ListDepth = 0;
+        ctx.HeadingLevel = 0;
     }
 
     static void ForceFlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)
