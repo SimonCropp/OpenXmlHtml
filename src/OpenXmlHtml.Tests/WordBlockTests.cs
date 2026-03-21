@@ -56,4 +56,19 @@ public class WordBlockTests
     [Test]
     public Task MixedNestedLists() =>
         Verify(WordHtmlConverter.ToParagraphs("<ul><li>bullet</li><li><ol><li>numbered</li></ol></li></ul>"));
+
+    [Test]
+    public Task PageBreakBefore() =>
+        Verify(WordHtmlConverter.ToElements(
+            """<p>Page one</p><p style="page-break-before: always">Page two</p>"""));
+
+    [Test]
+    public Task PageBreakAfter() =>
+        Verify(WordHtmlConverter.ToElements(
+            """<p style="page-break-after: always">Page one</p><p>Page two</p>"""));
+
+    [Test]
+    public Task PageBreakOnDiv() =>
+        Verify(WordHtmlConverter.ToElements(
+            """<div>First section</div><div style="page-break-before: always">Second section</div>"""));
 }

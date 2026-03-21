@@ -183,9 +183,26 @@ static class WordContentBuilder
         }
 
         var isBlock = HtmlSegmentParser.IsBlockElement(tag);
+        var pageBreakBefore = false;
+        var pageBreakAfter = false;
+
         if (isBlock)
         {
+            var style = element.GetAttribute("style");
+            if (style != null)
+            {
+                var declarations = StyleParser.Parse(style);
+                pageBreakBefore = declarations.TryGetValue("page-break-before", out var pbb) && pbb == "always";
+                pageBreakAfter = declarations.TryGetValue("page-break-after", out var pba) && pba == "always";
+            }
+
             FlushParagraph(elements, ctx);
+
+            if (pageBreakBefore)
+            {
+                elements.Add(new Paragraph(
+                    new ParagraphProperties(new PageBreakBefore())));
+            }
         }
 
         ProcessChildren(element, newFormat, elements, ctx, inPre);
@@ -193,6 +210,12 @@ static class WordContentBuilder
         if (isBlock)
         {
             FlushParagraph(elements, ctx);
+
+            if (pageBreakAfter)
+            {
+                elements.Add(new Paragraph(
+                    new ParagraphProperties(new PageBreakBefore())));
+            }
         }
     }
 

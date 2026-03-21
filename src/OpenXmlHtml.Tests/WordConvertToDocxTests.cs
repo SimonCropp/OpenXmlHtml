@@ -260,6 +260,25 @@ public class WordConvertToDocxTests
     }
 
     [Test]
+    public Task PageBreaks()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <h1>Chapter 1</h1>
+            <p>Content of chapter one.</p>
+            <h1 style="page-break-before: always">Chapter 2</h1>
+            <p>Content of chapter two.</p>
+            <p style="page-break-after: always">End of chapter two.</p>
+            <h1>Chapter 3</h1>
+            <p>Content of chapter three.</p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
     public Task FromStream()
     {
         var htmlBytes = "<p>Hello <b>World</b></p>"u8.ToArray();
