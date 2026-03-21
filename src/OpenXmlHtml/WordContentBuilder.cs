@@ -6,6 +6,7 @@ class WordBuildContext
     internal int ImageIndex;
     internal int ListDepth;
     internal int HeadingLevel;
+    internal int FootnoteIndex;
     internal MainDocumentPart? MainPart;
 }
 
@@ -178,6 +179,31 @@ static class WordContentBuilder
             {
                 FlushParagraph(elements, ctx);
                 ProcessChildren(element, newFormat, elements, ctx, true);
+                FlushParagraph(elements, ctx);
+                return;
+            }
+            case "abbr" or "acronym":
+            {
+                ProcessChildren(element, newFormat, elements, ctx, inPre);
+                var title = element.GetAttribute("title");
+                if (!string.IsNullOrEmpty(title) && ctx.MainPart != null)
+                {
+                    ctx.CurrentRuns.Add(BuildFootnoteRun(ctx, title!));
+                }
+
+                return;
+            }
+        }
+
+        // Handle blockquote with cite attribute as footnote
+        if (tag == "blockquote")
+        {
+            var cite = element.GetAttribute("cite");
+            if (!string.IsNullOrEmpty(cite) && ctx.MainPart != null)
+            {
+                FlushParagraph(elements, ctx);
+                ProcessChildren(element, newFormat, elements, ctx, inPre);
+                ctx.CurrentRuns.Add(BuildFootnoteRun(ctx, cite!));
                 FlushParagraph(elements, ctx);
                 return;
             }
@@ -506,5 +532,54 @@ static class WordContentBuilder
         }
 
         return defaultValue;
+    }
+
+    static Run BuildFootnoteRun(WordBuildContext ctx, string footnoteText)
+    {
+        ctx.FootnoteIndex++;
+        var footnoteId = ctx.FootnoteIndex;
+
+        var footnotesPart = ctx.MainPart!.FootnotesPart;
+        if (footnotesPart == null)
+        {
+            footnotesPart = ctx.MainPart.AddNewPart<FootnotesPart>();
+            footnotesPart.Footnotes = new Footnotes(
+                new Footnote(
+                    new Paragraph(
+                        new Run(
+                            new SeparatorMark())))
+                {
+                    Type = FootnoteEndnoteValues.Separator,
+                    Id = -1
+                },
+                new Footnote(
+                    new Paragraph(
+                        new Run(
+                            new ContinuationSeparatorMark())))
+                {
+                    Type = FootnoteEndnoteValues.ContinuationSeparator,
+                    Id = 0
+                });
+        }
+
+        footnotesPart.Footnotes!.Append(
+            new Footnote(
+                new Paragraph(
+                    new Run(
+                        new RunProperties(
+                            new VerticalTextAlignment { Val = VerticalPositionValues.Superscript }),
+                        new FootnoteReferenceMark()),
+                    new Run(
+                        new Text(" " + footnoteText) { Space = SpaceProcessingModeValues.Preserve })))
+            {
+                Id = footnoteId
+            });
+
+        var run = new Run(
+            new RunProperties(
+                new VerticalTextAlignment { Val = VerticalPositionValues.Superscript }),
+            new FootnoteReference { Id = footnoteId });
+
+        return run;
     }
 }

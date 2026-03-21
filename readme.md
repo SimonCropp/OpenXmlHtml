@@ -223,7 +223,7 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 
  * `p`, `div` - Paragraphs / divisions
  * `h1` - `h6` - Headings (Word: Heading1-Heading6 paragraph styles; Spreadsheet: bold)
- * `blockquote` - Block quotation
+ * `blockquote` - Block quotation (Word: `cite` attribute creates footnote)
  * `pre` - Preformatted text (whitespace preserved)
  * `hr` - Horizontal rule
  * `article`, `aside`, `section`, `header`, `footer`, `nav`, `main` - Semantic blocks
@@ -251,7 +251,7 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
  * `span` - Generic inline container
  * `font` - Font styling (color, size, face attributes)
  * `time` - Time element
- * `abbr`, `acronym` - Abbreviations
+ * `abbr`, `acronym` - Abbreviations (Word: `title` attribute creates footnote)
  * `q` - Inline quotation (smart quotes)
  * `img` - Image (base64 data URIs embedded in Word, alt text fallback)
  * `figure`, `figcaption` - Figure and caption

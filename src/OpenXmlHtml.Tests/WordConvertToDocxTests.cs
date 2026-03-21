@@ -279,6 +279,36 @@ public class WordConvertToDocxTests
     }
 
     [Test]
+    public Task FootnoteFromAbbr()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <p>The <abbr title="World Health Organization">WHO</abbr> recommends vaccination.</p>
+            <p>Use <abbr title="HyperText Markup Language">HTML</abbr> for web pages.</p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
+    public Task FootnoteFromBlockquoteCite()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <blockquote cite="https://example.com/source">
+              To be or not to be, that is the question.
+            </blockquote>
+            <p>Normal paragraph after quote.</p>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
     public Task FromStream()
     {
         var htmlBytes = "<p>Hello <b>World</b></p>"u8.ToArray();

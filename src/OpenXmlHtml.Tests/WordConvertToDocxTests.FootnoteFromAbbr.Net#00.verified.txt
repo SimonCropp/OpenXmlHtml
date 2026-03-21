@@ -1,0 +1,5 @@
+﻿{
+  Text:
+The WHO recommends vaccination.
+Use HTML for web pages.
+}
