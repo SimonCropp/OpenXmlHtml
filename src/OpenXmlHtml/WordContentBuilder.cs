@@ -7,6 +7,7 @@ class WordBuildContext
     internal int ListDepth;
     internal int HeadingLevel;
     internal int FootnoteIndex;
+    internal int BookmarkId;
     internal MainDocumentPart? MainPart;
 }
 
@@ -155,14 +156,33 @@ static class WordContentBuilder
             }
             case "a":
             {
-                ProcessChildren(element, newFormat, elements, ctx, inPre);
                 var href = element.GetAttribute("href");
-                if (!string.IsNullOrEmpty(href))
+                if (href != null && href.StartsWith('#') && href.Length > 1)
                 {
-                    var linkText = element.TextContent.Trim();
-                    if (linkText != href)
+                    // Internal anchor link → Word hyperlink to bookmark
+                    var runsBefore = ctx.CurrentRuns.Count;
+                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    var hyperlink = new Hyperlink { Anchor = href[1..] };
+                    // Move newly added runs into the hyperlink
+                    while (ctx.CurrentRuns.Count > runsBefore)
                     {
-                        AddTextRun($" ({href})", format, ctx);
+                        var run = ctx.CurrentRuns[runsBefore];
+                        ctx.CurrentRuns.RemoveAt(runsBefore);
+                        hyperlink.Append(run);
+                    }
+
+                    ctx.CurrentRuns.Add(hyperlink);
+                }
+                else
+                {
+                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    if (!string.IsNullOrEmpty(href))
+                    {
+                        var linkText = element.TextContent.Trim();
+                        if (linkText != href)
+                        {
+                            AddTextRun($" ({href})", format, ctx);
+                        }
                     }
                 }
 
@@ -237,7 +257,20 @@ static class WordContentBuilder
             }
         }
 
+        // Add bookmark for elements with id attribute
+        var elementId = element.GetAttribute("id") ?? element.GetAttribute("name");
+        if (elementId != null && isBlock)
+        {
+            ctx.BookmarkId++;
+            ctx.CurrentRuns.Add(new BookmarkStart { Id = ctx.BookmarkId.ToString(), Name = elementId });
+        }
+
         ProcessChildren(element, newFormat, elements, ctx, inPre);
+
+        if (elementId != null && isBlock)
+        {
+            ctx.CurrentRuns.Add(new BookmarkEnd { Id = ctx.BookmarkId.ToString() });
+        }
 
         if (isBlock)
         {

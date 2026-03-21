@@ -216,12 +216,12 @@ WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
  * `small` - Smaller font size
  * `code`, `kbd`, `samp` - Monospace font (Courier New)
  * `mark` - Highlight
- * `a` - Hyperlink (underline + blue, URL appended)
+ * `a` - Hyperlink (underline + blue, URL appended; Word: `#id` links become internal bookmarks)
 
 
 ### Block Elements
 
- * `p`, `div` - Paragraphs / divisions
+ * `p`, `div` - Paragraphs / divisions (Word: `id` attribute creates bookmark)
  * `h1` - `h6` - Headings (Word: Heading1-Heading6 paragraph styles; Spreadsheet: bold)
  * `blockquote` - Block quotation (Word: `cite` attribute creates footnote)
  * `pre` - Preformatted text (whitespace preserved)
