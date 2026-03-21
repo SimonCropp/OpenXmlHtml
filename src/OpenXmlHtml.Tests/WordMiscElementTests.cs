@@ -48,4 +48,38 @@ public class WordMiscElementTests
     public Task BlockquoteWithQ() =>
         Verify(WordHtmlConverter.ToParagraphs(
             "<blockquote><q>To be or not to be</q></blockquote>"));
+
+    [Test]
+    public Task NavTag() =>
+        Verify(WordHtmlConverter.ToParagraphs("<nav>Navigation content</nav>"));
+
+    [Test]
+    public Task MainTag() =>
+        Verify(WordHtmlConverter.ToParagraphs("<main>Main content</main>"));
+
+    [Test]
+    public Task HeaderTag() =>
+        Verify(WordHtmlConverter.ToParagraphs("<header>Header content</header>"));
+
+    [Test]
+    public Task FooterTag() =>
+        Verify(WordHtmlConverter.ToParagraphs("<footer>Footer content</footer>"));
+
+    [Test]
+    public Task AsideTag() =>
+        Verify(WordHtmlConverter.ToParagraphs("<aside>Sidebar content</aside>"));
+
+    [Test]
+    public Task DfnTag() =>
+        Verify(WordHtmlConverter.ToParagraphs("A <dfn>variable</dfn> stores data."));
+
+    [Test]
+    public Task DetailsAndSummaryTags() =>
+        Verify(WordHtmlConverter.ToParagraphs(
+            "<details><summary>Click to expand</summary>Hidden content here</details>"));
+
+    [Test]
+    public Task AddressTag() =>
+        Verify(WordHtmlConverter.ToParagraphs(
+            "<address>123 Main St, Anytown USA</address>"));
 }

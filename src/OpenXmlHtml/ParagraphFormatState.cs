@@ -8,6 +8,7 @@ class ParagraphFormatState
     internal int? LineHeightTwips { get; set; }
     internal double? LineHeightMultiple { get; set; }
     internal JustificationValues? TextAlign { get; set; }
+    internal string? BackgroundColor { get; set; }
 
     internal bool HasProperties =>
         MarginTopTwips != null ||
@@ -17,5 +18,6 @@ class ParagraphFormatState
         TextIndentTwips != null ||
         LineHeightTwips != null ||
         LineHeightMultiple != null ||
-        TextAlign != null;
+        TextAlign != null ||
+        BackgroundColor != null;
 }

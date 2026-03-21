@@ -13,6 +13,7 @@ class FormatState
     internal int ListDepth { get; set; }
     internal string? LinkUrl { get; set; }
     internal string? RunStyleId { get; set; }
+    internal string? BackgroundColor { get; set; }
 
     internal FormatState Copy() =>
         new()
@@ -29,7 +30,8 @@ class FormatState
             Image = Image,
             ListDepth = ListDepth,
             LinkUrl = LinkUrl,
-            RunStyleId = RunStyleId
+            RunStyleId = RunStyleId,
+            BackgroundColor = BackgroundColor
         };
 
     internal bool HasFormatting =>
@@ -42,5 +44,6 @@ class FormatState
         Color != null ||
         FontSizePt != null ||
         FontFamily != null ||
-        RunStyleId != null;
+        RunStyleId != null ||
+        BackgroundColor != null;
 }

@@ -55,6 +55,47 @@ Two code paths exist for Word output:
 - `HtmlConvertSettings` (public) — Settings for image resolution: `WebImages`/`LocalImages` policies, optional `HttpClient`.
 - `ColorParser`, `StyleParser` (internal) — Parse CSS colors (hex/named/rgb), inline style attributes, and CSS lengths (pt/px/em/in/cm/mm → twips).
 
+## Test Organization
+
+Tests are organized by feature area. Each supported HTML element and CSS property should have a dedicated test. When adding a new feature, add a corresponding test in the appropriate file.
+
+### Test file → feature mapping
+
+| Test File | Covers |
+|---|---|
+| `WordBasicTests` | `b`, `strong`, `i`, `em`, `u`, `ins`, `s`, `strike`, `del`, `sub`, `sup`, `br`, HTML entities |
+| `WordBlockTests` | `p`, `div`, `h1`–`h6`, `blockquote`, `pre`, `hr`, `ul`/`ol`/`li` (text prefix path), page breaks |
+| `WordHeadingTests` | `h1`–`h6` heading styles |
+| `WordColorAndFontTests` | `color`, `font-size`, `font-family`, `font` attributes, `small`, `code`/`kbd`/`samp`, named/hex/rgb colors |
+| `WordMiscElementTests` | `abbr`, `acronym`, `time`, `q`, `figure`/`figcaption`, `svg`, `article`, `section`, `nav`, `main`, `header`, `footer`, `aside`, `dfn`, `details`/`summary`, `address`, `dl`/`dt`/`dd` |
+| `WordTableTests` | `table`, `tr`, `td`, `th`, `colspan`, `rowspan`, `thead`/`tbody`/`tfoot`, `caption`, nested tables |
+| `WordTableStyleTests` | Cell `padding`/`width`/`background-color`/`vertical-align`, table `width`/`background-color`/`padding`, `cellpadding`/`bgcolor`/`width` HTML attributes |
+| `WordAnchorTests` | `a` (hyperlinks, internal `#id` links), `id` attribute bookmarks |
+| `WordNestedTests` | Deeply nested formatting combinations |
+| `WordEdgeCaseTests` | Whitespace collapsing, malformed HTML, unclosed tags, unknown tags, image alt fallback |
+| `WordParagraphSpacingTests` | `margin`, `text-indent`, `text-align`, `line-height` |
+| `WordBackgroundColorTests` | `background-color` on runs/paragraphs, `background` shorthand, `<mark>` element |
+| `WordStyleMappingTests` | CSS `class` → Word paragraph/character style mapping |
+| `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
+| `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |
+| `WordConvertToDocxTests` | Full docx output: images, SVG, footnotes, page breaks, CSS styles, lists, tables |
+| `WordConvertFileTests` | `ConvertFileToDocx` file I/O |
+| `WordIntegrationTests` | `AppendHtml`, `ToParagraphs` rich document scenarios |
+| `WordStyleComboTests` | Single large docx exercising all features together |
+| `ImagePolicyTests` | `ImagePolicy` unit tests (Deny/AllowAll/SafeDomains/SafeDirectories/Filter) |
+| `StyleParserTests` | CSS parsing, `ParseFontSize`, `ParseLengthToTwips` |
+| `ColorParserTests` | Hex/named/RGB color parsing |
+| `Spreadsheet*Tests` | Mirror of Word tests for spreadsheet-supported features |
+
+### Adding tests for new features
+
+1. Find the appropriate test file from the table above (or create a new `Word<Feature>Tests.cs`)
+2. Add a test method named after the feature (e.g., `SmallCapsTag`, `BorderShorthand`)
+3. For features requiring `MainDocumentPart` (styles, numbering, images), use `ConvertToDocx` or `AppendHtml` with a `MainDocumentPart`
+4. For simple formatting, `ToParagraphs` is sufficient
+5. Run test → copy `.received.*` to `.verified.*` → run again to confirm
+6. Update the test file mapping table above if you create a new test file
+
 ## Key Conventions
 
 - **Multi-target**: Library targets `net48;net10.0`. Tests target `net10.0;net48`. Uses [Polyfill](https://github.com/SimonCropp/Polyfill) + `System.Memory` for span support on net48.

@@ -275,6 +275,11 @@ public static class WordHtmlConverter
             props.Append(new VerticalTextAlignment { Val = VerticalPositionValues.Subscript });
         }
 
+        if (format.BackgroundColor != null)
+        {
+            props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = format.BackgroundColor });
+        }
+
         return props;
     }
 

@@ -362,6 +362,16 @@ static class WordContentBuilder
                     pf.TextAlign = StyleParser.ParseTextAlign(ta);
                 }
 
+                if (declarations.TryGetValue("background-color", out var blockBg) ||
+                    declarations.TryGetValue("background", out blockBg))
+                {
+                    var parsed = ColorParser.Parse(blockBg);
+                    if (parsed != null)
+                    {
+                        pf.BackgroundColor = parsed;
+                    }
+                }
+
                 if (declarations.TryGetValue("line-height", out var lh))
                 {
                     var lhSpan = lh.AsSpan().Trim();
@@ -589,6 +599,11 @@ static class WordContentBuilder
         if (pf.TextAlign != null)
         {
             props.Append(new Justification { Val = pf.TextAlign.Value });
+        }
+
+        if (pf.BackgroundColor != null)
+        {
+            props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = pf.BackgroundColor });
         }
     }
 

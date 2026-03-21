@@ -271,7 +271,7 @@ When converting with a `MainDocumentPart` that has a `StyleDefinitionsPart`, CSS
  * `sup` - Superscript
  * `small` - Smaller font size
  * `code`, `kbd`, `samp` - Monospace font (Courier New)
- * `mark` - Highlight
+ * `mark` - Highlight (yellow background shading)
  * `a` - Hyperlink (underline + blue, URL appended; Word: `#id` links become internal bookmarks)
 
 
@@ -342,6 +342,7 @@ Inline `style` attributes are supported:
  * `margin-left`, `margin-right` - Paragraph indentation (Word)
  * `text-indent` - First line indent or hanging indent (Word)
  * `line-height` - Line spacing: numeric multiple (1.5), percentage (150%), or fixed length (18pt) (Word)
+ * `background-color` - Background shading on runs and paragraphs (Word); also on table cells
 
 CSS length units supported: `pt`, `px`, `em`, `in`, `cm`, `mm`.
 

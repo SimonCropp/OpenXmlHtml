@@ -223,6 +223,7 @@ static class HtmlSegmentParser
                 break;
             case "mark":
                 format.Color ??= "000000";
+                format.BackgroundColor ??= "FFFF00";
                 break;
             case "code" or "kbd" or "samp":
                 format.FontFamily ??= "Courier New";
@@ -317,6 +318,16 @@ static class HtmlSegmentParser
         if (declarations.TryGetValue("font-family", out var fontFamily))
         {
             format.FontFamily = fontFamily.Trim('\'', '"');
+        }
+
+        if (declarations.TryGetValue("background-color", out var bgColor) ||
+            declarations.TryGetValue("background", out bgColor))
+        {
+            var parsed = ColorParser.Parse(bgColor);
+            if (parsed != null)
+            {
+                format.BackgroundColor = parsed;
+            }
         }
 
         if (declarations.TryGetValue("vertical-align", out var verticalAlign))

@@ -1,0 +1,2 @@
+﻿Paragraph with gray background
+Normal paragraph
