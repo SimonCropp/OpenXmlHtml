@@ -99,8 +99,10 @@ public class WordHeaderFooterTests
             </p>
             """);
 
-        document.Dispose();
-        stream.Position = 0;
-        return Verify(stream, "docx");
+        // Verify body + footer XML (not full docx binary) to avoid
+        // non-deterministic relationship IDs in footer .rels
+        // (DeterministicIoPackaging 0.24.3+ will fix this)
+        var footer = mainPart.FooterParts.First().Footer!;
+        return Verify(new { Body = body, Footer = footer });
     }
 }

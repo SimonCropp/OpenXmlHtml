@@ -1,6 +1,6 @@
 ﻿{
   Text:
-Visit our site (https://example.com)
+Visit 
  Company Logo 
 Figure 1: Logo
 }

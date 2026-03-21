@@ -1,0 +1,3 @@
+﻿{
+  Text: THIS SHOULD BE UPPERCASE
+}

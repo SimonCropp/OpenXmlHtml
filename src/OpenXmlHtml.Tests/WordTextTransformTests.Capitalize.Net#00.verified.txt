@@ -1,0 +1,3 @@
+﻿{
+  Text: Each Word Should Be Capitalized
+}

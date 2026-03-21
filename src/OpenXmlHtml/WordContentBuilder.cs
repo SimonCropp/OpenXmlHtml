@@ -18,6 +18,7 @@ class WordBuildContext
     internal int NextNumId;
     internal int? ListNumId;
     internal int? ListIlvl;
+    internal int? ReversedStart;
 }
 
 static class WordContentBuilder
@@ -140,7 +141,8 @@ static class WordContentBuilder
             case "ul" or "ol":
             {
                 FlushParagraph(elements, ctx);
-                if (ctx.MainPart != null)
+                var isReversed = tag == "ol" && element.HasAttribute("reversed");
+                if (ctx.MainPart != null && !isReversed)
                 {
                     var isOrdered = tag == "ol";
                     var part = WordNumberingBuilder.EnsureNumberingPart(ctx.MainPart);
@@ -188,7 +190,24 @@ static class WordContentBuilder
                 }
                 else
                 {
+                    if (isReversed)
+                    {
+                        // Count <li> children for reversed numbering
+                        var liCount = 0;
+                        foreach (var child in element.Children)
+                        {
+                            if (child.LocalName == "li")
+                            {
+                                liCount++;
+                            }
+                        }
+
+                        var startAttr2 = element.GetAttribute("start");
+                        ctx.ReversedStart = startAttr2 != null && int.TryParse(startAttr2, out var s) ? s : liCount;
+                    }
+
                     ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    ctx.ReversedStart = null;
                 }
 
                 FlushParagraph(elements, ctx);
@@ -226,6 +245,12 @@ static class WordContentBuilder
                             }
                         }
 
+                        if (ctx.ReversedStart != null)
+                        {
+                            // Reversed: count down from start
+                            index = ctx.ReversedStart.Value - (index - 1);
+                        }
+
                         AddTextRun($"{index}. ", newFormat, ctx);
                     }
                     else
@@ -254,6 +279,23 @@ static class WordContentBuilder
                     ProcessChildren(element, newFormat, elements, ctx, inPre);
                     var hyperlink = new Hyperlink { Anchor = href[1..] };
                     // Move newly added runs into the hyperlink
+                    while (ctx.CurrentRuns.Count > runsBefore)
+                    {
+                        var run = ctx.CurrentRuns[runsBefore];
+                        ctx.CurrentRuns.RemoveAt(runsBefore);
+                        hyperlink.Append(run);
+                    }
+
+                    ctx.CurrentRuns.Add(hyperlink);
+                }
+                else if (!string.IsNullOrEmpty(href) && ctx.MainPart != null &&
+                         Uri.TryCreate(href, UriKind.Absolute, out var uri))
+                {
+                    // External hyperlink with relationship
+                    var runsBefore = ctx.CurrentRuns.Count;
+                    ProcessChildren(element, newFormat, elements, ctx, inPre);
+                    var rel = ctx.MainPart.AddHyperlinkRelationship(uri, true);
+                    var hyperlink = new Hyperlink { Id = rel.Id };
                     while (ctx.CurrentRuns.Count > runsBefore)
                     {
                         var run = ctx.CurrentRuns[runsBefore];
@@ -530,11 +572,40 @@ static class WordContentBuilder
         }
 
         run.Append(
-            new Text(text)
+            new Text(ApplyTextTransform(text, format.TextTransform))
             {
                 Space = SpaceProcessingModeValues.Preserve
             });
         ctx.CurrentRuns.Add(run);
+    }
+
+    internal static string ApplyTextTransform(string text, string? transform) =>
+        transform switch
+        {
+            "uppercase" => text.ToUpperInvariant(),
+            "lowercase" => text.ToLowerInvariant(),
+            "capitalize" => CapitalizeWords(text),
+            _ => text
+        };
+
+    static string CapitalizeWords(string text)
+    {
+        var chars = text.ToCharArray();
+        var capitalizeNext = true;
+        for (var i = 0; i < chars.Length; i++)
+        {
+            if (char.IsWhiteSpace(chars[i]))
+            {
+                capitalizeNext = true;
+            }
+            else if (capitalizeNext)
+            {
+                chars[i] = char.ToUpperInvariant(chars[i]);
+                capitalizeNext = false;
+            }
+        }
+
+        return new(chars);
     }
 
     static void FlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)

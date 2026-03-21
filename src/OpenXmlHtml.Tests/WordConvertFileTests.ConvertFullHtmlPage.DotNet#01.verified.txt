@@ -1,7 +1,7 @@
 ﻿ Test Page 
 Welcome
  
-This is a link (https://example.com).
+This is a .
  
  
 A wise quote

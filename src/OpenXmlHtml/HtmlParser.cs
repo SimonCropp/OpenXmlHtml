@@ -343,6 +343,23 @@ static class HtmlSegmentParser
             }
         }
 
+        if (declarations.TryGetValue("font-variant", out var fontVariant))
+        {
+            if (fontVariant.Contains("small-caps", StringComparison.OrdinalIgnoreCase))
+            {
+                format.SmallCaps = true;
+            }
+        }
+
+        if (declarations.TryGetValue("text-transform", out var textTransform))
+        {
+            format.TextTransform = textTransform.Trim().ToLowerInvariant() switch
+            {
+                "uppercase" or "lowercase" or "capitalize" => textTransform.Trim().ToLowerInvariant(),
+                _ => null
+            };
+        }
+
         if (declarations.TryGetValue("border", out var borderVal))
         {
             format.Border = StyleParser.ParseBorder(borderVal);

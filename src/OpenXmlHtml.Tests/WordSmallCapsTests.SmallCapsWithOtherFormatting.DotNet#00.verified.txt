@@ -1,0 +1,3 @@
+﻿{
+  Text: Bold Small Caps and Italic Small Caps
+}

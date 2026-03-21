@@ -311,7 +311,7 @@ WordHtmlConverter.AppendHtml(
  * `small` - Smaller font size
  * `code`, `kbd`, `samp` - Monospace font (Courier New)
  * `mark` - Highlight (yellow background shading)
- * `a` - Hyperlink (underline + blue, URL appended; Word: `#id` links become internal bookmarks)
+ * `a` - Hyperlink (underline + blue; Word: `#id` links become bookmarks, external URLs become clickable Word hyperlinks including images inside links)
 
 
 ### Block Elements
@@ -333,6 +333,7 @@ WordHtmlConverter.AppendHtml(
  * `type` attribute on `<ol>`: `1` (decimal), `a` (lower-alpha), `A` (upper-alpha), `i` (lower-roman), `I` (upper-roman) (Word)
  * `start` attribute on `<ol>`: starting number (e.g., `<ol start="5">`) (Word)
  * `list-style-type` CSS: `decimal`, `lower-alpha`/`lower-latin`, `upper-alpha`/`upper-latin`, `lower-roman`, `upper-roman` (Word)
+ * `reversed` attribute on `<ol>`: countdown numbering (Word, via text prefix fallback)
 
 
 ### Tables
@@ -392,6 +393,8 @@ Inline `style` attributes are supported:
  * `text-indent` - First line indent or hanging indent (Word)
  * `line-height` - Line spacing: numeric multiple (1.5), percentage (150%), or fixed length (18pt) (Word)
  * `background-color` - Background shading on runs and paragraphs (Word); also on table cells
+ * `font-variant: small-caps` - Small capitals (Word)
+ * `text-transform` - Transform text: `uppercase`, `lowercase`, `capitalize` (Word)
  * `writing-mode` - Text direction: `vertical-rl`, `vertical-lr` (Word, on paragraphs and table cells)
  * `direction: rtl` - Right-to-left text direction (Word)
 

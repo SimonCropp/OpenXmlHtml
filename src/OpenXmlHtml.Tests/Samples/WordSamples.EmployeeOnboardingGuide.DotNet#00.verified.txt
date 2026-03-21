@@ -7,7 +7,7 @@ Welcome to Contoso Ltd
 We're excited to have you join the team! Below you'll find everything you need to get started on your first day.
 Checklist
 Sign employment agreement
-Complete tax forms (https://hr.contoso.com/tax)
+Complete 
 Collect your badge and laptop from IT
 Read the code of conduct
 Key Contacts
@@ -18,7 +18,7 @@ Up to 3 days per week after probation period.
 Time Off
 20 days PTO plus 10 public holidays.
  “The strength of the team is each individual member.” — Phil Jackson 
-Last updated: January 2024. For questions contact onboarding@contoso.com (mailto:onboarding@contoso.com).
+Last updated: January 2024. For questions contact .
 Department	Contact	Extension
 IT Support	helpdesk@contoso.com	x4100
 Facilities	facilities@contoso.com	x4200

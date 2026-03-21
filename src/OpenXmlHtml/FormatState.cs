@@ -15,6 +15,8 @@ class FormatState
     internal string? RunStyleId { get; set; }
     internal string? BackgroundColor { get; set; }
     internal BorderInfo? Border { get; set; }
+    internal bool SmallCaps { get; set; }
+    internal string? TextTransform { get; set; }
 
     internal FormatState Copy() =>
         new()
@@ -33,7 +35,9 @@ class FormatState
             LinkUrl = LinkUrl,
             RunStyleId = RunStyleId,
             BackgroundColor = BackgroundColor,
-            Border = Border
+            Border = Border,
+            SmallCaps = SmallCaps,
+            TextTransform = TextTransform
         };
 
     internal bool HasFormatting =>
@@ -48,5 +52,6 @@ class FormatState
         FontFamily != null ||
         RunStyleId != null ||
         BackgroundColor != null ||
-        Border != null;
+        Border != null ||
+        SmallCaps;
 }

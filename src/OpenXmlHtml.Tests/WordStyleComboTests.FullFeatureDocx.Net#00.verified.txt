@@ -21,9 +21,9 @@ Risk Factors
 This section uses combined CSS: justified text, custom margins on all sides, and 150% line spacing. It demonstrates that multiple paragraph-level CSS properties can be applied simultaneously alongside inline formatting.
 Team Contacts
 Engineering
-Contact eng@example.com (mailto:eng@example.com)
+Contact 
 Sales
-Contact sales@example.com (mailto:sales@example.com)
+Contact 
 ———
  Confidential — Internal Use Only 
 Appendix A: Raw Data

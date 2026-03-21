@@ -80,6 +80,10 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordStyleMappingTests` | CSS `class` → Word paragraph/character style mapping |
 | `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
 | `WordListStyleTests` | `type` attribute (a/A/i/I), `start` attribute, `list-style-type` CSS, mixed list types |
+| `WordReversedListTests` | `<ol reversed>`, reversed with `start`, reversed fallback without MainPart |
+| `WordSmallCapsTests` | `font-variant: small-caps` CSS |
+| `WordTextTransformTests` | `text-transform`: uppercase, lowercase, capitalize (both code paths) |
+| `WordClickableImageTests` | Images inside `<a>` tags, external link hyperlinks, fallback without MainPart |
 | `WordWritingModeTests` | `writing-mode` (vertical-rl, vertical-lr), `direction: rtl`, vertical text in cells |
 | `WordRowHeightTests` | `height` CSS and HTML attribute on `<tr>` |
 | `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |
