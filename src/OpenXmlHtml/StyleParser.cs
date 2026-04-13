@@ -57,7 +57,7 @@ static class StyleParser
             return em * 12;
         }
 
-        if (double.TryParse(span.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
+        if (double.TryParse(span, NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
         {
             return raw;
         }
@@ -141,7 +141,7 @@ static class StyleParser
         }
 
         // Bare number treated as px
-        if (double.TryParse(span.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
+        if (double.TryParse(span, NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
         {
             return (int)Math.Round(raw * 15);
         }
@@ -339,7 +339,7 @@ static class StyleParser
             return Math.Max(1, (int)Math.Round(px * 6));
         }
 
-        if (double.TryParse(span.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
+        if (double.TryParse(span, NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
         {
             return raw == 0 ? 0 : Math.Max(1, (int)Math.Round(raw * 6));
         }
@@ -352,7 +352,7 @@ static class StyleParser
         if (span.EndsWith(suffix.AsSpan(), StringComparison.OrdinalIgnoreCase))
         {
             return double.TryParse(
-                span[..^suffix.Length].Trim().ToString(),
+                span[..^suffix.Length].Trim(),
                 NumberStyles.Float,
                 CultureInfo.InvariantCulture,
                 out result);
