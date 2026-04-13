@@ -449,9 +449,12 @@ Entry points: `WordContentBuilder.ProcessTable`.
 - **Notes**: Word tables are always collapsed; `border-collapse: separate` is ignored.
 
 
-### 4.10 `<colgroup>` / `<col>` `TODO`
+### 4.10 `<colgroup>` / `<col>` `DONE`
 
-- **Notes**: Parsed but no per-column widths are emitted.
+- **HTML**: `<col>`, `<colgroup>`, `span` attribute, `width` attribute (pixels or length), `style="width: ..."`
+- **OpenXml**: `w:tblGrid`/`w:gridCol` widths plus a fallback `w:tcW` on cells without explicit CSS width
+- **Notes**: Percentage widths are ignored (Word's table grid requires absolute twips). A `<colgroup span="N" width="W">` with no `<col>` children expands to `N` columns.
+- **Test**: `WordColgroupTests`
 
 ---
 
@@ -806,33 +809,32 @@ These categories are intentionally out of scope because Word/Excel does not mode
 | 1. Text Formatting | 17 | 0 | 0 | 17 |
 | 2. Block Elements | 7 | 1 | 0 | 8 |
 | 3. Lists and Numbering | 5 | 1 | 0 | 6 |
-| 4. Tables | 8 | 0 | 2 | 10 |
+| 4. Tables | 9 | 0 | 1 | 10 |
 | 5. Links and Anchors | 2 | 1 | 0 | 3 |
 | 6. Images and Media | 7 | 0 | 2 | 9 |
 | 7. Borders and Backgrounds | 4 | 0 | 1 | 5 |
 | 8. Paragraph Layout | 6 | 0 | 2 | 8 |
 | 9. Document Structure | 4 | 1 | 3 | 8 |
 | 10. Spreadsheet Path | 1 | 0 | 1 | 2 |
-| **Total** | **61** | **4** | **11** | **76** |
+| **Total** | **62** | **4** | **10** | **76** |
 
 
 ### Coverage
 
 ```mermaid
 pie title HTML Feature Implementation Status
-    "Done" : 61
+    "Done" : 62
     "Partial" : 4
-    "Todo" : 11
+    "Todo" : 10
 ```
 
-**Overall coverage: 80% fully implemented, 5% partial, 15% remaining.** Numbers exclude the "Not Supported" section, which lists features that are out of scope by design.
+**Overall coverage: 82% fully implemented, 5% partial, 13% remaining.** Numbers exclude the "Not Supported" section, which lists features that are out of scope by design.
 
 
 ### Priority Areas
 
-1. **`<colgroup>` / `<col>` widths** — cheap win for table fidelity
-2. **Endnotes and explicit `<footnote>` markup** — currently overloaded onto `blockquote cite`
-3. **Sections, columns, page setup** — common in long-form document conversion
-4. **Spreadsheet hyperlinks and images** — xlsx path is currently inline-text only
-5. **Table of contents from headings** — natural fit once heading styles are in place
-6. **CSS class lookup from embedded `<style>`** — today only external Word styles are matched
+1. **Endnotes and explicit `<footnote>` markup** — currently overloaded onto `blockquote cite`
+2. **Sections, columns, page setup** — common in long-form document conversion
+3. **Spreadsheet hyperlinks and images** — xlsx path is currently inline-text only
+4. **Table of contents from headings** — natural fit once heading styles are in place
+5. **CSS class lookup from embedded `<style>`** — today only external Word styles are matched
