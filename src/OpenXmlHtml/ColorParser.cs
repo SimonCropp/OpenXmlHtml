@@ -254,9 +254,9 @@ static class ColorParser
             bSpan = bSpan[..thirdComma];
         }
 
-        if (!int.TryParse(inner[..firstComma].Trim().ToString(), out var r) ||
-            !int.TryParse(rest[..secondComma].Trim().ToString(), out var g) ||
-            !int.TryParse(bSpan.Trim().ToString(), out var b))
+        if (!int.TryParse(inner[..firstComma].Trim(), out var r) ||
+            !int.TryParse(rest[..secondComma].Trim(), out var g) ||
+            !int.TryParse(bSpan.Trim(), out var b))
         {
             return null;
         }

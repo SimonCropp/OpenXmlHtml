@@ -434,9 +434,9 @@ static class WordContentBuilder
                 if (declarations.TryGetValue("line-height", out var lh))
                 {
                     var lhSpan = lh.AsSpan().Trim();
-                    if (lhSpan.EndsWith("%".AsSpan()))
+                    if (lhSpan.EndsWith('%'))
                     {
-                        if (double.TryParse(lhSpan[..^1].ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var pct))
+                        if (double.TryParse(lhSpan[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var pct))
                         {
                             pf.LineHeightMultiple = pct / 100.0;
                         }
