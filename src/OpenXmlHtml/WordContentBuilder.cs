@@ -642,10 +642,12 @@ static class WordContentBuilder
         // Apply paragraph style: heading > CSS class > default
         if (ctx.HeadingLevel > 0)
         {
+            var offset = ctx.Settings?.HeadingLevelOffset ?? 0;
+            var level = Math.Clamp(ctx.HeadingLevel + offset, 1, 9);
             paragraph.ParagraphProperties ??= new();
             paragraph.ParagraphProperties.ParagraphStyleId = new()
             {
-                Val = $"Heading{ctx.HeadingLevel}"
+                Val = $"Heading{level}"
             };
         }
         else if (ctx.ParagraphStyleId != null)
