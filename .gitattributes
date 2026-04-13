@@ -6,6 +6,8 @@
 *.xlsx binary
 *.docx binary
 *.zip binary
+*.ttf binary
+*.otf binary
 
 *.verified.txt text eol=lf working-tree-encoding=UTF-8
 *.verified.xml text eol=lf working-tree-encoding=UTF-8
