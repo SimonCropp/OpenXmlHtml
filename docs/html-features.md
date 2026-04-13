@@ -531,20 +531,25 @@ Entry points: `ImageResolver`, `ImagePolicy`, `HtmlConvertSettings`.
 - **Test**: `WordConvertToDocxTests.ImageWidthHeight`
 
 
-### 6.7 Alt Fallback `DONE` `[both]`
+### 6.7 CSS image sizing `DONE` `[dom]`
+
+- **CSS**: `width`, `height` on `<img>` in pt, px, em, in, cm, mm
+- **Behaviour**: CSS `width`/`height` takes precedence over the HTML `width=`/`height=` attributes. Percentage values are ignored (Word images need absolute dimensions) and fall through to the HTML attribute if present.
+- **Class**: `ImageResolver.ParseImageDimensions`, `StyleParser.ParseLengthToPixels`
+- **Test**: `WordImageSizingTests`
+
+> **Consumers**: When only one dimension is specified, the other defaults to 100px — aspect ratio is not inferred from intrinsic image dimensions. `object-fit` and `object-position` are not honoured.
+
+
+### 6.8 Alt Fallback `DONE` `[both]`
 
 - **Behaviour**: When an image cannot be resolved, `alt` text is emitted as a plain run
 - **Test**: `WordEdgeCaseTests.ImageAltFallback`
 
 
-### 6.8 `srcset` / `<picture>` `TODO`
+### 6.9 `srcset` / `<picture>` `TODO`
 
 - **Notes**: Only `src` is honoured; responsive variants are ignored.
-
-
-### 6.9 CSS image sizing `TODO`
-
-- **Notes**: Only HTML `width`/`height` attributes are honoured — not CSS `width`/`height`, `object-fit`, or `object-position`.
 
 ---
 
@@ -811,24 +816,24 @@ These categories are intentionally out of scope because Word/Excel does not mode
 | 3. Lists and Numbering | 5 | 1 | 0 | 6 |
 | 4. Tables | 9 | 0 | 1 | 10 |
 | 5. Links and Anchors | 2 | 1 | 0 | 3 |
-| 6. Images and Media | 7 | 0 | 2 | 9 |
+| 6. Images and Media | 8 | 0 | 1 | 9 |
 | 7. Borders and Backgrounds | 4 | 0 | 1 | 5 |
 | 8. Paragraph Layout | 6 | 0 | 2 | 8 |
 | 9. Document Structure | 4 | 1 | 3 | 8 |
 | 10. Spreadsheet Path | 1 | 0 | 1 | 2 |
-| **Total** | **62** | **4** | **10** | **76** |
+| **Total** | **63** | **4** | **9** | **76** |
 
 
 ### Coverage
 
 ```mermaid
 pie title HTML Feature Implementation Status
-    "Done" : 62
+    "Done" : 63
     "Partial" : 4
-    "Todo" : 10
+    "Todo" : 9
 ```
 
-**Overall coverage: 82% fully implemented, 5% partial, 13% remaining.** Numbers exclude the "Not Supported" section, which lists features that are out of scope by design.
+**Overall coverage: 83% fully implemented, 5% partial, 12% remaining.** Numbers exclude the "Not Supported" section, which lists features that are out of scope by design.
 
 
 ### Priority Areas

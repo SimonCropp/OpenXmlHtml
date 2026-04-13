@@ -101,23 +101,49 @@ static class ImageResolver
 
         contentType ??= "image/png";
 
-        int? width = null;
-        var widthAttr = element.GetAttribute("width");
-        if (widthAttr != null &&
-            int.TryParse(widthAttr, out var w))
-        {
-            width = w;
-        }
-
-        int? height = null;
-        var heightAttr = element.GetAttribute("height");
-        if (heightAttr != null &&
-            int.TryParse(heightAttr, out var h))
-        {
-            height = h;
-        }
-
+        var (width, height) = ParseImageDimensions(element);
         return new(bytes, contentType, width, height);
+    }
+
+    internal static (int? Width, int? Height) ParseImageDimensions(IElement element)
+    {
+        int? width = null;
+        int? height = null;
+
+        var style = element.GetAttribute("style");
+        if (style != null)
+        {
+            var declarations = StyleParser.Parse(style);
+            if (declarations.TryGetValue("width", out var cssWidth))
+            {
+                width = StyleParser.ParseLengthToPixels(cssWidth);
+            }
+
+            if (declarations.TryGetValue("height", out var cssHeight))
+            {
+                height = StyleParser.ParseLengthToPixels(cssHeight);
+            }
+        }
+
+        if (width == null)
+        {
+            var widthAttr = element.GetAttribute("width");
+            if (widthAttr != null && int.TryParse(widthAttr, out var w))
+            {
+                width = w;
+            }
+        }
+
+        if (height == null)
+        {
+            var heightAttr = element.GetAttribute("height");
+            if (heightAttr != null && int.TryParse(heightAttr, out var h))
+            {
+                height = h;
+            }
+        }
+
+        return (width, height);
     }
 
     static string GuessContentType(string path) =>

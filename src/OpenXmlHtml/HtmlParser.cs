@@ -537,20 +537,7 @@ static class HtmlSegmentParser
         Array.Resize(ref bytes, bytesWritten);
 #endif
 
-        int? width = null;
-        var widthAttr = element.GetAttribute("width");
-        if (widthAttr != null && int.TryParse(widthAttr, out var w))
-        {
-            width = w;
-        }
-
-        int? height = null;
-        var heightAttr = element.GetAttribute("height");
-        if (heightAttr != null && int.TryParse(heightAttr, out var h))
-        {
-            height = h;
-        }
-
+        var (width, height) = ImageResolver.ParseImageDimensions(element);
         return new(bytes, contentType, width, height);
     }
 

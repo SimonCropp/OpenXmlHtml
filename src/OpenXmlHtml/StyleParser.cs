@@ -149,6 +149,12 @@ static class StyleParser
         return null;
     }
 
+    internal static int? ParseLengthToPixels(string value)
+    {
+        var twips = ParseLengthToTwips(value);
+        return twips == null ? null : (int)Math.Round(twips.Value / 15d);
+    }
+
     internal static (int? Top, int? Right, int? Bottom, int? Left) ParseMarginShorthand(string value)
     {
         var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
