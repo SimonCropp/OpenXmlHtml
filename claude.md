@@ -71,6 +71,7 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordTableTests` | `table`, `tr`, `td`, `th`, `colspan`, `rowspan`, `thead`/`tbody`/`tfoot`, `caption`, nested tables |
 | `WordTableStyleTests` | Cell `padding`/`width`/`background-color`/`vertical-align`, table `width`/`background-color`/`padding`, `cellpadding`/`bgcolor`/`width` HTML attributes |
 | `WordColgroupTests` | `<colgroup>`, `<col>`, `col width=` / `col style="width"`, `col span=`, column width propagation to `tblGrid` and cells |
+| `WordImageSizingTests` | CSS `width`/`height` on `<img>` (px, pt, em, in), precedence over HTML `width=`/`height=` attributes, percentage fallthrough |
 | `WordAnchorTests` | `a` (hyperlinks, internal `#id` links), `id` attribute bookmarks |
 | `WordNestedTests` | Deeply nested formatting combinations |
 | `WordEdgeCaseTests` | Whitespace collapsing, malformed HTML, unclosed tags, unknown tags, image alt fallback |
