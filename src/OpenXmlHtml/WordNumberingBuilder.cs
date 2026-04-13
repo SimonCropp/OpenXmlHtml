@@ -10,7 +10,7 @@ static class WordNumberingBuilder
         }
 
         part = mainPart.AddNewPart<NumberingDefinitionsPart>();
-        part.Numbering = new Numbering();
+        part.Numbering = new();
         return part;
     }
 

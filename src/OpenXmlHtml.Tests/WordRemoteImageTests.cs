@@ -137,7 +137,7 @@ public class WordRemoteImageTests
             Cancel cancel)
         {
             var content = new ByteArrayContent(PngBytes);
-            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+            content.Headers.ContentType = new("image/png");
             var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
                 Content = content

@@ -227,12 +227,12 @@ public class WordSamples
         var styleMainPart = styleDoc.AddMainDocumentPart();
 
         var stylesPart = styleMainPart.AddNewPart<StyleDefinitionsPart>();
-        stylesPart.Styles = new Styles(
+        stylesPart.Styles = new(
             new Style { StyleId = "Quote", Type = StyleValues.Paragraph },
             new Style { StyleId = "Emphasis", Type = StyleValues.Character });
 
         var styleBody = new Body();
-        styleMainPart.Document = new Document(styleBody);
+        styleMainPart.Document = new(styleBody);
 
         #region StyleMapping
 

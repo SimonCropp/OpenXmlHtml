@@ -8,7 +8,7 @@ public class WordNestedComboTests
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body,
             """

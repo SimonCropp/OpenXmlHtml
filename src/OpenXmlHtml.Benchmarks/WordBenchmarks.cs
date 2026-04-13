@@ -1,11 +1,7 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using BenchmarkDotNet.Attributes;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using OpenXmlHtml;
 
 #pragma warning disable CA1822 // Mark members as static - BenchmarkDotNet requires instance methods
 
@@ -14,9 +10,9 @@ namespace OpenXmlHtml.Benchmarks;
 [MemoryDiagnoser]
 public class WordBenchmarks
 {
-    const string SimpleInline = "<b>Bold</b> and <i>italic</i> with <span style=\"color: red\">color</span>";
+    const string simpleInline = "<b>Bold</b> and <i>italic</i> with <span style=\"color: red\">color</span>";
 
-    const string RichParagraphs = """
+    const string richParagraphs = """
         <h1>Report</h1>
         <p>This is a <b>bold</b> and <i>italic</i> paragraph with <a href="https://example.com">a link</a>.</p>
         <p style="margin-left: 36pt; text-indent: 18pt; line-height: 1.5">
@@ -28,7 +24,7 @@ public class WordBenchmarks
           text block</pre>
         """;
 
-    const string NestedList = """
+    const string nestedList = """
         <ol>
           <li><b>First</b> item
             <ul>
@@ -46,7 +42,7 @@ public class WordBenchmarks
         </ol>
         """;
 
-    const string Table = """
+    const string table = """
         <table style="border: 1px solid black; width: 100%">
           <caption>Quarterly Results</caption>
           <thead>
@@ -71,7 +67,7 @@ public class WordBenchmarks
         </table>
         """;
 
-    const string NestedTable = """
+    const string nestedTable = """
         <table>
           <tr>
             <td>Outer</td>
@@ -85,7 +81,7 @@ public class WordBenchmarks
         </table>
         """;
 
-    static readonly string LargeDocument;
+    static readonly string largeDocument;
 
     static WordBenchmarks()
     {
@@ -95,46 +91,46 @@ public class WordBenchmarks
         {
             sections.Append($"""
                 <h2>Section {i + 1}</h2>
-                {RichParagraphs}
-                {NestedList}
-                {Table}
+                {richParagraphs}
+                {nestedList}
+                {table}
                 """);
         }
 
-        LargeDocument = sections.ToString();
+        largeDocument = sections.ToString();
     }
 
     // --- ToParagraphs (flat segment path) ---
 
     [Benchmark]
     public List<Paragraph> ToParagraphs_SimpleInline() =>
-        WordHtmlConverter.ToParagraphs(SimpleInline);
+        WordHtmlConverter.ToParagraphs(simpleInline);
 
     [Benchmark]
     public List<Paragraph> ToParagraphs_RichParagraphs() =>
-        WordHtmlConverter.ToParagraphs(RichParagraphs);
+        WordHtmlConverter.ToParagraphs(richParagraphs);
 
     // --- ToElements (DOM-based path, no MainDocumentPart) ---
 
     [Benchmark]
     public List<OpenXmlElement> ToElements_SimpleInline() =>
-        WordHtmlConverter.ToElements(SimpleInline);
+        WordHtmlConverter.ToElements(simpleInline);
 
     [Benchmark]
     public List<OpenXmlElement> ToElements_RichParagraphs() =>
-        WordHtmlConverter.ToElements(RichParagraphs);
+        WordHtmlConverter.ToElements(richParagraphs);
 
     [Benchmark]
     public List<OpenXmlElement> ToElements_NestedList() =>
-        WordHtmlConverter.ToElements(NestedList);
+        WordHtmlConverter.ToElements(nestedList);
 
     [Benchmark]
     public List<OpenXmlElement> ToElements_Table() =>
-        WordHtmlConverter.ToElements(Table);
+        WordHtmlConverter.ToElements(table);
 
     [Benchmark]
     public List<OpenXmlElement> ToElements_NestedTable() =>
-        WordHtmlConverter.ToElements(NestedTable);
+        WordHtmlConverter.ToElements(nestedTable);
 
     // --- ConvertToDocx (full pipeline with MainDocumentPart) ---
 
@@ -142,28 +138,28 @@ public class WordBenchmarks
     public void ConvertToDocx_RichParagraphs()
     {
         using var stream = new MemoryStream();
-        WordHtmlConverter.ConvertToDocx(RichParagraphs, stream);
+        WordHtmlConverter.ConvertToDocx(richParagraphs, stream);
     }
 
     [Benchmark]
     public void ConvertToDocx_Table()
     {
         using var stream = new MemoryStream();
-        WordHtmlConverter.ConvertToDocx(Table, stream);
+        WordHtmlConverter.ConvertToDocx(table, stream);
     }
 
     [Benchmark]
     public void ConvertToDocx_NestedList()
     {
         using var stream = new MemoryStream();
-        WordHtmlConverter.ConvertToDocx(NestedList, stream);
+        WordHtmlConverter.ConvertToDocx(nestedList, stream);
     }
 
     [Benchmark]
     public void ConvertToDocx_LargeDocument()
     {
         using var stream = new MemoryStream();
-        WordHtmlConverter.ConvertToDocx(LargeDocument, stream);
+        WordHtmlConverter.ConvertToDocx(largeDocument, stream);
     }
 
     // --- AppendHtml (into existing document) ---
@@ -175,8 +171,8 @@ public class WordBenchmarks
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
-        WordHtmlConverter.AppendHtml(body, RichParagraphs, mainPart);
+        mainPart.Document = new(body);
+        WordHtmlConverter.AppendHtml(body, richParagraphs, mainPart);
     }
 
     [Benchmark]
@@ -186,7 +182,7 @@ public class WordBenchmarks
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
-        WordHtmlConverter.AppendHtml(body, LargeDocument, mainPart);
+        mainPart.Document = new(body);
+        WordHtmlConverter.AppendHtml(body, largeDocument, mainPart);
     }
 }

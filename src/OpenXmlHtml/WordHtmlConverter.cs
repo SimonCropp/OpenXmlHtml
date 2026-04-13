@@ -279,7 +279,7 @@ public static class WordHtmlConverter
         var sectionProps = body.GetFirstChild<SectionProperties>();
         if (sectionProps == null)
         {
-            sectionProps = new SectionProperties();
+            sectionProps = new();
             body.Append(sectionProps);
         }
 

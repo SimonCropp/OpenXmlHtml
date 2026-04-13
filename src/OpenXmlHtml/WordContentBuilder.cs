@@ -277,7 +277,10 @@ static class WordContentBuilder
                     // Internal anchor link → Word hyperlink to bookmark
                     var runsBefore = context.CurrentRuns.Count;
                     ProcessChildren(element, newFormat, elements, context, inPre);
-                    var hyperlink = new Hyperlink { Anchor = href[1..] };
+                    var hyperlink = new Hyperlink
+                    {
+                        Anchor = href[1..]
+                    };
                     // Move newly added runs into the hyperlink
                     while (context.CurrentRuns.Count > runsBefore)
                     {
@@ -295,7 +298,10 @@ static class WordContentBuilder
                     var runsBefore = context.CurrentRuns.Count;
                     ProcessChildren(element, newFormat, elements, context, inPre);
                     var rel = context.MainPart.AddHyperlinkRelationship(uri, true);
-                    var hyperlink = new Hyperlink { Id = rel.Id };
+                    var hyperlink = new Hyperlink
+                    {
+                        Id = rel.Id
+                    };
                     while (context.CurrentRuns.Count > runsBefore)
                     {
                         var run = context.CurrentRuns[runsBefore];
@@ -436,7 +442,9 @@ static class WordContentBuilder
                         }
                     }
                     else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple) &&
-                             !lh.Contains("pt") && !lh.Contains("px") && !lh.Contains("em"))
+                             !lh.Contains("pt") &&
+                             !lh.Contains("px") &&
+                             !lh.Contains("em"))
                     {
                         pf.LineHeightMultiple = multiple;
                     }
@@ -452,8 +460,8 @@ static class WordContentBuilder
                     pf.WritingMode = wm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
                         ? TextDirectionValues.TopToBottomRightToLeft
                         : wm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
-                        ? TextDirectionValues.BottomToTopLeftToRight
-                        : null;
+                            ? TextDirectionValues.BottomToTopLeftToRight
+                            : null;
                 }
 
                 if (declarations.TryGetValue("direction", out var direction) &&
@@ -542,14 +550,21 @@ static class WordContentBuilder
         {
             context.BookmarkId++;
             bookmarkId = context.BookmarkId.ToString();
-            context.CurrentRuns.Add(new BookmarkStart { Id = bookmarkId, Name = elementId });
+            context.CurrentRuns.Add(new BookmarkStart
+            {
+                Id = bookmarkId,
+                Name = elementId
+            });
         }
 
         ProcessChildren(element, newFormat, elements, context, inPre);
 
         if (bookmarkId != null)
         {
-            context.CurrentRuns.Add(new BookmarkEnd { Id = bookmarkId });
+            context.CurrentRuns.Add(new BookmarkEnd
+            {
+                Id = bookmarkId
+            });
         }
 
         if (isBlock)
@@ -628,23 +643,38 @@ static class WordContentBuilder
         if (ctx.HeadingLevel > 0)
         {
             paragraph.ParagraphProperties ??= new();
-            paragraph.ParagraphProperties.ParagraphStyleId = new() { Val = $"Heading{ctx.HeadingLevel}" };
+            paragraph.ParagraphProperties.ParagraphStyleId = new()
+            {
+                Val = $"Heading{ctx.HeadingLevel}"
+            };
         }
         else if (ctx.ParagraphStyleId != null)
         {
             paragraph.ParagraphProperties ??= new();
-            paragraph.ParagraphProperties.ParagraphStyleId = new() { Val = ctx.ParagraphStyleId };
+            paragraph.ParagraphProperties.ParagraphStyleId = new()
+            {
+                Val = ctx.ParagraphStyleId
+            };
         }
 
         // Apply real Word numbering
         if (ctx.ListNumId != null)
         {
             paragraph.ParagraphProperties ??= new();
-            paragraph.ParagraphProperties.ParagraphStyleId ??= new() { Val = "ListParagraph" };
+            paragraph.ParagraphProperties.ParagraphStyleId ??= new()
+            {
+                Val = "ListParagraph"
+            };
             paragraph.ParagraphProperties.Append(
                 new NumberingProperties(
-                    new NumberingLevelReference { Val = ctx.ListIlvl ?? 0 },
-                    new NumberingId { Val = ctx.ListNumId.Value }));
+                    new NumberingLevelReference
+                    {
+                        Val = ctx.ListIlvl ?? 0
+                    },
+                    new NumberingId
+                    {
+                        Val = ctx.ListNumId.Value
+                    }));
         }
 
         // Apply paragraph format (CSS margins, alignment, line-height)
@@ -727,18 +757,28 @@ static class WordContentBuilder
 
         if (pf.TextAlign != null)
         {
-            props.Append(new Justification { Val = pf.TextAlign.Value });
+            props.Append(new Justification
+            {
+                Val = pf.TextAlign.Value
+            });
         }
 
         if (pf.BackgroundColor != null)
         {
-            props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = pf.BackgroundColor });
+            props.Append(new Shading
+            {
+                Val = ShadingPatternValues.Clear,
+                Fill = pf.BackgroundColor
+            });
         }
 
         if (pf.WritingMode != null)
         {
             props.Append(new BiDi());
-            props.Append(new TextDirection { Val = pf.WritingMode.Value });
+            props.Append(new TextDirection
+            {
+                Val = pf.WritingMode.Value
+            });
         }
 
         if (pf.BorderTop != null || pf.BorderRight != null || pf.BorderBottom != null || pf.BorderLeft != null)
@@ -746,22 +786,46 @@ static class WordContentBuilder
             var borders = new ParagraphBorders();
             if (pf.BorderTop != null && pf.BorderTop.Style != BorderValues.None)
             {
-                borders.Append(new TopBorder { Val = pf.BorderTop.Style, Size = (uint)pf.BorderTop.SizeEighths, Space = 1, Color = pf.BorderTop.Color ?? "auto" });
+                borders.Append(new TopBorder
+                {
+                    Val = pf.BorderTop.Style,
+                    Size = (uint)pf.BorderTop.SizeEighths,
+                    Space = 1,
+                    Color = pf.BorderTop.Color ?? "auto"
+                });
             }
 
             if (pf.BorderLeft != null && pf.BorderLeft.Style != BorderValues.None)
             {
-                borders.Append(new LeftBorder { Val = pf.BorderLeft.Style, Size = (uint)pf.BorderLeft.SizeEighths, Space = 1, Color = pf.BorderLeft.Color ?? "auto" });
+                borders.Append(new LeftBorder
+                {
+                    Val = pf.BorderLeft.Style,
+                    Size = (uint)pf.BorderLeft.SizeEighths,
+                    Space = 1,
+                    Color = pf.BorderLeft.Color ?? "auto"
+                });
             }
 
             if (pf.BorderBottom != null && pf.BorderBottom.Style != BorderValues.None)
             {
-                borders.Append(new BottomBorder { Val = pf.BorderBottom.Style, Size = (uint)pf.BorderBottom.SizeEighths, Space = 1, Color = pf.BorderBottom.Color ?? "auto" });
+                borders.Append(new BottomBorder
+                {
+                    Val = pf.BorderBottom.Style,
+                    Size = (uint)pf.BorderBottom.SizeEighths,
+                    Space = 1,
+                    Color = pf.BorderBottom.Color ?? "auto"
+                });
             }
 
             if (pf.BorderRight != null && pf.BorderRight.Style != BorderValues.None)
             {
-                borders.Append(new RightBorder { Val = pf.BorderRight.Style, Size = (uint)pf.BorderRight.SizeEighths, Space = 1, Color = pf.BorderRight.Color ?? "auto" });
+                borders.Append(new RightBorder
+                {
+                    Val = pf.BorderRight.Style,
+                    Size = (uint)pf.BorderRight.SizeEighths,
+                    Space = 1,
+                    Color = pf.BorderRight.Color ?? "auto"
+                });
             }
 
             props.Append(borders);
@@ -838,27 +902,97 @@ static class WordContentBuilder
         TableBorders tableBorders;
         if (defaultBorder.Style == BorderValues.None)
         {
-            tableBorders = new TableBorders(
-                new TopBorder { Val = BorderValues.None, Size = 0, Space = 0 },
-                new LeftBorder { Val = BorderValues.None, Size = 0, Space = 0 },
-                new BottomBorder { Val = BorderValues.None, Size = 0, Space = 0 },
-                new RightBorder { Val = BorderValues.None, Size = 0, Space = 0 },
-                new InsideHorizontalBorder { Val = BorderValues.None, Size = 0, Space = 0 },
-                new InsideVerticalBorder { Val = BorderValues.None, Size = 0, Space = 0 });
+            tableBorders = new(
+                new TopBorder
+                {
+                    Val = BorderValues.None,
+                    Size = 0,
+                    Space = 0
+                },
+                new LeftBorder
+                {
+                    Val = BorderValues.None,
+                    Size = 0,
+                    Space = 0
+                },
+                new BottomBorder
+                {
+                    Val = BorderValues.None,
+                    Size = 0,
+                    Space = 0
+                },
+                new RightBorder
+                {
+                    Val = BorderValues.None,
+                    Size = 0,
+                    Space = 0
+                },
+                new InsideHorizontalBorder
+                {
+                    Val = BorderValues.None,
+                    Size = 0,
+                    Space = 0
+                },
+                new InsideVerticalBorder
+                {
+                    Val = BorderValues.None,
+                    Size = 0,
+                    Space = 0
+                });
         }
         else
         {
-            tableBorders = new TableBorders(
-                new TopBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
-                new LeftBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
-                new BottomBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
-                new RightBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
-                new InsideHorizontalBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" },
-                new InsideVerticalBorder { Val = defaultBorder.Style, Size = (uint)defaultBorder.SizeEighths, Space = 0, Color = defaultBorder.Color ?? "auto" });
+            tableBorders = new(
+                new TopBorder
+                {
+                    Val = defaultBorder.Style,
+                    Size = (uint)defaultBorder.SizeEighths,
+                    Space = 0,
+                    Color = defaultBorder.Color ?? "auto"
+                },
+                new LeftBorder
+                {
+                    Val = defaultBorder.Style,
+                    Size = (uint)defaultBorder.SizeEighths,
+                    Space = 0,
+                    Color = defaultBorder.Color ?? "auto"
+                },
+                new BottomBorder
+                {
+                    Val = defaultBorder.Style,
+                    Size = (uint)defaultBorder.SizeEighths,
+                    Space = 0,
+                    Color = defaultBorder.Color ?? "auto"
+                },
+                new RightBorder
+                {
+                    Val = defaultBorder.Style,
+                    Size = (uint)defaultBorder.SizeEighths,
+                    Space = 0,
+                    Color = defaultBorder.Color ?? "auto"
+                },
+                new InsideHorizontalBorder
+                {
+                    Val = defaultBorder.Style,
+                    Size = (uint)defaultBorder.SizeEighths,
+                    Space = 0,
+                    Color = defaultBorder.Color ?? "auto"
+                },
+                new InsideVerticalBorder
+                {
+                    Val = defaultBorder.Style,
+                    Size = (uint)defaultBorder.SizeEighths,
+                    Space = 0,
+                    Color = defaultBorder.Color ?? "auto"
+                });
         }
 
         var tblPr = new TableProperties(
-            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
+            new TableWidth
+            {
+                Width = "0",
+                Type = TableWidthUnitValues.Auto
+            },
             tableBorders);
 
         if (declarations != null)
@@ -868,7 +1002,11 @@ static class WordContentBuilder
                 var twips = StyleParser.ParseLengthToTwips(tableWidth);
                 if (twips != null)
                 {
-                    tblPr.TableWidth = new TableWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa };
+                    tblPr.TableWidth = new()
+                    {
+                        Width = twips.Value.ToString(),
+                        Type = TableWidthUnitValues.Dxa
+                    };
                 }
             }
 
@@ -878,7 +1016,11 @@ static class WordContentBuilder
                 var parsed = ColorParser.Parse(tableBg);
                 if (parsed != null)
                 {
-                    tblPr.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = parsed });
+                    tblPr.Append(new Shading
+                    {
+                        Val = ShadingPatternValues.Clear,
+                        Fill = parsed
+                    });
                 }
             }
 
@@ -894,10 +1036,26 @@ static class WordContentBuilder
             {
                 var w = twips.Value.ToString();
                 var margin = new TableCellMarginDefault(
-                    new TopMargin { Width = w, Type = TableWidthUnitValues.Dxa },
-                    new StartMargin { Width = w, Type = TableWidthUnitValues.Dxa },
-                    new BottomMargin { Width = w, Type = TableWidthUnitValues.Dxa },
-                    new EndMargin { Width = w, Type = TableWidthUnitValues.Dxa });
+                    new TopMargin
+                    {
+                        Width = w,
+                        Type = TableWidthUnitValues.Dxa
+                    },
+                    new StartMargin
+                    {
+                        Width = w,
+                        Type = TableWidthUnitValues.Dxa
+                    },
+                    new BottomMargin
+                    {
+                        Width = w,
+                        Type = TableWidthUnitValues.Dxa
+                    },
+                    new EndMargin
+                    {
+                        Width = w,
+                        Type = TableWidthUnitValues.Dxa
+                    });
                 tblPr.Append(margin);
             }
         }
@@ -934,7 +1092,11 @@ static class WordContentBuilder
             if (rowHeight != null)
             {
                 tr.Append(new TableRowProperties(
-                    new TableRowHeight { Val = (uint)rowHeight.Value, HeightType = HeightRuleValues.AtLeast }));
+                    new TableRowHeight
+                    {
+                        Val = (uint)rowHeight.Value,
+                        HeightType = HeightRuleValues.AtLeast
+                    }));
             }
 
             var cells = GetCells(row);
@@ -948,7 +1110,10 @@ static class WordContentBuilder
                     var contTcPr = new TableCellProperties(new VerticalMerge());
                     if (spanInfo.Colspan > 1)
                     {
-                        contTcPr.Append(new GridSpan { Val = spanInfo.Colspan });
+                        contTcPr.Append(new GridSpan
+                        {
+                            Val = spanInfo.Colspan
+                        });
                     }
 
                     tr.Append(new TableCell(contTcPr, new Paragraph()));
@@ -1011,15 +1176,21 @@ static class WordContentBuilder
 
         if (colspan > 1 || isRowspanStart)
         {
-            tcPr = new TableCellProperties();
+            tcPr = new();
             if (colspan > 1)
             {
-                tcPr.Append(new GridSpan { Val = colspan });
+                tcPr.Append(new GridSpan
+                {
+                    Val = colspan
+                });
             }
 
             if (isRowspanStart)
             {
-                tcPr.Append(new VerticalMerge { Val = MergedCellValues.Restart });
+                tcPr.Append(new VerticalMerge
+                {
+                    Val = MergedCellValues.Restart
+                });
             }
         }
 
@@ -1037,8 +1208,12 @@ static class WordContentBuilder
             var parsed = ColorParser.Parse(bgColorAttr);
             if (parsed != null)
             {
-                tcPr ??= new TableCellProperties();
-                tcPr.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = parsed });
+                tcPr ??= new();
+                tcPr.Append(new Shading
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Fill = parsed
+                });
             }
         }
 
@@ -1049,15 +1224,23 @@ static class WordContentBuilder
             var twips = StyleParser.ParseLengthToTwips(widthAttr);
             if (twips != null)
             {
-                tcPr ??= new TableCellProperties();
-                tcPr.Append(new TableCellWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                tcPr ??= new();
+                tcPr.Append(new TableCellWidth
+                {
+                    Width = twips.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
         }
 
-        if (colWidth != null && (tcPr == null || tcPr.GetFirstChild<TableCellWidth>() == null))
+        if (colWidth != null && tcPr?.GetFirstChild<TableCellWidth>() == null)
         {
-            tcPr ??= new TableCellProperties();
-            tcPr.Append(new TableCellWidth { Width = colWidth.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+            tcPr ??= new();
+            tcPr.Append(new TableCellWidth
+            {
+                Width = colWidth.Value.ToString(),
+                Type = TableWidthUnitValues.Dxa
+            });
         }
 
         if (tcPr != null)
@@ -1107,7 +1290,7 @@ static class WordContentBuilder
 
     static TableCellProperties ApplyCellStyles(Dictionary<string, string> declarations, TableCellProperties? tcPr)
     {
-        tcPr ??= new TableCellProperties();
+        tcPr ??= new();
 
         // Cell width
         if (declarations.TryGetValue("width", out var cellWidth))
@@ -1115,7 +1298,11 @@ static class WordContentBuilder
             var twips = StyleParser.ParseLengthToTwips(cellWidth);
             if (twips != null)
             {
-                tcPr.Append(new TableCellWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                tcPr.Append(new TableCellWidth
+                {
+                    Width = twips.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
         }
 
@@ -1126,7 +1313,11 @@ static class WordContentBuilder
             var parsed = ColorParser.Parse(bgColor);
             if (parsed != null)
             {
-                tcPr.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = parsed });
+                tcPr.Append(new Shading
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Fill = parsed
+                });
             }
         }
 
@@ -1140,7 +1331,10 @@ static class WordContentBuilder
                 : (TableVerticalAlignmentValues?)null;
             if (val != null)
             {
-                tcPr.Append(new TableCellVerticalAlignment { Val = val.Value });
+                tcPr.Append(new TableCellVerticalAlignment
+                {
+                    Val = val.Value
+                });
             }
         }
 
@@ -1151,11 +1345,14 @@ static class WordContentBuilder
             var cellTextDir = cwm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
                 ? TextDirectionValues.TopToBottomRightToLeft
                 : cwm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
-                ? TextDirectionValues.BottomToTopLeftToRight
-                : (TextDirectionValues?)null;
+                    ? TextDirectionValues.BottomToTopLeftToRight
+                    : (TextDirectionValues?)null;
             if (cellTextDir != null)
             {
-                tcPr.Append(new TextDirection { Val = cellTextDir.Value });
+                tcPr.Append(new TextDirection
+                {
+                    Val = cellTextDir.Value
+                });
             }
         }
 
@@ -1202,22 +1399,38 @@ static class WordContentBuilder
             var margin = new TableCellMargin();
             if (padTop != null)
             {
-                margin.Append(new TopMargin { Width = padTop.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new TopMargin
+                {
+                    Width = padTop.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             if (padLeft != null)
             {
-                margin.Append(new StartMargin { Width = padLeft.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new StartMargin
+                {
+                    Width = padLeft.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             if (padBottom != null)
             {
-                margin.Append(new BottomMargin { Width = padBottom.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new BottomMargin
+                {
+                    Width = padBottom.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             if (padRight != null)
             {
-                margin.Append(new EndMargin { Width = padRight.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new EndMargin
+                {
+                    Width = padRight.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             tcPr.Append(margin);
@@ -1240,22 +1453,46 @@ static class WordContentBuilder
             var cellBorders = new TableCellBorders();
             if (cbt != null && cbt.Style != BorderValues.None)
             {
-                cellBorders.Append(new TopBorder { Val = cbt.Style, Size = (uint)cbt.SizeEighths, Space = 0, Color = cbt.Color ?? "auto" });
+                cellBorders.Append(new TopBorder
+                {
+                    Val = cbt.Style,
+                    Size = (uint)cbt.SizeEighths,
+                    Space = 0,
+                    Color = cbt.Color ?? "auto"
+                });
             }
 
             if (cbl != null && cbl.Style != BorderValues.None)
             {
-                cellBorders.Append(new LeftBorder { Val = cbl.Style, Size = (uint)cbl.SizeEighths, Space = 0, Color = cbl.Color ?? "auto" });
+                cellBorders.Append(new LeftBorder
+                {
+                    Val = cbl.Style,
+                    Size = (uint)cbl.SizeEighths,
+                    Space = 0,
+                    Color = cbl.Color ?? "auto"
+                });
             }
 
             if (cbb != null && cbb.Style != BorderValues.None)
             {
-                cellBorders.Append(new BottomBorder { Val = cbb.Style, Size = (uint)cbb.SizeEighths, Space = 0, Color = cbb.Color ?? "auto" });
+                cellBorders.Append(new BottomBorder
+                {
+                    Val = cbb.Style,
+                    Size = (uint)cbb.SizeEighths,
+                    Space = 0,
+                    Color = cbb.Color ?? "auto"
+                });
             }
 
             if (cbr != null && cbr.Style != BorderValues.None)
             {
-                cellBorders.Append(new RightBorder { Val = cbr.Style, Size = (uint)cbr.SizeEighths, Space = 0, Color = cbr.Color ?? "auto" });
+                cellBorders.Append(new RightBorder
+                {
+                    Val = cbr.Style,
+                    Size = (uint)cbr.SizeEighths,
+                    Space = 0,
+                    Color = cbr.Color ?? "auto"
+                });
             }
 
             tcPr.Append(cellBorders);
@@ -1308,22 +1545,38 @@ static class WordContentBuilder
             var margin = new TableCellMarginDefault();
             if (padTop != null)
             {
-                margin.Append(new TopMargin { Width = padTop.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new TopMargin
+                {
+                    Width = padTop.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             if (padLeft != null)
             {
-                margin.Append(new StartMargin { Width = padLeft.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new StartMargin
+                {
+                    Width = padLeft.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             if (padBottom != null)
             {
-                margin.Append(new BottomMargin { Width = padBottom.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new BottomMargin
+                {
+                    Width = padBottom.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             if (padRight != null)
             {
-                margin.Append(new EndMargin { Width = padRight.Value.ToString(), Type = TableWidthUnitValues.Dxa });
+                margin.Append(new EndMargin
+                {
+                    Width = padRight.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
             }
 
             tblPr.Append(margin);
@@ -1488,7 +1741,7 @@ static class WordContentBuilder
         if (footnotesPart == null)
         {
             footnotesPart = ctx.MainPart.AddNewPart<FootnotesPart>();
-            footnotesPart.Footnotes = new Footnotes(
+            footnotesPart.Footnotes = new(
                 new Footnote(
                     new Paragraph(
                         new Run(
@@ -1512,18 +1765,30 @@ static class WordContentBuilder
                 new Paragraph(
                     new Run(
                         new RunProperties(
-                            new VerticalTextAlignment { Val = VerticalPositionValues.Superscript }),
+                            new VerticalTextAlignment
+                            {
+                                Val = VerticalPositionValues.Superscript
+                            }),
                         new FootnoteReferenceMark()),
                     new Run(
-                        new Text(" " + footnoteText) { Space = SpaceProcessingModeValues.Preserve })))
+                        new Text(" " + footnoteText)
+                        {
+                            Space = SpaceProcessingModeValues.Preserve
+                        })))
             {
                 Id = footnoteId
             });
 
         var run = new Run(
             new RunProperties(
-                new VerticalTextAlignment { Val = VerticalPositionValues.Superscript }),
-            new FootnoteReference { Id = footnoteId });
+                new VerticalTextAlignment
+                {
+                    Val = VerticalPositionValues.Superscript
+                }),
+            new FootnoteReference
+            {
+                Id = footnoteId
+            });
 
         return run;
     }

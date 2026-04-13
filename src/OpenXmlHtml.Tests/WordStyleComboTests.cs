@@ -10,7 +10,7 @@ public class WordStyleComboTests
 
         // Add styles for CSS class mapping
         var stylesPart = mainPart.AddNewPart<StyleDefinitionsPart>();
-        stylesPart.Styles = new Styles(
+        stylesPart.Styles = new(
             new Style(
                 new StyleName { Val = "Subtle Reference" },
                 new BasedOn { Val = "Normal" },
@@ -32,7 +32,7 @@ public class WordStyleComboTests
             });
 
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body,
             """

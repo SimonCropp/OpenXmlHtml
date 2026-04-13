@@ -16,7 +16,7 @@ public class WordStyleMappingTests
         stylesPart.Styles = stylesheet;
 
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
         return (mainPart, body);
     }
 

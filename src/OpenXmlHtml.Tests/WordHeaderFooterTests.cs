@@ -8,7 +8,7 @@ public class WordHeaderFooterTests
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body, "<p>Document body content</p>", mainPart);
         WordHtmlConverter.SetHeader(mainPart, "<p>Page Header</p>");
@@ -25,7 +25,7 @@ public class WordHeaderFooterTests
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body, "<p>Document body content</p>", mainPart);
         WordHtmlConverter.SetFooter(mainPart, "<p>Page Footer</p>");
@@ -42,7 +42,7 @@ public class WordHeaderFooterTests
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body, "<h1>Report</h1><p>Content here.</p>", mainPart);
         WordHtmlConverter.SetHeader(mainPart,
@@ -62,7 +62,7 @@ public class WordHeaderFooterTests
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body, "<p>Body</p>", mainPart);
         WordHtmlConverter.SetHeader(mainPart,
@@ -88,7 +88,7 @@ public class WordHeaderFooterTests
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new Document(body);
+        mainPart.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body, "<p>Body</p>", mainPart);
         WordHtmlConverter.SetFooter(mainPart,
