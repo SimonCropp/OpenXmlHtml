@@ -70,6 +70,7 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordMiscElementTests` | `abbr`, `acronym`, `time`, `q`, `figure`/`figcaption`, `svg`, `article`, `section`, `nav`, `main`, `header`, `footer`, `aside`, `dfn`, `details`/`summary`, `address`, `dl`/`dt`/`dd` |
 | `WordTableTests` | `table`, `tr`, `td`, `th`, `colspan`, `rowspan`, `thead`/`tbody`/`tfoot`, `caption`, nested tables |
 | `WordTableStyleTests` | Cell `padding`/`width`/`background-color`/`vertical-align`, table `width`/`background-color`/`padding`, `cellpadding`/`bgcolor`/`width` HTML attributes |
+| `WordColgroupTests` | `<colgroup>`, `<col>`, `col width=` / `col style="width"`, `col span=`, column width propagation to `tblGrid` and cells |
 | `WordAnchorTests` | `a` (hyperlinks, internal `#id` links), `id` attribute bookmarks |
 | `WordNestedTests` | Deeply nested formatting combinations |
 | `WordEdgeCaseTests` | Whitespace collapsing, malformed HTML, unclosed tags, unknown tags, image alt fallback |

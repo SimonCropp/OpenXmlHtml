@@ -904,10 +904,17 @@ static class WordContentBuilder
 
         table.Append(tblPr);
 
+        var columnWidths = GetColumnWidths(tableElement, columnCount);
         var grid = new TableGrid();
         for (var i = 0; i < columnCount; i++)
         {
-            grid.Append(new GridColumn());
+            var gridCol = new GridColumn();
+            if (columnWidths[i] is { } w)
+            {
+                gridCol.Width = w.ToString();
+            }
+
+            grid.Append(gridCol);
         }
 
         table.Append(grid);
@@ -972,7 +979,16 @@ static class WordContentBuilder
                 var colspan = ParseIntAttribute(cellElement, "colspan", 1);
                 var rowspan = ParseIntAttribute(cellElement, "rowspan", 1);
 
-                tr.Append(BuildTableCell(cellElement, format, ctx, colspan, rowspan > 1));
+                int? cellColWidth = null;
+                for (var i = 0; i < colspan && colIndex + i < columnWidths.Count; i++)
+                {
+                    if (columnWidths[colIndex + i] is { } cw)
+                    {
+                        cellColWidth = (cellColWidth ?? 0) + cw;
+                    }
+                }
+
+                tr.Append(BuildTableCell(cellElement, format, ctx, colspan, rowspan > 1, cellColWidth));
 
                 if (rowspan > 1)
                 {
@@ -988,7 +1004,7 @@ static class WordContentBuilder
         elements.Add(table);
     }
 
-    static TableCell BuildTableCell(IElement cellElement, FormatState format, WordBuildContext parentCtx, int colspan, bool isRowspanStart)
+    static TableCell BuildTableCell(IElement cellElement, FormatState format, WordBuildContext parentCtx, int colspan, bool isRowspanStart, int? colWidth)
     {
         var tc = new TableCell();
         TableCellProperties? tcPr = null;
@@ -1036,6 +1052,12 @@ static class WordContentBuilder
                 tcPr ??= new TableCellProperties();
                 tcPr.Append(new TableCellWidth { Width = twips.Value.ToString(), Type = TableWidthUnitValues.Dxa });
             }
+        }
+
+        if (colWidth != null && (tcPr == null || tcPr.GetFirstChild<TableCellWidth>() == null))
+        {
+            tcPr ??= new TableCellProperties();
+            tcPr.Append(new TableCellWidth { Width = colWidth.Value.ToString(), Type = TableWidthUnitValues.Dxa });
         }
 
         if (tcPr != null)
@@ -1306,6 +1328,82 @@ static class WordContentBuilder
 
             tblPr.Append(margin);
         }
+    }
+
+    static List<int?> GetColumnWidths(IElement tableElement, int columnCount)
+    {
+        var widths = new List<int?>(columnCount);
+
+        foreach (var child in tableElement.Children)
+        {
+            switch (child.LocalName)
+            {
+                case "colgroup":
+                {
+                    var hasColChild = false;
+                    foreach (var gc in child.Children)
+                    {
+                        if (gc.LocalName == "col")
+                        {
+                            hasColChild = true;
+                            AddColWidth(gc, widths);
+                        }
+                    }
+
+                    if (!hasColChild)
+                    {
+                        AddColWidth(child, widths);
+                    }
+
+                    break;
+                }
+                case "col":
+                    AddColWidth(child, widths);
+                    break;
+            }
+        }
+
+        while (widths.Count < columnCount)
+        {
+            widths.Add(null);
+        }
+
+        return widths;
+    }
+
+    static void AddColWidth(IElement col, List<int?> widths)
+    {
+        var span = ParseIntAttribute(col, "span", 1);
+        var width = ParseColWidth(col);
+        for (var i = 0; i < span; i++)
+        {
+            widths.Add(width);
+        }
+    }
+
+    static int? ParseColWidth(IElement col)
+    {
+        var style = col.GetAttribute("style");
+        if (style != null)
+        {
+            var declarations = StyleParser.Parse(style);
+            if (declarations.TryGetValue("width", out var cssWidth))
+            {
+                var twips = StyleParser.ParseLengthToTwips(cssWidth);
+                if (twips != null)
+                {
+                    return twips;
+                }
+            }
+        }
+
+        var widthAttr = col.GetAttribute("width");
+        if (widthAttr != null && !widthAttr.EndsWith('%'))
+        {
+            return StyleParser.ParseLengthToTwips(widthAttr);
+        }
+
+        return null;
     }
 
     static List<IElement> GetTableRows(IElement tableElement)
