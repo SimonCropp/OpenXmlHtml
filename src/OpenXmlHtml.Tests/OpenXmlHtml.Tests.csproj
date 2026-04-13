@@ -6,6 +6,7 @@
     <PackageReference Include="DeterministicIoPackaging" />
     <PackageReference Include="Verify.DiffPlex" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Verify.ImageMagick" />
     <PackageReference Include="Verify.NUnit" />
     <PackageReference Include="Argon" />
     <PackageReference Include="DiffEngine" />
@@ -24,6 +25,5 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <PackageReference Include="Morph.OpenXml.Skia" />
-    <PackageReference Include="Verify.ImageSharp" />
   </ItemGroup>
 </Project>
