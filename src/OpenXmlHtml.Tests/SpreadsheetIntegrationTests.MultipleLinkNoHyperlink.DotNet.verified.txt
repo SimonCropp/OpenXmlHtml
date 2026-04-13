@@ -1,6 +1,13 @@
 ﻿{
-  SheetNames: [
-    Sheet1
+  Sheets: [
+    {
+      Name: Sheet1,
+      Columns: [
+        {
+          Name: Link 1 (https://example.com) and Link 2 (https://other.com)
+        }
+      ]
+    }
   ],
   WorksheetCount: 1
 }

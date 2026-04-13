@@ -1,6 +1,19 @@
 ﻿{
-  SheetNames: [
-    Sheet1
+  Sheets: [
+    {
+      Name: Sheet1,
+      Columns: [
+        {
+          Name:
+● Top level
+● 
+  ○ Nested item
+  ○ 
+    ■ Deep item
+● Back to top
+        }
+      ]
+    }
   ],
   WorksheetCount: 1
 }

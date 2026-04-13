@@ -1,6 +1,22 @@
 ﻿{
-  SheetNames: [
-    Bug Report
+  Sheets: [
+    {
+      Name: Bug Report,
+      Columns: [
+        {
+          Name: ID
+        },
+        {
+          Name: Priority
+        },
+        {
+          Name: Summary
+        },
+        {
+          Name: Details
+        }
+      ]
+    }
   ],
   WorksheetCount: 1
 }

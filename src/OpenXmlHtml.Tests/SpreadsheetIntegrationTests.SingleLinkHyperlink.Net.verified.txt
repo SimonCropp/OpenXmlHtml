@@ -1,6 +1,13 @@
 ﻿{
-  SheetNames: [
-    Sheet1
+  Sheets: [
+    {
+      Name: Sheet1,
+      Columns: [
+        {
+          Name: See the full report (https://example.com/report) for details.
+        }
+      ]
+    }
   ],
   WorksheetCount: 1
 }
