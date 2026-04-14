@@ -12,4 +12,6 @@
   </Folder>
   <Project Path="OpenXmlHtml.Tests\OpenXmlHtml.Tests.csproj" />
   <Project Path="OpenXmlHtml.Benchmarks\OpenXmlHtml.Benchmarks.csproj" />
+  <Project Path="OpenXmlStreaming\OpenXmlStreaming.csproj" />
+  <Project Path="OpenXmlStreaming.Tests\OpenXmlStreaming.Tests.csproj" />
 </Solution>

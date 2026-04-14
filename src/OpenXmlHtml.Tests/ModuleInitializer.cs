@@ -5,7 +5,9 @@ public static class ModuleInitializer
     {
         VerifierSettings.DontScrubDateTimes();
         VerifierSettings.DontScrubGuids();
-        VerifyImageMagick.RegisterComparers(.5);
+#if NET
+        VerifyImageSharp.Initialize(ssimThreshold: 0.999);
+#endif
         VerifierSettings.InitializePlugins();
         VerifierSettings.UniqueForRuntime();
         VerifyOpenXmlConverter.Initialize();
