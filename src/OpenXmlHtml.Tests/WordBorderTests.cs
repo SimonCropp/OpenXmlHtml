@@ -168,6 +168,46 @@ public class WordBorderTests
     }
 
     [Test]
+    public Task HtmlBorderAttributeOne()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <table border="1">
+              <tr>
+                <td>Cell A</td>
+                <td>Cell B</td>
+              </tr>
+              <tr>
+                <td>Cell C</td>
+                <td>Cell D</td>
+              </tr>
+            </table>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
+    public Task HtmlBorderAttributeThick()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            """
+            <table border="3">
+              <tr>
+                <td>Thick</td>
+                <td>Borders</td>
+              </tr>
+            </table>
+            """,
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
     public Task BorderWithBackground()
     {
         using var stream = new MemoryStream();
