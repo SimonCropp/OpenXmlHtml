@@ -882,11 +882,18 @@ static class WordContentBuilder
         // Default border: single thin line
         var defaultBorder = new BorderInfo(4, BorderValues.Single, "auto");
 
-        // HTML border attribute: border="0" removes borders
+        // HTML border attribute: border="0" removes borders, border="N" sets width
         var borderAttr = tableElement.GetAttribute("border");
-        if (borderAttr == "0")
+        if (borderAttr != null && int.TryParse(borderAttr, out var borderPx))
         {
-            defaultBorder = new(0, BorderValues.None, null);
+            if (borderPx == 0)
+            {
+                defaultBorder = new(0, BorderValues.None, null);
+            }
+            else
+            {
+                defaultBorder = new(borderPx * 4, BorderValues.Single, "auto");
+            }
         }
 
         var tableStyle = tableElement.GetAttribute("style");
