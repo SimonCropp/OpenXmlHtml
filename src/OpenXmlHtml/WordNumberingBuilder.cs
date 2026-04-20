@@ -1,15 +1,15 @@
 static class WordNumberingBuilder
 {
     static readonly string[] levelIndents = ["720", "1440", "2160", "2880", "3600", "4320", "5040", "5760", "6480"];
-    internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart mainPart)
+    internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart main)
     {
-        var part = mainPart.NumberingDefinitionsPart;
+        var part = main.NumberingDefinitionsPart;
         if (part != null)
         {
             return part;
         }
 
-        part = mainPart.AddNewPart<NumberingDefinitionsPart>();
+        part = main.AddNewPart<NumberingDefinitionsPart>();
         part.Numbering = new();
         return part;
     }

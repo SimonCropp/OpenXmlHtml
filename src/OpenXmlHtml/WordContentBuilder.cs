@@ -2,18 +2,18 @@ static partial class WordContentBuilder
 {
     static readonly HtmlParser parser = new();
 
-    internal static List<OpenXmlElement> Build(string html, MainDocumentPart? mainPart, HtmlConvertSettings? settings = null)
+    internal static List<OpenXmlElement> Build(string html, MainDocumentPart? main, HtmlConvertSettings? settings = null)
     {
         var document = parser.ParseDocument(string.Concat("<body>", html, "</body>"));
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
         var ctx = new WordBuildContext
         {
-            MainPart = mainPart,
+            MainPart = main,
             Settings = settings,
-            StyleMap = WordStyleLookup.BuildStyleMap(mainPart)
+            StyleMap = WordStyleLookup.BuildStyleMap(main)
         };
-        if (mainPart?.NumberingDefinitionsPart?.Numbering is { } existingNumbering)
+        if (main?.NumberingDefinitionsPart?.Numbering is { } existingNumbering)
         {
             ctx.NextNumId = WordNumberingBuilder.GetNextId(existingNumbering);
         }

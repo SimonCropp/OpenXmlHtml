@@ -6,10 +6,10 @@ public class WordStyleComboTests
     {
         using var stream = new MemoryStream();
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
+        var main = document.AddMainDocumentPart();
 
         // Add styles for CSS class mapping
-        var stylesPart = mainPart.AddNewPart<StyleDefinitionsPart>();
+        var stylesPart = main.AddNewPart<StyleDefinitionsPart>();
         stylesPart.Styles = new(
             new Style(
                 new StyleName { Val = "Subtle Reference" },
@@ -32,7 +32,7 @@ public class WordStyleComboTests
             });
 
         var body = new Body();
-        mainPart.Document = new(body);
+        main.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body,
             """
@@ -136,7 +136,7 @@ public class WordStyleComboTests
               as defined by <abbr title="Generally Accepted Accounting Principles">GAAP</abbr>.</p>
             </div>
             """,
-            mainPart);
+            main);
 
         document.Dispose();
         stream.Position = 0;

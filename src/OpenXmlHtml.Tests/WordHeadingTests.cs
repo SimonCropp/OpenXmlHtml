@@ -43,7 +43,7 @@ public class WordHeadingTests
                 <h2>Heading 2</h2>
                 <h3>Heading 3</h3>
                 """,
-                mainPart: null,
+                main: null,
                 new()
                 {
                     HeadingLevelOffset = 1
@@ -53,7 +53,7 @@ public class WordHeadingTests
     public Task HeadingOffsetClampsAtNine() =>
         Verify(WordHtmlConverter.ToElements(
             "<h5>Deep</h5><h6>Deeper</h6>",
-            mainPart: null,
+            main: null,
             new()
             {
                 HeadingLevelOffset = 5

@@ -23,13 +23,12 @@ public class WordSamples
         #region AppendHtml
 
         using var stream = new MemoryStream();
-        using var document = WordprocessingDocument.Create(
-            stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
-        mainPart.Document = new(new Body());
+        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+        var main = document.AddMainDocumentPart();
+        main.Document = new(new Body());
 
         WordHtmlConverter.AppendHtml(
-            mainPart.Document.Body!,
+            main.Document.Body!,
             """
             <h1>Meeting Notes</h1>
             <p><i>Date: January 15, 2024</i></p>
@@ -41,7 +40,7 @@ public class WordSamples
 
         #endregion
 
-        return Verify(mainPart.Document.Body!);
+        return Verify(main.Document.Body!);
     }
 
     [Test]
