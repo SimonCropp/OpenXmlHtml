@@ -145,6 +145,7 @@ static partial class WordContentBuilder
                 if (!string.IsNullOrEmpty(title) &&
                     context.MainPart != null)
                 {
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
                     context.CurrentRuns.Add(BuildFootnoteRun(context, title!));
                 }
 
@@ -161,6 +162,7 @@ static partial class WordContentBuilder
             {
                 FlushParagraph(elements, context);
                 ProcessChildren(element, newFormat, elements, context, inPre);
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
                 context.CurrentRuns.Add(BuildFootnoteRun(context, cite!));
                 FlushParagraph(elements, context);
                 return;
