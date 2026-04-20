@@ -88,6 +88,7 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordClickableImageTests` | Images inside `<a>` tags, external link hyperlinks, fallback without MainPart |
 | `WordWritingModeTests` | `writing-mode` (vertical-rl, vertical-lr), `direction: rtl`, vertical text in cells |
 | `WordRowHeightTests` | `height` CSS and HTML attribute on `<tr>` |
+| `WordPageSizeTests` | Explicit `pgSz` (A4) emitted so rendering is locale-independent |
 | `WordRemoteImageTests` | `ImagePolicy` (Deny/AllowAll/SafeDomains/Filter/SafeDirectories), `FakeImageHandler` |
 | `WordConvertToDocxTests` | Full docx output: images, SVG, footnotes, page breaks, CSS styles, lists, tables |
 | `WordHeaderFooterTests` | `SetHeader`/`SetFooter` with plain and formatted HTML, tables in headers |
