@@ -145,6 +145,7 @@ static partial class WordContentBuilder
                 if (!string.IsNullOrEmpty(title) &&
                     context.MainPart != null)
                 {
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
                     context.CurrentRuns.Add(BuildFootnoteRun(context, title!));
                 }
 
@@ -161,6 +162,7 @@ static partial class WordContentBuilder
             {
                 FlushParagraph(elements, context);
                 ProcessChildren(element, newFormat, elements, context, inPre);
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
                 context.CurrentRuns.Add(BuildFootnoteRun(context, cite!));
                 FlushParagraph(elements, context);
                 return;
@@ -282,13 +284,14 @@ static partial class WordContentBuilder
     }
 
     internal static string ApplyTextTransform(string text, string? transform) =>
-        transform switch
-        {
-            "uppercase" => text.ToUpperInvariant(),
-            "lowercase" => text.ToLowerInvariant(),
-            "capitalize" => CapitalizeWords(text),
-            _ => text
-        };
+        XmlCharFilter.StripInvalidXmlChars(
+            transform switch
+            {
+                "uppercase" => text.ToUpperInvariant(),
+                "lowercase" => text.ToLowerInvariant(),
+                "capitalize" => CapitalizeWords(text),
+                _ => text
+            });
 
     static string CapitalizeWords(string text)
     {

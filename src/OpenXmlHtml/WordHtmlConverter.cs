@@ -145,6 +145,7 @@ public static class WordHtmlConverter
         var main = document.AddMainDocumentPart();
         var body = new Body();
         AppendHtml(body, html, main);
+        EnsureSectionProperties(body);
         main.Document = new(body);
     }
 
@@ -177,6 +178,7 @@ public static class WordHtmlConverter
         var main = document.AddMainDocumentPart();
         var body = new Body();
         AppendHtml(body, html, main, settings);
+        EnsureSectionProperties(body);
         main.Document = new(body);
     }
 
@@ -295,14 +297,38 @@ public static class WordHtmlConverter
             return;
         }
 
+        var sectionProps = EnsureSectionProperties(body);
+        sectionProps.Append(reference);
+    }
+
+    // A4 in twips; emitted so rendering is not subject to the host system's
+    // regional paper-size default (e.g. CI rendering Letter vs dev rendering A4).
+    internal static SectionProperties EnsureSectionProperties(Body body)
+    {
         var sectionProps = body.GetFirstChild<SectionProperties>();
-        if (sectionProps == null)
+        if (sectionProps != null)
         {
-            sectionProps = new();
-            body.Append(sectionProps);
+            return sectionProps;
         }
 
-        sectionProps.Append(reference);
+        sectionProps = new(
+            new PageSize
+            {
+                Width = 11906,
+                Height = 16838
+            },
+            new PageMargin
+            {
+                Top = 1440,
+                Right = 1440,
+                Bottom = 1440,
+                Left = 1440,
+                Header = 720,
+                Footer = 720,
+                Gutter = 0
+            });
+        body.Append(sectionProps);
+        return sectionProps;
     }
 
     internal static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)

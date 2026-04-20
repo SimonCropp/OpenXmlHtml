@@ -318,4 +318,26 @@ public class WordConvertToDocxTests
         docxStream.Position = 0;
         return Verify(docxStream, "docx");
     }
+
+    [Test]
+    public Task InvalidXmlCharsInFootnote()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            "<p>See <abbr title=\"foot\u0001note &#1;text\">ref</abbr>.</p>",
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
+
+    [Test]
+    public Task InvalidXmlCharsInBody()
+    {
+        using var stream = new MemoryStream();
+        WordHtmlConverter.ConvertToDocx(
+            "<p>before&#1;&#0;&#x1F;after</p>",
+            stream);
+        stream.Position = 0;
+        return Verify(stream, "docx");
+    }
 }
