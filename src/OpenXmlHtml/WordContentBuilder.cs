@@ -7,7 +7,7 @@ static partial class WordContentBuilder
         var document = parser.ParseDocument(string.Concat("<body>", html, "</body>"));
         var body = document.Body!;
         var elements = new List<OpenXmlElement>();
-        var ctx = new WordBuildContext
+        var context = new WordBuildContext
         {
             MainPart = main,
             Settings = settings,
@@ -15,15 +15,15 @@ static partial class WordContentBuilder
         };
         if (main?.NumberingDefinitionsPart?.Numbering is { } existingNumbering)
         {
-            ctx.NextNumId = WordNumberingBuilder.GetNextId(existingNumbering);
+            context.NextNumId = WordNumberingBuilder.GetNextId(existingNumbering);
         }
         else
         {
-            ctx.NextNumId = 1;
+            context.NextNumId = 1;
         }
 
-        ProcessChildren(body, new(), elements, ctx, false);
-        FlushParagraph(elements, ctx);
+        ProcessChildren(body, new(), elements, context, false);
+        FlushParagraph(elements, context);
         TrimTrailingEmptyParagraphs(elements);
 
         if (elements.Count == 0)
@@ -78,21 +78,21 @@ static partial class WordContentBuilder
             case "img":
             {
                 var imageData = ImageResolver.Resolve(element, context.Settings);
-                if (imageData != null)
-                {
-                    if (context.MainPart != null)
-                    {
-                        context.ImageIndex++;
-                        context.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(context.MainPart, imageData, context.ImageIndex));
-                    }
-                }
-                else
+                if (imageData == null)
                 {
                     var alt = element.GetAttribute("alt");
                     if (!string.IsNullOrEmpty(alt))
                     {
                         // ReSharper disable once RedundantSuppressNullableWarningExpression
                         AddTextRun(alt!, format, context);
+                    }
+                }
+                else
+                {
+                    if (context.MainPart != null)
+                    {
+                        context.ImageIndex++;
+                        context.CurrentRuns.Add(WordHtmlConverter.BuildImageRun(context.MainPart, imageData, context.ImageIndex));
                     }
                 }
 
@@ -241,7 +241,8 @@ static partial class WordContentBuilder
 
         if (bookmarkId != null)
         {
-            context.CurrentRuns.Add(new BookmarkEnd
+            context.CurrentRuns.Add(
+                new BookmarkEnd
             {
                 Id = bookmarkId
             });
@@ -253,7 +254,8 @@ static partial class WordContentBuilder
 
             if (pageBreakAfter)
             {
-                elements.Add(new Paragraph(
+                elements.Add(
+                    new Paragraph(
                     new ParagraphProperties(new PageBreakBefore())));
             }
         }
