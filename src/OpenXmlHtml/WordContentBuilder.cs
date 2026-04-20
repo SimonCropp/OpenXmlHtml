@@ -193,7 +193,8 @@ static partial class WordContentBuilder
             }
 
             // CSS class → Word style mapping
-            if (context.StyleMap != null && element.ClassList.Length > 0)
+            if (context.StyleMap != null &&
+                element.ClassList.Length > 0)
             {
                 var (paraStyle, runStyle) = WordStyleLookup.LookupClasses(element, context.StyleMap);
                 if (paraStyle != null)
@@ -209,8 +210,9 @@ static partial class WordContentBuilder
 
             if (pageBreakBefore)
             {
-                elements.Add(new Paragraph(
-                    new ParagraphProperties(new PageBreakBefore())));
+                elements.Add(
+                    new Paragraph(
+                        new ParagraphProperties(new PageBreakBefore())));
             }
         }
         else if (context.StyleMap != null && element.ClassList.Length > 0)
@@ -230,11 +232,12 @@ static partial class WordContentBuilder
         {
             context.BookmarkId++;
             bookmarkId = context.BookmarkId.ToString();
-            context.CurrentRuns.Add(new BookmarkStart
-            {
-                Id = bookmarkId,
-                Name = elementId
-            });
+            context.CurrentRuns.Add(
+                new BookmarkStart
+                {
+                    Id = bookmarkId,
+                    Name = elementId
+                });
         }
 
         ProcessChildren(element, newFormat, elements, context, inPre);
@@ -243,9 +246,9 @@ static partial class WordContentBuilder
         {
             context.CurrentRuns.Add(
                 new BookmarkEnd
-            {
-                Id = bookmarkId
-            });
+                {
+                    Id = bookmarkId
+                });
         }
 
         if (isBlock)
@@ -256,7 +259,7 @@ static partial class WordContentBuilder
             {
                 elements.Add(
                     new Paragraph(
-                    new ParagraphProperties(new PageBreakBefore())));
+                        new ParagraphProperties(new PageBreakBefore())));
             }
         }
     }
@@ -307,42 +310,42 @@ static partial class WordContentBuilder
         return new(chars);
     }
 
-    static void FlushParagraph(List<OpenXmlElement> elements, WordBuildContext ctx)
+    static void FlushParagraph(List<OpenXmlElement> elements, WordBuildContext context)
     {
-        if (ctx.CurrentRuns.Count == 0)
+        if (context.CurrentRuns.Count == 0)
         {
-            ctx.HeadingLevel = 0;
-            ctx.ParagraphStyleId = null;
-            ctx.ParagraphFormat = null;
-            ctx.ListNumId = null;
-            ctx.ListIlvl = null;
+            context.HeadingLevel = 0;
+            context.ParagraphStyleId = null;
+            context.ParagraphFormat = null;
+            context.ListNumId = null;
+            context.ListIlvl = null;
             return;
         }
 
-        var paragraph = WordHtmlConverter.BuildParagraph(ctx.CurrentRuns, ctx.ListNumId != null ? 0 : ctx.ListDepth);
+        var paragraph = WordHtmlConverter.BuildParagraph(context.CurrentRuns, context.ListNumId != null ? 0 : context.ListDepth);
 
         // Apply paragraph style: heading > CSS class > default
-        if (ctx.HeadingLevel > 0)
+        if (context.HeadingLevel > 0)
         {
-            var offset = ctx.Settings?.HeadingLevelOffset ?? 0;
-            var level = Math.Clamp(ctx.HeadingLevel + offset, 1, 9);
+            var offset = context.Settings?.HeadingLevelOffset ?? 0;
+            var level = Math.Clamp(context.HeadingLevel + offset, 1, 9);
             paragraph.ParagraphProperties ??= new();
             paragraph.ParagraphProperties.ParagraphStyleId = new()
             {
                 Val = $"Heading{level}"
             };
         }
-        else if (ctx.ParagraphStyleId != null)
+        else if (context.ParagraphStyleId != null)
         {
             paragraph.ParagraphProperties ??= new();
             paragraph.ParagraphProperties.ParagraphStyleId = new()
             {
-                Val = ctx.ParagraphStyleId
+                Val = context.ParagraphStyleId
             };
         }
 
         // Apply real Word numbering
-        if (ctx.ListNumId != null)
+        if (context.ListNumId != null)
         {
             paragraph.ParagraphProperties ??= new();
             paragraph.ParagraphProperties.ParagraphStyleId ??= new()
@@ -353,35 +356,37 @@ static partial class WordContentBuilder
                 new NumberingProperties(
                     new NumberingLevelReference
                     {
-                        Val = ctx.ListIlvl ?? 0
+                        Val = context.ListIlvl ?? 0
                     },
                     new NumberingId
                     {
-                        Val = ctx.ListNumId.Value
+                        Val = context.ListNumId.Value
                     }));
         }
 
         // Apply paragraph format (CSS margins, alignment, line-height)
-        if (ctx.ParagraphFormat is { HasProperties: true })
+        if (context.ParagraphFormat is { HasProperties: true })
         {
             paragraph.ParagraphProperties ??= new();
-            ApplyParagraphFormat(paragraph.ParagraphProperties, ctx.ParagraphFormat);
+            ApplyParagraphFormat(paragraph.ParagraphProperties, context.ParagraphFormat);
         }
 
         elements.Add(paragraph);
-        ctx.CurrentRuns.Clear();
-        ctx.ListDepth = 0;
-        ctx.HeadingLevel = 0;
-        ctx.ParagraphStyleId = null;
-        ctx.ParagraphFormat = null;
-        ctx.ListNumId = null;
-        ctx.ListIlvl = null;
+        context.CurrentRuns.Clear();
+        context.ListDepth = 0;
+        context.HeadingLevel = 0;
+        context.ParagraphStyleId = null;
+        context.ParagraphFormat = null;
+        context.ListNumId = null;
+        context.ListIlvl = null;
     }
 
     static void ApplyParagraphFormat(ParagraphProperties props, ParagraphFormatState pf)
     {
-        if (pf.MarginTopTwips != null || pf.MarginBottomTwips != null ||
-            pf.LineHeightMultiple != null || pf.LineHeightTwips != null)
+        if (pf.MarginTopTwips != null ||
+            pf.MarginBottomTwips != null ||
+            pf.LineHeightMultiple != null ||
+            pf.LineHeightTwips != null)
         {
             var spacing = new SpacingBetweenLines();
             if (pf.MarginTopTwips != null)
@@ -396,7 +401,7 @@ static partial class WordContentBuilder
 
             if (pf.LineHeightMultiple != null)
             {
-                spacing.Line = ((int) (pf.LineHeightMultiple.Value * 240)).ToString();
+                spacing.Line = ((int)(pf.LineHeightMultiple.Value * 240)).ToString();
                 spacing.LineRule = LineSpacingRuleValues.Auto;
             }
             else if (pf.LineHeightTwips != null)
@@ -408,7 +413,9 @@ static partial class WordContentBuilder
             props.Append(spacing);
         }
 
-        if (pf.MarginLeftTwips != null || pf.MarginRightTwips != null || pf.TextIndentTwips != null)
+        if (pf.MarginLeftTwips != null ||
+            pf.MarginRightTwips != null ||
+            pf.TextIndentTwips != null)
         {
             var indent = props.GetFirstChild<Indentation>() ?? new Indentation();
             if (props.GetFirstChild<Indentation>() == null)
@@ -441,31 +448,37 @@ static partial class WordContentBuilder
 
         if (pf.TextAlign != null)
         {
-            props.Append(new Justification
-            {
-                Val = pf.TextAlign.Value
-            });
+            props.Append(
+                new Justification
+                {
+                    Val = pf.TextAlign.Value
+                });
         }
 
         if (pf.BackgroundColor != null)
         {
-            props.Append(new Shading
-            {
-                Val = ShadingPatternValues.Clear,
-                Fill = pf.BackgroundColor
-            });
+            props.Append(
+                new Shading
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Fill = pf.BackgroundColor
+                });
         }
 
         if (pf.WritingMode != null)
         {
             props.Append(new BiDi());
-            props.Append(new TextDirection
-            {
-                Val = pf.WritingMode.Value
-            });
+            props.Append(
+                new TextDirection
+                {
+                    Val = pf.WritingMode.Value
+                });
         }
 
-        if (pf.BorderTop != null || pf.BorderRight != null || pf.BorderBottom != null || pf.BorderLeft != null)
+        if (pf.BorderTop != null ||
+            pf.BorderRight != null ||
+            pf.BorderBottom != null ||
+            pf.BorderLeft != null)
         {
             var borders = new ParagraphBorders();
             BorderEmitter.AppendSides(borders, pf.BorderTop, pf.BorderLeft, pf.BorderBottom, pf.BorderRight, 1);
@@ -482,7 +495,8 @@ static partial class WordContentBuilder
 
     static void TrimTrailingEmptyParagraphs(List<OpenXmlElement> elements)
     {
-        while (elements.Count > 0 && elements[^1] is Paragraph { HasChildren: false })
+        while (elements.Count > 0 &&
+               elements[^1] is Paragraph { HasChildren: false })
         {
             elements.RemoveAt(elements.Count - 1);
         }
@@ -492,12 +506,20 @@ static partial class WordContentBuilder
     {
         var href = element.GetAttribute("href");
 
-        if (href != null && href.StartsWith('#') && href.Length > 1)
+        if (href != null &&
+            href.StartsWith('#') &&
+            href.Length > 1)
         {
-            WrapChildrenInHyperlink(element, newFormat, elements, context, inPre, new Hyperlink
-            {
-                Anchor = href[1..]
-            });
+            WrapChildrenInHyperlink(
+                element,
+                newFormat,
+                elements,
+                context,
+                inPre,
+                new()
+                {
+                    Anchor = href[1..]
+                });
             return;
         }
 
@@ -505,10 +527,16 @@ static partial class WordContentBuilder
             Uri.TryCreate(href, UriKind.Absolute, out var uri))
         {
             var rel = context.MainPart.AddHyperlinkRelationship(uri, true);
-            WrapChildrenInHyperlink(element, newFormat, elements, context, inPre, new Hyperlink
-            {
-                Id = rel.Id
-            });
+            WrapChildrenInHyperlink(
+                element,
+                newFormat,
+                elements,
+                context,
+                inPre,
+                new()
+                {
+                    Id = rel.Id
+                });
             return;
         }
 
