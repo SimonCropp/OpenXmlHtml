@@ -1,14 +1,14 @@
 static partial class WordContentBuilder
 {
-    static Run BuildFootnoteRun(WordBuildContext ctx, string footnoteText)
+    static Run BuildFootnoteRun(WordBuildContext context, string footnoteText)
     {
-        ctx.FootnoteIndex++;
-        var footnoteId = ctx.FootnoteIndex;
+        context.FootnoteIndex++;
+        var footnoteId = context.FootnoteIndex;
 
-        var footnotesPart = ctx.MainPart!.FootnotesPart;
+        var footnotesPart = context.MainPart!.FootnotesPart;
         if (footnotesPart == null)
         {
-            footnotesPart = ctx.MainPart.AddNewPart<FootnotesPart>();
+            footnotesPart = context.MainPart.AddNewPart<FootnotesPart>();
             footnotesPart.Footnotes = new(
                 new Footnote(
                     new Paragraph(

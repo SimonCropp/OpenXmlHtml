@@ -332,7 +332,10 @@ public static class WordHtmlConverter
 
         if (format.RunStyleId != null)
         {
-            props.Append(new RunStyle { Val = format.RunStyleId });
+            props.Append(new RunStyle
+            {
+                Val = format.RunStyleId
+            });
         }
 
         if (format.Bold)
@@ -347,7 +350,10 @@ public static class WordHtmlConverter
 
         if (format.UnderlineStyle != null)
         {
-            props.Append(new Underline { Val = format.UnderlineStyle });
+            props.Append(new Underline
+            {
+                Val = format.UnderlineStyle
+            });
         }
 
         if (format.Strikethrough)
@@ -362,35 +368,56 @@ public static class WordHtmlConverter
 
         if (format.Color != null)
         {
-            props.Append(new Color { Val = format.Color });
+            props.Append(new Color
+            {
+                Val = format.Color
+            });
         }
 
         if (format.FontSizePt != null)
         {
             var halfPoints = (int)(format.FontSizePt.Value * 2);
-            props.Append(new FontSize { Val = halfPoints.ToString() });
+            props.Append(new FontSize
+            {
+                Val = halfPoints.ToString()
+            });
         }
 
         if (format.FontFamily != null)
         {
-            props.Append(new RunFonts { Ascii = format.FontFamily, HighAnsi = format.FontFamily });
+            props.Append(new RunFonts
+            {
+                Ascii = format.FontFamily,
+                HighAnsi = format.FontFamily
+            });
         }
 
         if (format.Superscript)
         {
-            props.Append(new VerticalTextAlignment { Val = VerticalPositionValues.Superscript });
+            props.Append(new VerticalTextAlignment
+            {
+                Val = VerticalPositionValues.Superscript
+            });
         }
         else if (format.Subscript)
         {
-            props.Append(new VerticalTextAlignment { Val = VerticalPositionValues.Subscript });
+            props.Append(new VerticalTextAlignment
+            {
+                Val = VerticalPositionValues.Subscript
+            });
         }
 
         if (format.BackgroundColor != null)
         {
-            props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = format.BackgroundColor });
+            props.Append(new Shading
+            {
+                Val = ShadingPatternValues.Clear,
+                Fill = format.BackgroundColor
+            });
         }
 
-        if (format.Border != null && format.Border.Style != BorderValues.None)
+        if (format.Border != null &&
+            format.Border.Style != BorderValues.None)
         {
             props.Append(new Border
             {
@@ -418,9 +445,9 @@ public static class WordHtmlConverter
         var imagePartType = GetImagePartType(image.ContentType);
         var relationshipId = $"rImage{imageIndex}";
         var imagePart = main.AddImagePart(imagePartType, relationshipId);
-        using (var ms = new MemoryStream(image.Bytes))
+        using (var memoryStream = new MemoryStream(image.Bytes))
         {
-            imagePart.FeedData(ms);
+            imagePart.FeedData(memoryStream);
         }
 
         var widthEmu = (long)(image.WidthPx ?? 100) * 9525;
@@ -461,7 +488,10 @@ public static class WordHtmlConverter
         var heightEmu = (long)(image.HeightPx ?? 100) * 9525;
 
         // Blip references PNG fallback, with SVG extension for Word 2016+
-        var blip = new A.Blip { Embed = pngRelId };
+        var blip = new A.Blip
+        {
+            Embed = pngRelId
+        };
         var svgBlipElement = new OpenXmlUnknownElement("asvg", "svgBlip", "http://schemas.microsoft.com/office/drawing/2016/SVG/main");
         svgBlipElement.SetAttribute(new("r", "embed", "http://schemas.openxmlformats.org/officeDocument/2006/relationships", svgRelId));
         var ext = new OpenXmlUnknownElement("a", "ext", "http://schemas.openxmlformats.org/drawingml/2006/main");
@@ -481,24 +511,49 @@ public static class WordHtmlConverter
     static Drawing BuildImageDrawing(A.Blip blip, long widthEmu, long heightEmu) =>
         new(
             new DW.Inline(
-                new DW.Extent { Cx = widthEmu, Cy = heightEmu },
-                new DW.DocProperties { Id = 1U, Name = "Image" },
+                new DW.Extent
+                {
+                    Cx = widthEmu,
+                    Cy = heightEmu
+                },
+                new DW.DocProperties
+                {
+                    Id = 1U,
+                    Name = "Image"
+                },
                 new A.Graphic(
                     new A.GraphicData(
                         new PIC.Picture(
                             new PIC.NonVisualPictureProperties(
-                                new PIC.NonVisualDrawingProperties { Id = 0U, Name = "Image" },
+                                new PIC.NonVisualDrawingProperties
+                                {
+                                    Id = 0U,
+                                    Name = "Image"
+                                },
                                 new PIC.NonVisualPictureDrawingProperties()),
                             new PIC.BlipFill(
                                 blip,
                                 new A.Stretch(new A.FillRectangle())),
                             new PIC.ShapeProperties(
                                 new A.Transform2D(
-                                    new A.Offset { X = 0, Y = 0 },
-                                    new A.Extents { Cx = widthEmu, Cy = heightEmu }),
-                                new A.PresetGeometry(new A.AdjustValueList()) { Preset = A.ShapeTypeValues.Rectangle }))
+                                    new A.Offset
+                                    {
+                                        X = 0,
+                                        Y = 0
+                                    },
+                                    new A.Extents
+                                    {
+                                        Cx = widthEmu,
+                                        Cy = heightEmu
+                                    }),
+                                new A.PresetGeometry(new A.AdjustValueList())
+                                {
+                                    Preset = A.ShapeTypeValues.Rectangle
+                                }))
                     )
-                    { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" })
+                    {
+                        Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture"
+                    })
             )
             {
                 DistanceFromTop = 0U,

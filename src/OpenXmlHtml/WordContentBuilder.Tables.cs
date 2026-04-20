@@ -80,11 +80,12 @@ static partial class WordContentBuilder
                 var parsed = ColorParser.Parse(tableBg);
                 if (parsed != null)
                 {
-                    tblPr.Append(new Shading
-                    {
-                        Val = ShadingPatternValues.Clear,
-                        Fill = parsed
-                    });
+                    tblPr.Append(
+                        new Shading
+                        {
+                            Val = ShadingPatternValues.Clear,
+                            Fill = parsed
+                        });
                 }
             }
 
@@ -123,7 +124,7 @@ static partial class WordContentBuilder
 
         foreach (var row in rows)
         {
-            var tr = new TableRow();
+            var tableRow = new TableRow();
 
             var rowHeight = row.GetAttribute("style") is { } rowStyle
                 ? StyleParser.ParseLengthToTwips(StyleParser.Parse(rowStyle).GetValueOrDefault("height") ?? "")
@@ -131,12 +132,13 @@ static partial class WordContentBuilder
             rowHeight ??= row.GetAttribute("height") is { } rh ? StyleParser.ParseLengthToTwips(rh) : null;
             if (rowHeight != null)
             {
-                tr.Append(new TableRowProperties(
-                    new TableRowHeight
-                    {
-                        Val = (uint) rowHeight.Value,
-                        HeightType = HeightRuleValues.AtLeast
-                    }));
+                tableRow.Append(
+                    new TableRowProperties(
+                        new TableRowHeight
+                        {
+                            Val = (uint)rowHeight.Value,
+                            HeightType = HeightRuleValues.AtLeast
+                        }));
             }
 
             var cells = GetCells(row);
@@ -156,7 +158,7 @@ static partial class WordContentBuilder
                         });
                     }
 
-                    tr.Append(new TableCell(contTcPr, new Paragraph()));
+                    tableRow.Append(new TableCell(contTcPr, new Paragraph()));
 
                     if (spanInfo.Remaining <= 1)
                     {
@@ -173,7 +175,7 @@ static partial class WordContentBuilder
 
                 if (cellIndex >= cells.Count)
                 {
-                    tr.Append(new TableCell(new Paragraph()));
+                    tableRow.Append(new TableCell(new Paragraph()));
                     colIndex++;
                     continue;
                 }
@@ -193,7 +195,7 @@ static partial class WordContentBuilder
                     }
                 }
 
-                tr.Append(BuildTableCell(cellElement, format, ctx, colspan, rowspan > 1, cellColWidth));
+                tableRow.Append(BuildTableCell(cellElement, format, ctx, colspan, rowspan > 1, cellColWidth));
 
                 if (rowspan > 1)
                 {
@@ -203,7 +205,7 @@ static partial class WordContentBuilder
                 colIndex += colspan;
             }
 
-            table.Append(tr);
+            table.Append(tableRow);
         }
 
         elements.Add(table);
@@ -212,25 +214,27 @@ static partial class WordContentBuilder
     static TableCell BuildTableCell(IElement cellElement, FormatState format, WordBuildContext parentCtx, int colspan, bool isRowspanStart, int? colWidth)
     {
         var tc = new TableCell();
-        TableCellProperties? tcPr = null;
+        TableCellProperties? cellProperties = null;
 
         if (colspan > 1 || isRowspanStart)
         {
-            tcPr = new();
+            cellProperties = new();
             if (colspan > 1)
             {
-                tcPr.Append(new GridSpan
-                {
-                    Val = colspan
-                });
+                cellProperties.Append(
+                    new GridSpan
+                    {
+                        Val = colspan
+                    });
             }
 
             if (isRowspanStart)
             {
-                tcPr.Append(new VerticalMerge
-                {
-                    Val = MergedCellValues.Restart
-                });
+                cellProperties.Append(
+                    new VerticalMerge
+                    {
+                        Val = MergedCellValues.Restart
+                    });
             }
         }
 
@@ -238,7 +242,7 @@ static partial class WordContentBuilder
         if (cellStyle != null)
         {
             var declarations = StyleParser.Parse(cellStyle);
-            tcPr = ApplyCellStyles(declarations, tcPr);
+            cellProperties = ApplyCellStyles(declarations, cellProperties);
         }
 
         var bgColorAttr = cellElement.GetAttribute("bgcolor");
@@ -247,12 +251,13 @@ static partial class WordContentBuilder
             var parsed = ColorParser.Parse(bgColorAttr);
             if (parsed != null)
             {
-                tcPr ??= new();
-                tcPr.Append(new Shading
-                {
-                    Val = ShadingPatternValues.Clear,
-                    Fill = parsed
-                });
+                cellProperties ??= new();
+                cellProperties.Append(
+                    new Shading
+                    {
+                        Val = ShadingPatternValues.Clear,
+                        Fill = parsed
+                    });
             }
         }
 
@@ -262,28 +267,31 @@ static partial class WordContentBuilder
             var twips = StyleParser.ParseLengthToTwips(widthAttr);
             if (twips != null)
             {
-                tcPr ??= new();
-                tcPr.Append(new TableCellWidth
-                {
-                    Width = twips.Value.ToString(),
-                    Type = TableWidthUnitValues.Dxa
-                });
+                cellProperties ??= new();
+                cellProperties.Append(
+                    new TableCellWidth
+                    {
+                        Width = twips.Value.ToString(),
+                        Type = TableWidthUnitValues.Dxa
+                    });
             }
         }
 
-        if (colWidth != null && tcPr?.GetFirstChild<TableCellWidth>() == null)
+        if (colWidth != null &&
+            cellProperties?.GetFirstChild<TableCellWidth>() == null)
         {
-            tcPr ??= new();
-            tcPr.Append(new TableCellWidth
-            {
-                Width = colWidth.Value.ToString(),
-                Type = TableWidthUnitValues.Dxa
-            });
+            cellProperties ??= new();
+            cellProperties.Append(
+                new TableCellWidth
+                {
+                    Width = colWidth.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
         }
 
-        if (tcPr != null)
+        if (cellProperties != null)
         {
-            tc.Append(tcPr);
+            tc.Append(cellProperties);
         }
 
         var cellFormat = format;
@@ -335,11 +343,12 @@ static partial class WordContentBuilder
             var twips = StyleParser.ParseLengthToTwips(cellWidth);
             if (twips != null)
             {
-                tcPr.Append(new TableCellWidth
-                {
-                    Width = twips.Value.ToString(),
-                    Type = TableWidthUnitValues.Dxa
-                });
+                tcPr.Append(
+                    new TableCellWidth
+                    {
+                        Width = twips.Value.ToString(),
+                        Type = TableWidthUnitValues.Dxa
+                    });
             }
         }
 
@@ -349,11 +358,12 @@ static partial class WordContentBuilder
             var parsed = ColorParser.Parse(bgColor);
             if (parsed != null)
             {
-                tcPr.Append(new Shading
-                {
-                    Val = ShadingPatternValues.Clear,
-                    Fill = parsed
-                });
+                tcPr.Append(
+                    new Shading
+                    {
+                        Val = ShadingPatternValues.Clear,
+                        Fill = parsed
+                    });
             }
         }
 
@@ -363,13 +373,14 @@ static partial class WordContentBuilder
             var val = va.Equals("top", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Top
                 : va.Equals("middle", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Center
                 : va.Equals("bottom", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Bottom
-                : (TableVerticalAlignmentValues?) null;
+                : (TableVerticalAlignmentValues?)null;
             if (val != null)
             {
-                tcPr.Append(new TableCellVerticalAlignment
-                {
-                    Val = val.Value
-                });
+                tcPr.Append(
+                    new TableCellVerticalAlignment
+                    {
+                        Val = val.Value
+                    });
             }
         }
 
@@ -380,13 +391,14 @@ static partial class WordContentBuilder
                 ? TextDirectionValues.TopToBottomRightToLeft
                 : cwm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
                     ? TextDirectionValues.BottomToTopLeftToRight
-                    : (TextDirectionValues?) null;
+                    : (TextDirectionValues?)null;
             if (cellTextDir != null)
             {
-                tcPr.Append(new TextDirection
-                {
-                    Val = cellTextDir.Value
-                });
+                tcPr.Append(
+                    new TextDirection
+                    {
+                        Val = cellTextDir.Value
+                    });
             }
         }
 
@@ -406,7 +418,10 @@ static partial class WordContentBuilder
         var cbb = declarations.TryGetValue("border-bottom", out var cbbVal) ? StyleParser.ParseBorder(cbbVal) : cellBorderAll;
         var cbl = declarations.TryGetValue("border-left", out var cblVal) ? StyleParser.ParseBorder(cblVal) : cellBorderAll;
 
-        if (cbt != null || cbr != null || cbb != null || cbl != null)
+        if (cbt != null ||
+            cbr != null ||
+            cbb != null ||
+            cbl != null)
         {
             var cellBorders = new TableCellBorders();
             BorderEmitter.AppendSides(cellBorders, cbt, cbl, cbb, cbr, 0);

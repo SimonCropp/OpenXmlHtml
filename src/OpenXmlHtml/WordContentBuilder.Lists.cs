@@ -65,7 +65,9 @@ static partial class WordContentBuilder
 
         int? startOverride = null;
         var startAttr = element.GetAttribute("start");
-        if (startAttr != null && int.TryParse(startAttr, out var startVal) && startVal != 1)
+        if (startAttr != null &&
+            int.TryParse(startAttr, out var startVal) &&
+            startVal != 1)
         {
             startOverride = startVal;
         }
