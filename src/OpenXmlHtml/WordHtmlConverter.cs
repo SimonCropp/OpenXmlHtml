@@ -213,8 +213,13 @@ public static class WordHtmlConverter
         }
 
         headerPart.Header = header;
-        EnsureHeaderFooterReference(mainPart,
-            new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) });
+        EnsureHeaderFooterReference(
+            mainPart,
+            new HeaderReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = mainPart.GetIdOfPart(headerPart)
+            });
     }
 
     /// <summary>
@@ -231,7 +236,11 @@ public static class WordHtmlConverter
 
         headerPart.Header = header;
         EnsureHeaderFooterReference(mainPart,
-            new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) });
+            new HeaderReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = mainPart.GetIdOfPart(headerPart)
+            });
     }
 
     /// <summary>
