@@ -358,7 +358,8 @@ static class WordContentBuilder
         if (tag == "blockquote")
         {
             var cite = element.GetAttribute("cite");
-            if (!string.IsNullOrEmpty(cite) && context.MainPart != null)
+            if (!string.IsNullOrEmpty(cite) &&
+                context.MainPart != null)
             {
                 FlushParagraph(elements, context);
                 ProcessChildren(element, newFormat, elements, context, inPre);

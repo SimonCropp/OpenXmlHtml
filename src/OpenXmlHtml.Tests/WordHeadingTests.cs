@@ -36,21 +36,28 @@ public class WordHeadingTests
 
     [Test]
     public Task HeadingOffsetShifts() =>
-        Verify(WordHtmlConverter.ToElements(
-            """
-            <h1>Heading 1</h1>
-            <h2>Heading 2</h2>
-            <h3>Heading 3</h3>
-            """,
-            mainPart: null,
-            new HtmlConvertSettings { HeadingLevelOffset = 1 }));
+        Verify(
+            WordHtmlConverter.ToElements(
+                """
+                <h1>Heading 1</h1>
+                <h2>Heading 2</h2>
+                <h3>Heading 3</h3>
+                """,
+                mainPart: null,
+                new()
+                {
+                    HeadingLevelOffset = 1
+                }));
 
     [Test]
     public Task HeadingOffsetClampsAtNine() =>
         Verify(WordHtmlConverter.ToElements(
             "<h5>Deep</h5><h6>Deeper</h6>",
             mainPart: null,
-            new HtmlConvertSettings { HeadingLevelOffset = 5 }));
+            new()
+            {
+                HeadingLevelOffset = 5
+            }));
 
     [Test]
     public Task HeadingStylesDocx()
