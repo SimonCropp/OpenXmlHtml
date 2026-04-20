@@ -40,4 +40,17 @@ public class WordEdgeCaseTests
     [Test]
     public Task VarTag() =>
         Verify(WordHtmlConverter.ToParagraphs("<var>variable</var>"));
+
+    [Test]
+    public Task InvalidXmlCharsFromEntities() =>
+        Verify(WordHtmlConverter.ToParagraphs("before&#1;&#0;&#x1F;after"));
+
+    [Test]
+    public Task InvalidXmlCharsRaw() =>
+        Verify(WordHtmlConverter.ToParagraphs("before\u0001\u0000\u001fafter"));
+
+    [Test]
+    public Task LoneSurrogate() =>
+        Verify(WordHtmlConverter.ToParagraphs("before\uD800after"));
+
 }

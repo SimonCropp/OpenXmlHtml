@@ -282,13 +282,14 @@ static partial class WordContentBuilder
     }
 
     internal static string ApplyTextTransform(string text, string? transform) =>
-        transform switch
-        {
-            "uppercase" => text.ToUpperInvariant(),
-            "lowercase" => text.ToLowerInvariant(),
-            "capitalize" => CapitalizeWords(text),
-            _ => text
-        };
+        XmlCharFilter.StripInvalidXmlChars(
+            transform switch
+            {
+                "uppercase" => text.ToUpperInvariant(),
+                "lowercase" => text.ToLowerInvariant(),
+                "capitalize" => CapitalizeWords(text),
+                _ => text
+            });
 
     static string CapitalizeWords(string text)
     {
