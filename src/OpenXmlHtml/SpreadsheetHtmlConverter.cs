@@ -102,7 +102,7 @@ public static class SpreadsheetHtmlConverter
             }
 
             run.Append(
-                new SpreadsheetText(segment.Text)
+                new SpreadsheetText(XmlCharFilter.StripInvalidXmlChars(segment.Text))
                 {
                     Space = SpaceProcessingModeValues.Preserve
                 });
