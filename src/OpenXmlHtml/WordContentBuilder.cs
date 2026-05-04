@@ -22,9 +22,19 @@ static partial class WordContentBuilder
             context.NextNumId = 1;
         }
 
+        if (settings?.NumberingSession is { } session)
+        {
+            context.BulletAbstractNumId = session.BulletAbstractNumId;
+        }
+
         ProcessChildren(body, new(), elements, context, false);
         FlushParagraph(elements, context);
         TrimTrailingEmptyParagraphs(elements);
+
+        if (settings?.NumberingSession is { } session2)
+        {
+            session2.BulletAbstractNumId = context.BulletAbstractNumId;
+        }
 
         if (elements.Count == 0)
         {
