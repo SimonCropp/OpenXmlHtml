@@ -2,7 +2,7 @@
 <Project>
   <PropertyGroup>
     <NoWarn>CS1591;NU1608;NU1109</NoWarn>
-    <Version>0.5.1</Version>
+    <Version>0.6.0</Version>
     <LangVersion>preview</LangVersion>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <Description>OpenXmlHtml converts HTML to OpenXml elements for use in xlsx and docx files.</Description>
