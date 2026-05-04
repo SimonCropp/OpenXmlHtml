@@ -20,7 +20,10 @@ public class SpreadsheetIntegrationTests
         });
 
         var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>()!;
-        var row = new Row { RowIndex = 1 };
+        var row = new Row
+        {
+            RowIndex = 1
+        };
         sheetData.Append(row);
 
         var cell = new SpreadsheetCell { CellReference = "A1" };
@@ -147,8 +150,14 @@ public class SpreadsheetIntegrationTests
                         Name = "Sheet1"
                     }));
 
-            var row = new Row { RowIndex = 1 };
-            var cell = new SpreadsheetCell { CellReference = "A1" };
+            var row = new Row
+            {
+                RowIndex = 1
+            };
+            var cell = new SpreadsheetCell
+            {
+                CellReference = "A1"
+            };
             SpreadsheetHtmlConverter.SetCellHtml(cell,
                 """Email <a href="mailto:support@example.com">support</a>.""",
                 worksheetPart);
@@ -180,8 +189,14 @@ public class SpreadsheetIntegrationTests
                         Name = "Sheet1"
                     }));
 
-            var row = new Row { RowIndex = 1 };
-            var cell = new SpreadsheetCell { CellReference = "A1" };
+            var row = new Row
+            {
+                RowIndex = 1
+            };
+            var cell = new SpreadsheetCell
+            {
+                CellReference = "A1"
+            };
             SpreadsheetHtmlConverter.SetCellHtml(cell,
                 """<a href="https://example.com" title="Open Example">Example</a>""",
                 worksheetPart);
@@ -246,8 +261,14 @@ public class SpreadsheetIntegrationTests
                         Name = "Sheet1"
                     }));
 
-            var row = new Row { RowIndex = 1 };
-            var cell = new SpreadsheetCell { CellReference = "A1" };
+            var row = new Row
+            {
+                RowIndex = 1
+            };
+            var cell = new SpreadsheetCell
+            {
+                CellReference = "A1"
+            };
             SpreadsheetHtmlConverter.SetCellHtml(cell,
                 """See <a href="/reports/q1">Q1 report</a>.""",
                 worksheetPart);
