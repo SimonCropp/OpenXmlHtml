@@ -11,7 +11,8 @@
   ○ 
     ■ Deep item
 ● Back to top,
-          ContainsRichText: false
+          ContainsRichText: false,
+          RequiredHighlight: false
         }
       ]
     }

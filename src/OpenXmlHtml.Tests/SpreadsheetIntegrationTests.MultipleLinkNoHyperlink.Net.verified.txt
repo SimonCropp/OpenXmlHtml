@@ -5,7 +5,8 @@
       Columns: [
         {
           Name: Link 1 (https://example.com) and Link 2 (https://other.com),
-          ContainsRichText: false
+          ContainsRichText: false,
+          RequiredHighlight: false
         }
       ]
     }
