@@ -185,6 +185,7 @@ static partial class WordContentBuilder
 
         if (isBlock)
         {
+            ParagraphFormatState? pendingFormat = null;
             if (styleDeclarations != null)
             {
                 pageBreakBefore = styleDeclarations.TryGetValue("page-break-before", out var pbb) && pbb == "always";
@@ -193,11 +194,16 @@ static partial class WordContentBuilder
                 var pf = ParagraphFormatState.ParseFrom(styleDeclarations);
                 if (pf.HasProperties)
                 {
-                    context.ParagraphFormat = pf;
+                    pendingFormat = pf;
                 }
             }
 
             FlushParagraph(elements, context);
+
+            if (pendingFormat != null)
+            {
+                context.ParagraphFormat = pendingFormat;
+            }
 
             if (tag is "h1" or "h2" or "h3" or "h4" or "h5" or "h6")
             {
