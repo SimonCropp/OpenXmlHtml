@@ -189,6 +189,32 @@ public class WordSamples
     }
 
     [Test]
+    public void SharedNumberingSession()
+    {
+        using var stream = new MemoryStream();
+        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+        var mainPart = document.AddMainDocumentPart();
+        mainPart.Document = new(new Body());
+
+        #region SharedNumberingSession
+
+        var session = new HtmlNumberingSession();
+        var settings = new HtmlConvertSettings
+        {
+            NumberingSession = session
+        };
+
+        // Both fragments reuse one bullet abstract — one definition, two numbering instances.
+        var first = WordHtmlConverter.ToElements("<ul><li>a</li><li>b</li></ul>", mainPart, settings);
+        var second = WordHtmlConverter.ToElements("<ul><li>c</li><li>d</li></ul>", mainPart, settings);
+
+        #endregion
+
+        _ = first;
+        _ = second;
+    }
+
+    [Test]
     public Task HeadersAndFooters()
     {
         #region HeadersAndFooters
