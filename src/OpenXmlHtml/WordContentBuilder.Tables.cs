@@ -32,9 +32,16 @@ static partial class WordContentBuilder
         var defaultBorder = new BorderInfo(4, BorderValues.Single, "auto");
 
         var borderAttr = tableElement.GetAttribute("border");
-        if (borderAttr == "0")
+        if (borderAttr != null && int.TryParse(borderAttr, out var borderPx))
         {
-            defaultBorder = new(0, BorderValues.None, null);
+            if (borderPx == 0)
+            {
+                defaultBorder = new(0, BorderValues.None, null);
+            }
+            else
+            {
+                defaultBorder = new(borderPx * 4, BorderValues.Single, "auto");
+            }
         }
 
         var tableStyle = tableElement.GetAttribute("style");
