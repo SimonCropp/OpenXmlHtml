@@ -1,3 +1,4 @@
+using System.Text;
 using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlHtml;
@@ -38,10 +39,10 @@ public static class SpreadsheetHtmlConverter
             cell.StyleIndex = EnsureWrapTextStyle(workbookPart);
         }
 
-        var linkUrl = GetSingleLinkUrl(segments);
-        if (linkUrl != null && cell.CellReference?.Value != null)
+        var link = GetSingleLink(segments);
+        if (link != null && cell.CellReference?.Value != null)
         {
-            ApplyHyperlink(worksheetPart, cell.CellReference!, linkUrl);
+            ApplyHyperlink(worksheetPart, cell.CellReference!, link.Value);
         }
     }
 
@@ -76,10 +77,10 @@ public static class SpreadsheetHtmlConverter
             cell.StyleIndex = EnsureWrapTextStyle(workbookPart);
         }
 
-        var linkUrl = GetSingleLinkUrl(segments);
-        if (linkUrl != null && cell.CellReference?.Value != null)
+        var link = GetSingleLink(segments);
+        if (link != null && cell.CellReference?.Value != null)
         {
-            ApplyHyperlink(worksheetPart, cell.CellReference!, linkUrl);
+            ApplyHyperlink(worksheetPart, cell.CellReference!, link.Value);
         }
     }
 
@@ -112,9 +113,13 @@ public static class SpreadsheetHtmlConverter
         return inlineString;
     }
 
-    static string? GetSingleLinkUrl(List<TextSegment> segments)
+    readonly record struct LinkInfo(string Url, string? Title, string Display);
+
+    static LinkInfo? GetSingleLink(List<TextSegment> segments)
     {
         string? url = null;
+        string? title = null;
+        var display = new StringBuilder();
         foreach (var segment in segments)
         {
             if (segment.Format.LinkUrl == null)
@@ -129,14 +134,21 @@ public static class SpreadsheetHtmlConverter
             }
 
             url = segment.Format.LinkUrl;
+            title ??= segment.Format.LinkTitle;
+            display.Append(segment.Text);
         }
 
-        return url;
+        if (url == null)
+        {
+            return null;
+        }
+
+        return new(url, string.IsNullOrEmpty(title) ? null : title, display.ToString());
     }
 
-    static void ApplyHyperlink(WorksheetPart worksheetPart, string cellReference, string url)
+    static void ApplyHyperlink(WorksheetPart worksheetPart, string cellReference, LinkInfo link)
     {
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        if (!Uri.TryCreate(link.Url, UriKind.Absolute, out var uri))
         {
             return;
         }
@@ -152,12 +164,18 @@ public static class SpreadsheetHtmlConverter
             worksheet.InsertAfter(hyperlinks, sheetData);
         }
 
-        hyperlinks.Append(
-            new DocumentFormat.OpenXml.Spreadsheet.Hyperlink
-            {
-                Reference = cellReference,
-                Id = relationship.Id
-            });
+        var hyperlink = new DocumentFormat.OpenXml.Spreadsheet.Hyperlink
+        {
+            Reference = cellReference,
+            Id = relationship.Id,
+            Display = link.Display
+        };
+        if (link.Title != null)
+        {
+            hyperlink.Tooltip = link.Title;
+        }
+
+        hyperlinks.Append(hyperlink);
     }
 
     static bool HasNewlines(InlineString inlineString)

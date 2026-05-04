@@ -713,9 +713,16 @@ Entry point: `SpreadsheetHtmlConverter.ToInlineString`.
 - **Test**: `Spreadsheet*Tests`
 
 
-### 10.2 Tables, images, hyperlinks in cells `TODO`
+### 10.2 Hyperlinks in cells `DONE`
 
-- **Notes**: Spreadsheet path is inline-text-only. Block structure, tables, images and hyperlinks are flattened or dropped.
+- **API**: `SpreadsheetHtmlConverter.SetCellHtml(cell, html, worksheetPart)` (or the overload taking `HtmlConvertSettings`). When the cell HTML contains exactly one distinct `<a href>` and the target parses as an absolute URI (`http`/`https`/`mailto`/etc.), a real workbook hyperlink relationship is created and a `<hyperlinks>` entry is appended to the worksheet with `display` set from the anchor text and `tooltip` set from `<a title>` when present.
+- **Notes**: Multiple distinct link targets in the same cell are silently dropped (Excel cells only support one hyperlink). Relative URLs and internal sheet locations (`#Sheet2!A1`) are also dropped. The link URL still appears in parentheses inside the inline text when the anchor text differs from the href.
+- **Test**: `SpreadsheetIntegrationTests.SingleLinkHyperlink`, `MultipleLinkNoHyperlink`, `MailtoLinkHyperlink`, `LinkWithTitleTooltip`, `RelativeLinkNoHyperlink`
+
+
+### 10.3 Tables and images in cells `TODO`
+
+- **Notes**: Spreadsheet path is inline-text-only. Block structure, tables, and images are flattened or dropped.
 
 ---
 
@@ -820,15 +827,15 @@ These categories are intentionally out of scope because Word/Excel does not mode
 | 7. Borders and Backgrounds | 4 | 0 | 1 | 5 |
 | 8. Paragraph Layout | 6 | 0 | 2 | 8 |
 | 9. Document Structure | 4 | 1 | 3 | 8 |
-| 10. Spreadsheet Path | 1 | 0 | 1 | 2 |
-| **Total** | **63** | **4** | **9** | **76** |
+| 10. Spreadsheet Path | 2 | 0 | 1 | 3 |
+| **Total** | **64** | **4** | **9** | **77** |
 
 
 ### Coverage
 
 ```mermaid
 pie title HTML Feature Implementation Status
-    "Done" : 63
+    "Done" : 64
     "Partial" : 4
     "Todo" : 9
 ```
@@ -840,6 +847,6 @@ pie title HTML Feature Implementation Status
 
 1. **Endnotes and explicit `<footnote>` markup** — currently overloaded onto `blockquote cite`
 2. **Sections, columns, page setup** — common in long-form document conversion
-3. **Spreadsheet hyperlinks and images** — xlsx path is currently inline-text only
+3. **Spreadsheet images** — xlsx path drops `<img>` entirely; hyperlinks already work
 4. **Table of contents from headings** — natural fit once heading styles are in place
 5. **CSS class lookup from embedded `<style>`** — today only external Word styles are matched

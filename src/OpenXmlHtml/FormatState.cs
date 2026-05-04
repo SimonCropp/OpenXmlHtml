@@ -12,6 +12,7 @@ struct FormatState
     internal ImageData? Image { get; set; }
     internal int ListDepth { get; set; }
     internal string? LinkUrl { get; set; }
+    internal string? LinkTitle { get; set; }
     internal string? RunStyleId { get; set; }
     internal string? BackgroundColor { get; set; }
     internal BorderInfo? Border { get; set; }

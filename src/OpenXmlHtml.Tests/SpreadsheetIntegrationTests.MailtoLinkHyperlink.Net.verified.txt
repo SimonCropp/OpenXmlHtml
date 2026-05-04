@@ -1,0 +1,15 @@
+﻿{
+  Sheets: [
+    {
+      Name: Sheet1,
+      Columns: [
+        {
+          Name: Email support (mailto:support@example.com).,
+          ContainsRichText: false,
+          RequiredHighlight: false
+        }
+      ]
+    }
+  ],
+  WorksheetCount: 1
+}
