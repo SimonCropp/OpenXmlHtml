@@ -1,7 +1,8 @@
 namespace OpenXmlHtml;
 
 /// <summary>
-/// Settings for controlling remote image resolution during HTML conversion.
+/// Settings for HTML-to-Word conversion: image policies, heading offset, and optional shared
+/// numbering state.
 /// </summary>
 public class HtmlConvertSettings
 {
@@ -26,4 +27,12 @@ public class HtmlConvertSettings
     /// is clamped to [1, 9] so out-of-range inputs still produce a valid heading style. Default 0.
     /// </summary>
     public int HeadingLevelOffset { get; init; }
+
+    /// <summary>
+    /// Optional shared numbering session. When provided, bullet abstract numbering definitions
+    /// are reused across multiple <c>WordHtmlConverter.ToElements</c> calls that share
+    /// the same session, so N HTML fragments with bullet lists produce one abstract definition
+    /// instead of N.
+    /// </summary>
+    public HtmlNumberingSession? NumberingSession { get; init; }
 }

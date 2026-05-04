@@ -6,13 +6,13 @@ public class WordIntegrationTests
     {
         using var stream = new MemoryStream();
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
-        mainPart.Document = new(new Body());
+        var main = document.AddMainDocumentPart();
+        main.Document = new(new Body());
 
-        WordHtmlConverter.AppendHtml(mainPart.Document.Body!,
+        WordHtmlConverter.AppendHtml(main.Document.Body!,
             "<h1>Report Title</h1><p>This is a <b>bold</b> statement.</p>");
 
-        return Verify(mainPart.Document.Body!);
+        return Verify(main.Document.Body!);
     }
 
     [Test]

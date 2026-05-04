@@ -111,13 +111,12 @@ Append HTML content directly to a Word document body:
 <a id='snippet-AppendHtml'></a>
 ```cs
 using var stream = new MemoryStream();
-using var document = WordprocessingDocument.Create(
-    stream, WordprocessingDocumentType.Document);
-var mainPart = document.AddMainDocumentPart();
-mainPart.Document = new(new Body());
+using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+var main = document.AddMainDocumentPart();
+main.Document = new(new Body());
 
 WordHtmlConverter.AppendHtml(
-    mainPart.Document.Body!,
+    main.Document.Body!,
     """
     <h1>Meeting Notes</h1>
     <p><i>Date: January 15, 2024</i></p>
@@ -127,7 +126,7 @@ WordHtmlConverter.AppendHtml(
     </ol>
     """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L23-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-AppendHtml' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L23-L41' title='Snippet source file'>snippet source</a> | <a href='#snippet-AppendHtml' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -147,7 +146,7 @@ var paragraphs = WordHtmlConverter.ToParagraphs(
     <p>Contact <a href="mailto:ops@example.com">ops team</a> for details.</p>
     """);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L50-L63' title='Snippet source file'>snippet source</a> | <a href='#snippet-WordRichDocument' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L49-L62' title='Snippet source file'>snippet source</a> | <a href='#snippet-WordRichDocument' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -170,7 +169,7 @@ WordHtmlConverter.ConvertToDocx(
     """,
     stream);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L71-L85' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L70-L84' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -186,7 +185,7 @@ using var htmlStream = new MemoryStream(
 using var docxStream = new MemoryStream();
 WordHtmlConverter.ConvertToDocx(htmlStream, docxStream);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L94-L101' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertStreamToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L93-L100' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertStreamToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -199,7 +198,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L263-L267' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L288-L292' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -227,7 +226,7 @@ WordHtmlConverter.SetHeader(headerMainPart,
 WordHtmlConverter.SetFooter(headerMainPart,
     """<p style="text-align: center; font-size: 9pt; color: gray">Confidential</p>""");
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L195-L214' title='Snippet source file'>snippet source</a> | <a href='#snippet-HeadersAndFooters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L220-L239' title='Snippet source file'>snippet source</a> | <a href='#snippet-HeadersAndFooters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Headers and footers support all the same HTML elements and CSS properties as the document body (tables, formatting, images, etc.). Overloads accepting `HtmlConvertSettings` are also available.
@@ -257,7 +256,7 @@ WordHtmlConverter.ConvertToDocx(
     settingsStream,
     settings);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L167-L186' title='Snippet source file'>snippet source</a> | <a href='#snippet-RemoteImageSettings' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L166-L185' title='Snippet source file'>snippet source</a> | <a href='#snippet-RemoteImageSettings' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Available policies:
@@ -269,6 +268,29 @@ Available policies:
  * `ImagePolicy.Filter(src => ...)` — Custom predicate.
 
 All conversion methods (`ToParagraphs`, `ToElements`, `AppendHtml`, `ConvertToDocx`, `ConvertFileToDocx`) and their spreadsheet equivalents accept an `HtmlConvertSettings` parameter. A custom `HttpClient` can be provided via `HtmlConvertSettings.HttpClient`.
+
+
+### Shared Numbering Session
+
+When calling `ToElements` multiple times to build a single Word document, each call normally creates its own bullet abstract numbering definition. Passing the same `HtmlNumberingSession` via `HtmlConvertSettings.NumberingSession` makes all calls share one definition:
+
+<!-- snippet: SharedNumberingSession -->
+<a id='snippet-SharedNumberingSession'></a>
+```cs
+var session = new HtmlNumberingSession();
+var settings = new HtmlConvertSettings
+{
+    NumberingSession = session
+};
+
+// Both fragments reuse one bullet abstract — one definition, two numbering instances.
+var first = WordHtmlConverter.ToElements("<ul><li>a</li><li>b</li></ul>", mainPart, settings);
+var second = WordHtmlConverter.ToElements("<ul><li>c</li><li>d</li></ul>", mainPart, settings);
+```
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L199-L211' title='Snippet source file'>snippet source</a> | <a href='#snippet-SharedNumberingSession' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Without a session each `ToElements` call allocates its own abstract, which is harmless but produces redundant definitions. A session is only needed when you call `ToElements` several times against the same `MainDocumentPart` within one render.
 
 
 ### CSS Class to Word Style Mapping
@@ -289,7 +311,7 @@ WordHtmlConverter.AppendHtml(
     """,
     styleMainPart);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L237-L250' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L262-L275' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
  * Paragraph styles (`w:type="paragraph"`) are applied via `ParagraphStyleId`

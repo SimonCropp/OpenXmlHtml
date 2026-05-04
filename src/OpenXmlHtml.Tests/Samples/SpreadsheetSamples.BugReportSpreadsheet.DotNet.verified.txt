@@ -4,16 +4,24 @@
       Name: Bug Report,
       Columns: [
         {
-          Name: ID
+          Name: ID,
+          ContainsRichText: false,
+          RequiredHighlight: false
         },
         {
-          Name: Priority
+          Name: Priority,
+          ContainsRichText: false,
+          RequiredHighlight: false
         },
         {
-          Name: Summary
+          Name: Summary,
+          ContainsRichText: false,
+          RequiredHighlight: false
         },
         {
-          Name: Details
+          Name: Details,
+          ContainsRichText: false,
+          RequiredHighlight: false
         }
       ]
     }

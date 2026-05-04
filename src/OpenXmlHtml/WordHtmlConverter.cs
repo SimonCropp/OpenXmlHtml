@@ -18,16 +18,16 @@ public static class WordHtmlConverter
     /// <summary>
     /// Converts HTML to a list of Paragraph elements, embedding images into the given MainDocumentPart.
     /// </summary>
-    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? mainPart) =>
-        ToParagraphsCore(HtmlSegmentParser.Parse(html), mainPart);
+    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? main) =>
+        ToParagraphsCore(HtmlSegmentParser.Parse(html), main);
 
     /// <summary>
     /// Converts HTML to a list of Paragraph elements, with settings controlling remote image resolution.
     /// </summary>
-    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? mainPart, HtmlConvertSettings settings) =>
-        ToParagraphsCore(HtmlSegmentParser.Parse(html, settings), mainPart);
+    public static List<Paragraph> ToParagraphs(string html, MainDocumentPart? main, HtmlConvertSettings settings) =>
+        ToParagraphsCore(HtmlSegmentParser.Parse(html, settings), main);
 
-    static List<Paragraph> ToParagraphsCore(List<TextSegment> segments, MainDocumentPart? mainPart)
+    static List<Paragraph> ToParagraphsCore(List<TextSegment> segments, MainDocumentPart? main)
     {
         var paragraphs = new List<Paragraph>();
         var currentRuns = new List<OpenXmlElement>();
@@ -46,10 +46,10 @@ public static class WordHtmlConverter
 
             if (segment.Format.Image != null)
             {
-                if (mainPart != null)
+                if (main != null)
                 {
                     imageIndex++;
-                    currentRuns.Add(BuildImageRun(mainPart, segment.Format.Image, imageIndex));
+                    currentRuns.Add(BuildImageRun(main, segment.Format.Image, imageIndex));
                 }
 
                 continue;
@@ -99,14 +99,14 @@ public static class WordHtmlConverter
     /// <summary>
     /// Converts HTML to a list of OpenXml elements, embedding images into the given MainDocumentPart.
     /// </summary>
-    public static List<OpenXmlElement> ToElements(string html, MainDocumentPart? mainPart) =>
-        WordContentBuilder.Build(html, mainPart);
+    public static List<OpenXmlElement> ToElements(string html, MainDocumentPart? main) =>
+        WordContentBuilder.Build(html, main);
 
     /// <summary>
     /// Converts HTML to a list of OpenXml elements, with settings controlling remote image resolution.
     /// </summary>
-    public static List<OpenXmlElement> ToElements(string html, MainDocumentPart? mainPart, HtmlConvertSettings settings) =>
-        WordContentBuilder.Build(html, mainPart, settings);
+    public static List<OpenXmlElement> ToElements(string html, MainDocumentPart? main, HtmlConvertSettings settings) =>
+        WordContentBuilder.Build(html, main, settings);
 
     /// <summary>
     /// Appends HTML content as paragraphs to a Word document body.
@@ -117,9 +117,9 @@ public static class WordHtmlConverter
     /// <summary>
     /// Appends HTML content to a Word document body, embedding images into the given MainDocumentPart.
     /// </summary>
-    public static void AppendHtml(Body body, string html, MainDocumentPart? mainPart)
+    public static void AppendHtml(Body body, string html, MainDocumentPart? main)
     {
-        foreach (var element in ToElements(html, mainPart))
+        foreach (var element in ToElements(html, main))
         {
             body.Append(element);
         }
@@ -128,9 +128,9 @@ public static class WordHtmlConverter
     /// <summary>
     /// Appends HTML content to a Word document body, with settings controlling remote image resolution.
     /// </summary>
-    public static void AppendHtml(Body body, string html, MainDocumentPart? mainPart, HtmlConvertSettings settings)
+    public static void AppendHtml(Body body, string html, MainDocumentPart? main, HtmlConvertSettings settings)
     {
-        foreach (var element in ToElements(html, mainPart, settings))
+        foreach (var element in ToElements(html, main, settings))
         {
             body.Append(element);
         }
@@ -142,10 +142,11 @@ public static class WordHtmlConverter
     public static void ConvertToDocx(string html, Stream stream)
     {
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
+        var main = document.AddMainDocumentPart();
         var body = new Body();
-        AppendHtml(body, html, mainPart);
-        mainPart.Document = new(body);
+        AppendHtml(body, html, main);
+        EnsureSectionProperties(body);
+        main.Document = new(body);
     }
 
     /// <summary>
@@ -174,10 +175,11 @@ public static class WordHtmlConverter
     public static void ConvertToDocx(string html, Stream stream, HtmlConvertSettings settings)
     {
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
+        var main = document.AddMainDocumentPart();
         var body = new Body();
-        AppendHtml(body, html, mainPart, settings);
-        mainPart.Document = new(body);
+        AppendHtml(body, html, main, settings);
+        EnsureSectionProperties(body);
+        main.Document = new(body);
     }
 
     /// <summary>
@@ -203,87 +205,131 @@ public static class WordHtmlConverter
     /// <summary>
     /// Sets the default header of a Word document from HTML content.
     /// </summary>
-    public static void SetHeader(MainDocumentPart mainPart, string html)
+    public static void SetHeader(MainDocumentPart main, string html)
     {
-        var headerPart = mainPart.AddNewPart<HeaderPart>();
+        var headerPart = main.AddNewPart<HeaderPart>();
         var header = new Header();
-        foreach (var element in WordContentBuilder.Build(html, mainPart))
+        foreach (var element in WordContentBuilder.Build(html, main))
         {
             header.Append(element);
         }
 
         headerPart.Header = header;
-        EnsureHeaderFooterReference(mainPart,
-            new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) });
+        EnsureHeaderFooterReference(
+            main,
+            new HeaderReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = main.GetIdOfPart(headerPart)
+            });
     }
 
     /// <summary>
     /// Sets the default header of a Word document from HTML content, with settings controlling remote image resolution.
     /// </summary>
-    public static void SetHeader(MainDocumentPart mainPart, string html, HtmlConvertSettings settings)
+    public static void SetHeader(MainDocumentPart main, string html, HtmlConvertSettings settings)
     {
-        var headerPart = mainPart.AddNewPart<HeaderPart>();
+        var headerPart = main.AddNewPart<HeaderPart>();
         var header = new Header();
-        foreach (var element in WordContentBuilder.Build(html, mainPart, settings))
+        foreach (var element in WordContentBuilder.Build(html, main, settings))
         {
             header.Append(element);
         }
 
         headerPart.Header = header;
-        EnsureHeaderFooterReference(mainPart,
-            new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) });
+        EnsureHeaderFooterReference(
+            main,
+            new HeaderReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = main.GetIdOfPart(headerPart)
+            });
     }
 
     /// <summary>
     /// Sets the default footer of a Word document from HTML content.
     /// </summary>
-    public static void SetFooter(MainDocumentPart mainPart, string html)
+    public static void SetFooter(MainDocumentPart main, string html)
     {
-        var footerPart = mainPart.AddNewPart<FooterPart>();
+        var footerPart = main.AddNewPart<FooterPart>();
         var footer = new Footer();
-        foreach (var element in WordContentBuilder.Build(html, mainPart))
+        foreach (var element in WordContentBuilder.Build(html, main))
         {
             footer.Append(element);
         }
 
         footerPart.Footer = footer;
-        EnsureHeaderFooterReference(mainPart,
-            new FooterReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(footerPart) });
+        EnsureHeaderFooterReference(
+            main,
+            new FooterReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = main.GetIdOfPart(footerPart)
+            });
     }
 
     /// <summary>
     /// Sets the default footer of a Word document from HTML content, with settings controlling remote image resolution.
     /// </summary>
-    public static void SetFooter(MainDocumentPart mainPart, string html, HtmlConvertSettings settings)
+    public static void SetFooter(MainDocumentPart main, string html, HtmlConvertSettings settings)
     {
-        var footerPart = mainPart.AddNewPart<FooterPart>();
+        var footerPart = main.AddNewPart<FooterPart>();
         var footer = new Footer();
-        foreach (var element in WordContentBuilder.Build(html, mainPart, settings))
+        foreach (var element in WordContentBuilder.Build(html, main, settings))
         {
             footer.Append(element);
         }
 
         footerPart.Footer = footer;
-        EnsureHeaderFooterReference(mainPart,
-            new FooterReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(footerPart) });
+        EnsureHeaderFooterReference(
+            main,
+            new FooterReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = main.GetIdOfPart(footerPart)
+            });
     }
 
-    static void EnsureHeaderFooterReference(MainDocumentPart mainPart, OpenXmlElement reference)
+    static void EnsureHeaderFooterReference(MainDocumentPart main, OpenXmlElement reference)
     {
-        var body = mainPart.Document?.Body;
+        var body = main.Document?.Body;
         if (body == null)
         {
             return;
         }
 
+        var sectionProps = EnsureSectionProperties(body);
+        sectionProps.Append(reference);
+    }
+
+    // A4 in twips; emitted so rendering is not subject to the host system's
+    // regional paper-size default (e.g. CI rendering Letter vs dev rendering A4).
+    internal static SectionProperties EnsureSectionProperties(Body body)
+    {
         var sectionProps = body.GetFirstChild<SectionProperties>();
-        if (sectionProps == null)
+        if (sectionProps != null)
         {
-            sectionProps = new();
-            body.Append(sectionProps);
+            return sectionProps;
         }
 
-        sectionProps.Append(reference);
+        sectionProps = new(
+            new PageSize
+            {
+                Width = 11906,
+                Height = 16838
+            },
+            new PageMargin
+            {
+                Top = 1440,
+                Right = 1440,
+                Bottom = 1440,
+                Left = 1440,
+                Header = 720,
+                Footer = 720,
+                Gutter = 0
+            });
+        body.Append(sectionProps);
+        return sectionProps;
     }
 
     internal static Paragraph BuildParagraph(List<OpenXmlElement> runs, int listDepth = 0)
@@ -313,7 +359,11 @@ public static class WordHtmlConverter
 
         if (format.RunStyleId != null)
         {
-            props.Append(new RunStyle { Val = format.RunStyleId });
+            props.Append(
+                new RunStyle
+                {
+                    Val = format.RunStyleId
+                });
         }
 
         if (format.Bold)
@@ -328,7 +378,10 @@ public static class WordHtmlConverter
 
         if (format.UnderlineStyle != null)
         {
-            props.Append(new Underline { Val = format.UnderlineStyle });
+            props.Append(new Underline
+            {
+                Val = format.UnderlineStyle
+            });
         }
 
         if (format.Strikethrough)
@@ -343,43 +396,71 @@ public static class WordHtmlConverter
 
         if (format.Color != null)
         {
-            props.Append(new Color { Val = format.Color });
+            props.Append(
+                new Color
+                {
+                    Val = format.Color
+                });
         }
 
         if (format.FontSizePt != null)
         {
             var halfPoints = (int)(format.FontSizePt.Value * 2);
-            props.Append(new FontSize { Val = halfPoints.ToString() });
+            props.Append(
+                new FontSize
+                {
+                    Val = halfPoints.ToString()
+                });
         }
 
         if (format.FontFamily != null)
         {
-            props.Append(new RunFonts { Ascii = format.FontFamily, HighAnsi = format.FontFamily });
+            props.Append(
+                new RunFonts
+                {
+                    Ascii = format.FontFamily,
+                    HighAnsi = format.FontFamily
+                });
         }
 
         if (format.Superscript)
         {
-            props.Append(new VerticalTextAlignment { Val = VerticalPositionValues.Superscript });
+            props.Append(
+                new VerticalTextAlignment
+                {
+                    Val = VerticalPositionValues.Superscript
+                });
         }
         else if (format.Subscript)
         {
-            props.Append(new VerticalTextAlignment { Val = VerticalPositionValues.Subscript });
+            props.Append(
+                new VerticalTextAlignment
+                {
+                    Val = VerticalPositionValues.Subscript
+                });
         }
 
         if (format.BackgroundColor != null)
         {
-            props.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = format.BackgroundColor });
+            props.Append(
+                new Shading
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Fill = format.BackgroundColor
+                });
         }
 
-        if (format.Border != null && format.Border.Style != BorderValues.None)
+        if (format.Border != null &&
+            format.Border.Style != BorderValues.None)
         {
-            props.Append(new Border
-            {
-                Val = format.Border.Style,
-                Size = (uint)format.Border.SizeEighths,
-                Space = 1,
-                Color = format.Border.Color ?? "auto"
-            });
+            props.Append(
+                new Border
+                {
+                    Val = format.Border.Style,
+                    Size = (uint)format.Border.SizeEighths,
+                    Space = 1,
+                    Color = format.Border.Color ?? "auto"
+                });
         }
 
         return props;
@@ -389,19 +470,19 @@ public static class WordHtmlConverter
     static readonly byte[] fallbackPng = Convert.FromBase64String(
         "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==");
 
-    internal static Run BuildImageRun(MainDocumentPart mainPart, ImageData image, int imageIndex)
+    internal static Run BuildImageRun(MainDocumentPart main, ImageData image, int imageIndex)
     {
         if (image.ContentType == "image/svg+xml")
         {
-            return BuildSvgImageRun(mainPart, image, imageIndex);
+            return BuildSvgImageRun(main, image, imageIndex);
         }
 
         var imagePartType = GetImagePartType(image.ContentType);
         var relationshipId = $"rImage{imageIndex}";
-        var imagePart = mainPart.AddImagePart(imagePartType, relationshipId);
-        using (var ms = new MemoryStream(image.Bytes))
+        var imagePart = main.AddImagePart(imagePartType, relationshipId);
+        using (var memoryStream = new MemoryStream(image.Bytes))
         {
-            imagePart.FeedData(ms);
+            imagePart.FeedData(memoryStream);
         }
 
         var widthEmu = (long)(image.WidthPx ?? 100) * 9525;
@@ -420,11 +501,11 @@ public static class WordHtmlConverter
         return run;
     }
 
-    static Run BuildSvgImageRun(MainDocumentPart mainPart, ImageData image, int imageIndex)
+    static Run BuildSvgImageRun(MainDocumentPart main, ImageData image, int imageIndex)
     {
         // Add PNG fallback for older Word versions
         var pngRelId = $"rImage{imageIndex}";
-        var pngPart = mainPart.AddImagePart("image/png", pngRelId);
+        var pngPart = main.AddImagePart("image/png", pngRelId);
         using (var ms = new MemoryStream(fallbackPng))
         {
             pngPart.FeedData(ms);
@@ -432,7 +513,7 @@ public static class WordHtmlConverter
 
         // Add SVG image part
         var svgRelId = $"rImage{imageIndex}s";
-        var svgPart = mainPart.AddImagePart("image/svg+xml", svgRelId);
+        var svgPart = main.AddImagePart("image/svg+xml", svgRelId);
         using (var ms = new MemoryStream(image.Bytes))
         {
             svgPart.FeedData(ms);
@@ -442,7 +523,10 @@ public static class WordHtmlConverter
         var heightEmu = (long)(image.HeightPx ?? 100) * 9525;
 
         // Blip references PNG fallback, with SVG extension for Word 2016+
-        var blip = new A.Blip { Embed = pngRelId };
+        var blip = new A.Blip
+        {
+            Embed = pngRelId
+        };
         var svgBlipElement = new OpenXmlUnknownElement("asvg", "svgBlip", "http://schemas.microsoft.com/office/drawing/2016/SVG/main");
         svgBlipElement.SetAttribute(new("r", "embed", "http://schemas.openxmlformats.org/officeDocument/2006/relationships", svgRelId));
         var ext = new OpenXmlUnknownElement("a", "ext", "http://schemas.openxmlformats.org/drawingml/2006/main");
@@ -462,24 +546,49 @@ public static class WordHtmlConverter
     static Drawing BuildImageDrawing(A.Blip blip, long widthEmu, long heightEmu) =>
         new(
             new DW.Inline(
-                new DW.Extent { Cx = widthEmu, Cy = heightEmu },
-                new DW.DocProperties { Id = 1U, Name = "Image" },
+                new DW.Extent
+                {
+                    Cx = widthEmu,
+                    Cy = heightEmu
+                },
+                new DW.DocProperties
+                {
+                    Id = 1U,
+                    Name = "Image"
+                },
                 new A.Graphic(
                     new A.GraphicData(
                         new PIC.Picture(
                             new PIC.NonVisualPictureProperties(
-                                new PIC.NonVisualDrawingProperties { Id = 0U, Name = "Image" },
+                                new PIC.NonVisualDrawingProperties
+                                {
+                                    Id = 0U,
+                                    Name = "Image"
+                                },
                                 new PIC.NonVisualPictureDrawingProperties()),
                             new PIC.BlipFill(
                                 blip,
                                 new A.Stretch(new A.FillRectangle())),
                             new PIC.ShapeProperties(
                                 new A.Transform2D(
-                                    new A.Offset { X = 0, Y = 0 },
-                                    new A.Extents { Cx = widthEmu, Cy = heightEmu }),
-                                new A.PresetGeometry(new A.AdjustValueList()) { Preset = A.ShapeTypeValues.Rectangle }))
+                                    new A.Offset
+                                    {
+                                        X = 0,
+                                        Y = 0
+                                    },
+                                    new A.Extents
+                                    {
+                                        Cx = widthEmu,
+                                        Cy = heightEmu
+                                    }),
+                                new A.PresetGeometry(new A.AdjustValueList())
+                                {
+                                    Preset = A.ShapeTypeValues.Rectangle
+                                }))
                     )
-                    { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" })
+                    {
+                        Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture"
+                    })
             )
             {
                 DistanceFromTop = 0U,

@@ -10,7 +10,9 @@
   ○ Nested item
   ○ 
     ■ Deep item
-● Back to top
+● Back to top,
+          ContainsRichText: false,
+          RequiredHighlight: false
         }
       ]
     }

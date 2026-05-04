@@ -72,14 +72,12 @@ static class ImageResolver
             var path = src;
             if (src.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
             {
-                try
-                {
-                    path = new Uri(src).LocalPath;
-                }
-                catch
+                if (!Uri.TryCreate(src, UriKind.Absolute, out var uri))
                 {
                     return null;
                 }
+
+                path = uri.LocalPath;
             }
 
             try

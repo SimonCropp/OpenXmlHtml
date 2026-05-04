@@ -2,6 +2,18 @@
 public class WordListStyleTests
 {
     [Test]
+    public void UnknownListStyleType_OrderedFallsBackToDecimal() =>
+        Assert.That(
+            WordNumberingBuilder.ParseListStyleType("nonsense", null, isOrdered: true),
+            Is.EqualTo(NumberFormatValues.Decimal));
+
+    [Test]
+    public void UnknownListStyleType_UnorderedFallsBackToBullet() =>
+        Assert.That(
+            WordNumberingBuilder.ParseListStyleType(null, "nonsense", isOrdered: false),
+            Is.EqualTo(NumberFormatValues.Bullet));
+
+    [Test]
     public Task LowerAlphaType()
     {
         using var stream = new MemoryStream();

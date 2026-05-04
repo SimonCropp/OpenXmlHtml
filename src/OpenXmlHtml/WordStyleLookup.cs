@@ -6,16 +6,16 @@ enum StyleType
 
 static class WordStyleLookup
 {
-    internal static Dictionary<string, StyleType>? BuildStyleMap(MainDocumentPart? mainPart)
+    internal static Dictionary<string, StyleType>? BuildStyleMap(MainDocumentPart? main)
     {
-        var stylesPart = mainPart?.StyleDefinitionsPart;
-        if (stylesPart?.Styles == null)
+        var styles = main?.StyleDefinitionsPart;
+        if (styles?.Styles == null)
         {
             return null;
         }
 
         var map = new Dictionary<string, StyleType>(StringComparer.OrdinalIgnoreCase);
-        foreach (var style in stylesPart.Styles.Elements<Style>())
+        foreach (var style in styles.Styles.Elements<Style>())
         {
             var styleId = style.StyleId?.Value;
             if (styleId == null)

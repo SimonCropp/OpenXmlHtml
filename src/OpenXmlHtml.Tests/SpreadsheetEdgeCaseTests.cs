@@ -68,4 +68,16 @@ public class SpreadsheetEdgeCaseTests
     [Test]
     public Task SampTag() =>
         Verify(SpreadsheetHtmlConverter.ToInlineString("<samp>sample output</samp>"));
+
+    [Test]
+    public Task InvalidXmlCharsFromEntities() =>
+        Verify(SpreadsheetHtmlConverter.ToInlineString("before&#1;&#0;&#x1F;after"));
+
+    [Test]
+    public Task InvalidXmlCharsRaw() =>
+        Verify(SpreadsheetHtmlConverter.ToInlineString("before\u0001\u0000\u001fafter"));
+
+    [Test]
+    public Task LoneSurrogate() =>
+        Verify(SpreadsheetHtmlConverter.ToInlineString("before\uD800after"));
 }

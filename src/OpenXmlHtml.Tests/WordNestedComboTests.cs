@@ -6,9 +6,9 @@ public class WordNestedComboTests
     {
         using var stream = new MemoryStream();
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
+        var main = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new(body);
+        main.Document = new(body);
 
         WordHtmlConverter.AppendHtml(body,
             """
@@ -261,7 +261,7 @@ public class WordNestedComboTests
               <p>Hidden content with <i>italic</i> and <a href="https://example.com">link</a>.</p>
             </details>
             """,
-            mainPart);
+            main);
 
         document.Dispose();
         stream.Position = 0;

@@ -1,15 +1,16 @@
 static class WordNumberingBuilder
 {
     static readonly string[] levelIndents = ["720", "1440", "2160", "2880", "3600", "4320", "5040", "5760", "6480"];
-    internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart mainPart)
+
+    internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart main)
     {
-        var part = mainPart.NumberingDefinitionsPart;
+        var part = main.NumberingDefinitionsPart;
         if (part != null)
         {
             return part;
         }
 
-        part = mainPart.AddNewPart<NumberingDefinitionsPart>();
+        part = main.AddNewPart<NumberingDefinitionsPart>();
         part.Numbering = new();
         return part;
     }
@@ -36,20 +37,44 @@ static class WordNumberingBuilder
         return maxId + 1;
     }
 
+    static string[] bullets =
+    [
+        "\u25CF",
+        "\u25CB",
+        "\u25A0"
+    ];
+
     internal static int CreateBulletAbstractNum(Numbering numbering, int abstractNumId)
     {
-        var abstractNum = new AbstractNum { AbstractNumberId = abstractNumId };
-        abstractNum.Append(new MultiLevelType { Val = MultiLevelValues.HybridMultilevel });
-
-        var bullets = new[] { "\u25CF", "\u25CB", "\u25A0" };
+        var abstractNum = new AbstractNum
+        {
+            AbstractNumberId = abstractNumId
+        };
+        abstractNum.Append(
+            new MultiLevelType
+            {
+                Val = MultiLevelValues.HybridMultilevel
+            });
         for (var i = 0; i < 9; i++)
         {
             var bullet = bullets[i % bullets.Length];
             var level = new Level(
-                new StartNumberingValue { Val = 1 },
-                new NumberingFormat { Val = NumberFormatValues.Bullet },
-                new LevelText { Val = bullet },
-                new LevelJustification { Val = LevelJustificationValues.Left },
+                new StartNumberingValue
+                {
+                    Val = 1
+                },
+                new NumberingFormat
+                {
+                    Val = NumberFormatValues.Bullet
+                },
+                new LevelText
+                {
+                    Val = bullet
+                },
+                new LevelJustification
+                {
+                    Val = LevelJustificationValues.Left
+                },
                 new ParagraphProperties(
                     new Indentation
                     {
@@ -74,17 +99,36 @@ static class WordNumberingBuilder
 
     internal static int CreateOrderedAbstractNum(Numbering numbering, int abstractNumId, NumberFormatValues format)
     {
-        var abstractNum = new AbstractNum { AbstractNumberId = abstractNumId };
-        abstractNum.Append(new MultiLevelType { Val = MultiLevelValues.HybridMultilevel });
+        var abstractNum = new AbstractNum
+        {
+            AbstractNumberId = abstractNumId
+        };
+        abstractNum.Append(
+            new MultiLevelType
+            {
+                Val = MultiLevelValues.HybridMultilevel
+            });
 
         var suffix = format == NumberFormatValues.Decimal ? "." : ")";
         for (var i = 0; i < 9; i++)
         {
             var level = new Level(
-                new StartNumberingValue { Val = 1 },
-                new NumberingFormat { Val = format },
-                new LevelText { Val = $"%{i + 1}{suffix}" },
-                new LevelJustification { Val = LevelJustificationValues.Left },
+                new StartNumberingValue
+                {
+                    Val = 1
+                },
+                new NumberingFormat
+                {
+                    Val = format
+                },
+                new LevelText
+                {
+                    Val = $"%{i + 1}{suffix}"
+                },
+                new LevelJustification
+                {
+                    Val = LevelJustificationValues.Left
+                },
                 new ParagraphProperties(
                     new Indentation
                     {
@@ -104,7 +148,10 @@ static class WordNumberingBuilder
     internal static int AddNumberingInstance(Numbering numbering, int numId, int abstractNumId, int? startOverride = null)
     {
         var instance = new NumberingInstance(
-            new AbstractNumId { Val = abstractNumId })
+            new AbstractNumId
+            {
+                Val = abstractNumId
+            })
         {
             NumberID = numId
         };
@@ -113,7 +160,10 @@ static class WordNumberingBuilder
         {
             instance.Append(
                 new LevelOverride(
-                    new StartOverrideNumberingValue { Val = startOverride.Value })
+                    new StartOverrideNumberingValue
+                    {
+                        Val = startOverride.Value
+                    })
                 {
                     LevelIndex = 0
                 });
@@ -164,13 +214,13 @@ static class WordNumberingBuilder
     static void InsertAbstractNum(Numbering numbering, AbstractNum abstractNum)
     {
         var firstInstance = numbering.GetFirstChild<NumberingInstance>();
-        if (firstInstance != null)
+        if (firstInstance == null)
         {
-            numbering.InsertBefore(abstractNum, firstInstance);
+            numbering.Append(abstractNum);
         }
         else
         {
-            numbering.Append(abstractNum);
+            numbering.InsertBefore(abstractNum, firstInstance);
         }
     }
 }

@@ -25,6 +25,9 @@ public class ColorParserTests
     [TestCase("notacolor")]
     [TestCase("#GGG")]
     [TestCase("rgb(abc)")]
+    [TestCase("rgb(255 0 0)")]
+    [TestCase("rgb(255, 0)")]
+    [TestCase("rgb(abc, 0, 0)")]
     public void InvalidColors(string? input) =>
         Assert.That(ColorParser.Parse(input), Is.Null);
 

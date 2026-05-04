@@ -23,13 +23,12 @@ public class WordSamples
         #region AppendHtml
 
         using var stream = new MemoryStream();
-        using var document = WordprocessingDocument.Create(
-            stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
-        mainPart.Document = new(new Body());
+        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+        var main = document.AddMainDocumentPart();
+        main.Document = new(new Body());
 
         WordHtmlConverter.AppendHtml(
-            mainPart.Document.Body!,
+            main.Document.Body!,
             """
             <h1>Meeting Notes</h1>
             <p><i>Date: January 15, 2024</i></p>
@@ -41,7 +40,7 @@ public class WordSamples
 
         #endregion
 
-        return Verify(mainPart.Document.Body!);
+        return Verify(main.Document.Body!);
     }
 
     [Test]
@@ -187,6 +186,32 @@ public class WordSamples
 
         settingsStream.Position = 0;
         return Verify(settingsStream, "docx");
+    }
+
+    [Test]
+    public void SharedNumberingSession()
+    {
+        using var stream = new MemoryStream();
+        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
+        var mainPart = document.AddMainDocumentPart();
+        mainPart.Document = new(new Body());
+
+        #region SharedNumberingSession
+
+        var session = new HtmlNumberingSession();
+        var settings = new HtmlConvertSettings
+        {
+            NumberingSession = session
+        };
+
+        // Both fragments reuse one bullet abstract — one definition, two numbering instances.
+        var first = WordHtmlConverter.ToElements("<ul><li>a</li><li>b</li></ul>", mainPart, settings);
+        var second = WordHtmlConverter.ToElements("<ul><li>c</li><li>d</li></ul>", mainPart, settings);
+
+        #endregion
+
+        _ = first;
+        _ = second;
     }
 
     [Test]

@@ -169,10 +169,10 @@ public class WordBenchmarks
     {
         using var stream = new MemoryStream();
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
+        var main = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new(body);
-        WordHtmlConverter.AppendHtml(body, richParagraphs, mainPart);
+        main.Document = new(body);
+        WordHtmlConverter.AppendHtml(body, richParagraphs, main);
     }
 
     [Benchmark]
@@ -180,9 +180,9 @@ public class WordBenchmarks
     {
         using var stream = new MemoryStream();
         using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
-        var mainPart = document.AddMainDocumentPart();
+        var main = document.AddMainDocumentPart();
         var body = new Body();
-        mainPart.Document = new(body);
-        WordHtmlConverter.AppendHtml(body, largeDocument, mainPart);
+        main.Document = new(body);
+        WordHtmlConverter.AppendHtml(body, largeDocument, main);
     }
 }

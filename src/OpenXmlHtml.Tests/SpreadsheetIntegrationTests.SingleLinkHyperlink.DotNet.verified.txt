@@ -4,7 +4,9 @@
       Name: Sheet1,
       Columns: [
         {
-          Name: See the full report (https://example.com/report) for details.
+          Name: See the full report (https://example.com/report) for details.,
+          ContainsRichText: false,
+          RequiredHighlight: false
         }
       ]
     }
