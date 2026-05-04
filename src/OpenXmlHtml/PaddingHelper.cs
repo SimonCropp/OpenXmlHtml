@@ -49,38 +49,42 @@ static class PaddingHelper
         var margin = new T();
         if (top != null)
         {
-            margin.Append(new TopMargin
-            {
-                Width = top.Value.ToString(),
-                Type = TableWidthUnitValues.Dxa
-            });
+            margin.Append(
+                new TopMargin
+                {
+                    Width = top.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
         }
 
         if (left != null)
         {
-            margin.Append(new StartMargin
-            {
-                Width = left.Value.ToString(),
-                Type = TableWidthUnitValues.Dxa
-            });
+            margin.Append(
+                new StartMargin
+                {
+                    Width = left.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
         }
 
         if (bottom != null)
         {
-            margin.Append(new BottomMargin
-            {
-                Width = bottom.Value.ToString(),
-                Type = TableWidthUnitValues.Dxa
-            });
+            margin.Append(
+                new BottomMargin
+                {
+                    Width = bottom.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
         }
 
         if (right != null)
         {
-            margin.Append(new EndMargin
-            {
-                Width = right.Value.ToString(),
-                Type = TableWidthUnitValues.Dxa
-            });
+            margin.Append(
+                new EndMargin
+                {
+                    Width = right.Value.ToString(),
+                    Type = TableWidthUnitValues.Dxa
+                });
         }
 
         return margin;

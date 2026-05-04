@@ -237,7 +237,8 @@ public static class WordHtmlConverter
         }
 
         headerPart.Header = header;
-        EnsureHeaderFooterReference(main,
+        EnsureHeaderFooterReference(
+            main,
             new HeaderReference
             {
                 Type = HeaderFooterValues.Default,
@@ -358,10 +359,11 @@ public static class WordHtmlConverter
 
         if (format.RunStyleId != null)
         {
-            props.Append(new RunStyle
-            {
-                Val = format.RunStyleId
-            });
+            props.Append(
+                new RunStyle
+                {
+                    Val = format.RunStyleId
+                });
         }
 
         if (format.Bold)
@@ -394,64 +396,71 @@ public static class WordHtmlConverter
 
         if (format.Color != null)
         {
-            props.Append(new Color
-            {
-                Val = format.Color
-            });
+            props.Append(
+                new Color
+                {
+                    Val = format.Color
+                });
         }
 
         if (format.FontSizePt != null)
         {
             var halfPoints = (int)(format.FontSizePt.Value * 2);
-            props.Append(new FontSize
-            {
-                Val = halfPoints.ToString()
-            });
+            props.Append(
+                new FontSize
+                {
+                    Val = halfPoints.ToString()
+                });
         }
 
         if (format.FontFamily != null)
         {
-            props.Append(new RunFonts
-            {
-                Ascii = format.FontFamily,
-                HighAnsi = format.FontFamily
-            });
+            props.Append(
+                new RunFonts
+                {
+                    Ascii = format.FontFamily,
+                    HighAnsi = format.FontFamily
+                });
         }
 
         if (format.Superscript)
         {
-            props.Append(new VerticalTextAlignment
-            {
-                Val = VerticalPositionValues.Superscript
-            });
+            props.Append(
+                new VerticalTextAlignment
+                {
+                    Val = VerticalPositionValues.Superscript
+                });
         }
         else if (format.Subscript)
         {
-            props.Append(new VerticalTextAlignment
-            {
-                Val = VerticalPositionValues.Subscript
-            });
+            props.Append(
+                new VerticalTextAlignment
+                {
+                    Val = VerticalPositionValues.Subscript
+                });
         }
 
         if (format.BackgroundColor != null)
         {
-            props.Append(new Shading
-            {
-                Val = ShadingPatternValues.Clear,
-                Fill = format.BackgroundColor
-            });
+            props.Append(
+                new Shading
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Fill = format.BackgroundColor
+                });
         }
 
         if (format.Border != null &&
             format.Border.Style != BorderValues.None)
         {
-            props.Append(new Border
-            {
-                Val = format.Border.Style,
-                Size = (uint)format.Border.SizeEighths,
-                Space = 1,
-                Color = format.Border.Color ?? "auto"
-            });
+            props.Append(
+                new Border
+                {
+                    Val = format.Border.Style,
+                    Size = (uint)format.Border.SizeEighths,
+                    Space = 1,
+                    Color = format.Border.Color ?? "auto"
+                });
         }
 
         return props;

@@ -37,23 +37,24 @@ static class WordNumberingBuilder
         return maxId + 1;
     }
 
+    static string[] bullets =
+    [
+        "\u25CF",
+        "\u25CB",
+        "\u25A0"
+    ];
+
     internal static int CreateBulletAbstractNum(Numbering numbering, int abstractNumId)
     {
         var abstractNum = new AbstractNum
         {
             AbstractNumberId = abstractNumId
         };
-        abstractNum.Append(new MultiLevelType
-        {
-            Val = MultiLevelValues.HybridMultilevel
-        });
-
-        var bullets = new[]
-        {
-            "\u25CF",
-            "\u25CB",
-            "\u25A0"
-        };
+        abstractNum.Append(
+            new MultiLevelType
+            {
+                Val = MultiLevelValues.HybridMultilevel
+            });
         for (var i = 0; i < 9; i++)
         {
             var bullet = bullets[i % bullets.Length];
@@ -102,10 +103,11 @@ static class WordNumberingBuilder
         {
             AbstractNumberId = abstractNumId
         };
-        abstractNum.Append(new MultiLevelType
-        {
-            Val = MultiLevelValues.HybridMultilevel
-        });
+        abstractNum.Append(
+            new MultiLevelType
+            {
+                Val = MultiLevelValues.HybridMultilevel
+            });
 
         var suffix = format == NumberFormatValues.Decimal ? "." : ")";
         for (var i = 0; i < 9; i++)
@@ -212,13 +214,13 @@ static class WordNumberingBuilder
     static void InsertAbstractNum(Numbering numbering, AbstractNum abstractNum)
     {
         var firstInstance = numbering.GetFirstChild<NumberingInstance>();
-        if (firstInstance != null)
+        if (firstInstance == null)
         {
-            numbering.InsertBefore(abstractNum, firstInstance);
+            numbering.Append(abstractNum);
         }
         else
         {
-            numbering.Append(abstractNum);
+            numbering.InsertBefore(abstractNum, firstInstance);
         }
     }
 }

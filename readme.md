@@ -198,7 +198,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L292-L296' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L288-L292' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -226,7 +226,7 @@ WordHtmlConverter.SetHeader(headerMainPart,
 WordHtmlConverter.SetFooter(headerMainPart,
     """<p style="text-align: center; font-size: 9pt; color: gray">Confidential</p>""");
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L224-L243' title='Snippet source file'>snippet source</a> | <a href='#snippet-HeadersAndFooters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L220-L239' title='Snippet source file'>snippet source</a> | <a href='#snippet-HeadersAndFooters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Headers and footers support all the same HTML elements and CSS properties as the document body (tables, formatting, images, etc.). Overloads accepting `HtmlConvertSettings` are also available.
@@ -311,7 +311,7 @@ WordHtmlConverter.AppendHtml(
     """,
     styleMainPart);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L266-L279' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L262-L275' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
  * Paragraph styles (`w:type="paragraph"`) are applied via `ParagraphStyleId`

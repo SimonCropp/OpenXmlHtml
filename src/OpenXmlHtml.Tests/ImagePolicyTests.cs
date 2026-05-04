@@ -68,6 +68,20 @@ public class ImagePolicyTests
     }
 
     [Test]
+    public void SafeDirectories_RejectsMalformedFileUri()
+    {
+        var policy = ImagePolicy.SafeDirectories(Path.GetTempPath());
+        Assert.That(policy.IsAllowed("file:///%"), Is.False);
+    }
+
+    [Test]
+    public void SafeDirectories_RejectsInvalidPath()
+    {
+        var policy = ImagePolicy.SafeDirectories(Path.GetTempPath());
+        Assert.That(policy.IsAllowed("\0invalid"), Is.False);
+    }
+
+    [Test]
     public void Filter_CustomPredicate()
     {
         var policy = ImagePolicy.Filter(src => src.Contains("allowed"));

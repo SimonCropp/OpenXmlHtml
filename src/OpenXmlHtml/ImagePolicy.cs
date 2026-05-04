@@ -39,14 +39,12 @@ public sealed class ImagePolicy
             var path = source;
             if (path.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
             {
-                try
-                {
-                    path = new Uri(path).LocalPath;
-                }
-                catch
+                if (!Uri.TryCreate(path, UriKind.Absolute, out var uri))
                 {
                     return false;
                 }
+
+                path = uri.LocalPath;
             }
 
             try
@@ -107,12 +105,4 @@ public sealed class ImagePolicy
 
         return fullPath;
     }
-}
-
-enum ImagePolicyKind
-{
-    Deny,
-    AllowAll,
-    SafeList,
-    Filter
 }

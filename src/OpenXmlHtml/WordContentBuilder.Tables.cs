@@ -152,7 +152,8 @@ static partial class WordContentBuilder
                     var contTcPr = new TableCellProperties(new VerticalMerge());
                     if (spanInfo.Colspan > 1)
                     {
-                        contTcPr.Append(new GridSpan
+                        contTcPr.Append(
+                            new GridSpan
                         {
                             Val = spanInfo.Colspan
                         });

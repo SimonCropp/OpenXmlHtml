@@ -76,4 +76,14 @@ public class StyleParserTests
     [Test]
     public void FontSizeInvalid() =>
         Assert.That(StyleParser.ParseFontSize("abc"), Is.Null);
+
+    [Test]
+    public void MarginShorthandTooManyParts()
+    {
+        var result = StyleParser.ParseMarginShorthand("10px 20px 30px 40px 50px");
+        Assert.That(result.Top, Is.Null);
+        Assert.That(result.Right, Is.Null);
+        Assert.That(result.Bottom, Is.Null);
+        Assert.That(result.Left, Is.Null);
+    }
 }
