@@ -213,6 +213,7 @@ static class HtmlSegmentParser
                 format.UnderlineStyle ??= UnderlineValues.Single;
                 format.Color ??= "0563C1";
                 format.LinkUrl = element.GetAttribute("href");
+                format.LinkTitle = element.GetAttribute("title");
                 break;
             case "sup":
                 format.Superscript = true;
