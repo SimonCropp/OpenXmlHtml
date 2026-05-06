@@ -1,4 +1,3 @@
-using System.Text;
 using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlHtml;
@@ -32,7 +31,7 @@ public static class SpreadsheetHtmlConverter
         cell.DataType = CellValues.InlineString;
         cell.InlineString = ToInlineString(segments);
 
-        var workbookPart = ((SpreadsheetDocument) worksheetPart.OpenXmlPackage).WorkbookPart!;
+        var workbookPart = ((SpreadsheetDocument)worksheetPart.OpenXmlPackage).WorkbookPart!;
 
         if (HasNewlines(cell.InlineString))
         {
@@ -70,7 +69,7 @@ public static class SpreadsheetHtmlConverter
         cell.DataType = CellValues.InlineString;
         cell.InlineString = ToInlineString(segments);
 
-        var workbookPart = ((SpreadsheetDocument) worksheetPart.OpenXmlPackage).WorkbookPart!;
+        var workbookPart = ((SpreadsheetDocument)worksheetPart.OpenXmlPackage).WorkbookPart!;
 
         if (HasNewlines(cell.InlineString))
         {

@@ -12,20 +12,35 @@ public class WordStyleComboTests
         var stylesPart = main.AddNewPart<StyleDefinitionsPart>();
         stylesPart.Styles = new(
             new Style(
-                new StyleName { Val = "Subtle Reference" },
-                new BasedOn { Val = "Normal" },
+                new StyleName
+                {
+                    Val = "Subtle Reference"
+                },
+                new BasedOn
+                {
+                    Val = "Normal"
+                },
                 new StyleParagraphProperties(
-                    new SpacingBetweenLines { After = "100" }))
+                    new SpacingBetweenLines
+                    {
+                        After = "100"
+                    }))
             {
                 StyleId = "SubtleReference",
                 Type = StyleValues.Paragraph
             },
             new Style(
-                new StyleName { Val = "Intense Emphasis" },
+                new StyleName
+                {
+                    Val = "Intense Emphasis"
+                },
                 new StyleRunProperties(
                     new WBold(),
                     new WItalic(),
-                    new WColor { Val = "4472C4" }))
+                    new WColor
+                    {
+                        Val = "4472C4"
+                    }))
             {
                 StyleId = "IntenseEmphasis",
                 Type = StyleValues.Character

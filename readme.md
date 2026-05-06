@@ -198,7 +198,7 @@ Convert an HTML file to a docx file:
 ```cs
 WordHtmlConverter.ConvertFileToDocx(htmlPath, docxPath);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L288-L292' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L295-L299' title='Snippet source file'>snippet source</a> | <a href='#snippet-ConvertFileToDocx' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -311,7 +311,7 @@ WordHtmlConverter.AppendHtml(
     """,
     styleMainPart);
 ```
-<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L262-L275' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/OpenXmlHtml.Tests/Samples/WordSamples.cs#L269-L282' title='Snippet source file'>snippet source</a> | <a href='#snippet-StyleMapping' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
  * Paragraph styles (`w:type="paragraph"`) are applied via `ParagraphStyleId`

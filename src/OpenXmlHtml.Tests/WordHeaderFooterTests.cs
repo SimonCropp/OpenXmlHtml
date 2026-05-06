@@ -103,6 +103,11 @@ public class WordHeaderFooterTests
         // non-deterministic relationship IDs in footer .rels
         // (DeterministicIoPackaging 0.24.3+ will fix this)
         var footer = main.FooterParts.First().Footer!;
-        return Verify(new { Body = body, Footer = footer });
+        return Verify(
+            new
+            {
+                body,
+                footer
+            });
     }
 }

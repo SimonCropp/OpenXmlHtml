@@ -126,7 +126,10 @@ public class SpreadsheetSamples
                     }));
 
             // Header row
-            var headerRow = new Row { RowIndex = 1 };
+            var headerRow = new Row
+            {
+                RowIndex = 1
+            };
             string[] headers = ["ID", "Priority", "Summary", "Details"];
             foreach (var header in headers)
             {
@@ -141,7 +144,10 @@ public class SpreadsheetSamples
             sheetData.Append(headerRow);
 
             // Bug row
-            var bugRow = new Row { RowIndex = 2 };
+            var bugRow = new Row
+            {
+                RowIndex = 2
+            };
 
             var idCell = new SpreadsheetCell();
             SpreadsheetHtmlConverter.SetCellHtml(idCell, "<code>BUG-4821</code>");

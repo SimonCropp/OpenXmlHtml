@@ -36,8 +36,20 @@ public class WordListNumberingSessionTests
         main.Document = new(new Body());
 
         var session = new HtmlNumberingSession();
-        WordHtmlConverter.ToElements("<ul><li>a</li></ul>", main, new() { NumberingSession = session });
-        WordHtmlConverter.ToElements("<ul><li>b</li></ul>", main, new() { NumberingSession = session });
+        WordHtmlConverter.ToElements(
+            "<ul><li>a</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
+        WordHtmlConverter.ToElements(
+            "<ul><li>b</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
 
         Assert.That(BulletAbstractCount(main), Is.EqualTo(1));
         Assert.That(NumberingInstanceCount(main), Is.EqualTo(2));
@@ -54,7 +66,13 @@ public class WordListNumberingSessionTests
         var session = new HtmlNumberingSession();
         Assert.That(session.BulletAbstractNumId, Is.Null);
 
-        WordHtmlConverter.ToElements("<ul><li>a</li></ul>", main, new() { NumberingSession = session });
+        WordHtmlConverter.ToElements(
+            "<ul><li>a</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
 
         Assert.That(session.BulletAbstractNumId, Is.Not.Null);
     }
@@ -68,7 +86,13 @@ public class WordListNumberingSessionTests
         main.Document = new(new Body());
 
         var session = new HtmlNumberingSession();
-        WordHtmlConverter.ToElements("<p>plain text</p>", main, new() { NumberingSession = session });
+        WordHtmlConverter.ToElements(
+            "<p>plain text</p>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
 
         Assert.That(session.BulletAbstractNumId, Is.Null);
     }
@@ -82,8 +106,20 @@ public class WordListNumberingSessionTests
         main.Document = new(new Body());
 
         var session = new HtmlNumberingSession();
-        WordHtmlConverter.ToElements("<p>no list here</p>", main, new() { NumberingSession = session });
-        WordHtmlConverter.ToElements("<ul><li>a</li><li>b</li></ul>", main, new() { NumberingSession = session });
+        WordHtmlConverter.ToElements(
+            "<p>no list here</p>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
+        WordHtmlConverter.ToElements(
+            "<ul><li>a</li><li>b</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
 
         Assert.That(BulletAbstractCount(main), Is.EqualTo(1));
         Assert.That(NumberingInstanceCount(main), Is.EqualTo(1));
@@ -98,9 +134,27 @@ public class WordListNumberingSessionTests
         main.Document = new(new Body());
 
         var session = new HtmlNumberingSession();
-        WordHtmlConverter.ToElements("<ul><li>a</li></ul>", main, new() { NumberingSession = session });
-        WordHtmlConverter.ToElements("<ul><li>b</li></ul>", main, new() { NumberingSession = session });
-        WordHtmlConverter.ToElements("<ul><li>c</li></ul>", main, new() { NumberingSession = session });
+        WordHtmlConverter.ToElements(
+            "<ul><li>a</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
+        WordHtmlConverter.ToElements(
+            "<ul><li>b</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
+        WordHtmlConverter.ToElements(
+            "<ul><li>c</li></ul>",
+            main,
+            new()
+            {
+                NumberingSession = session
+            });
 
         Assert.That(BulletAbstractCount(main), Is.EqualTo(1));
         Assert.That(NumberingInstanceCount(main), Is.EqualTo(3));

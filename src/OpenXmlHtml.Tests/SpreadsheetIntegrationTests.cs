@@ -26,7 +26,10 @@ public class SpreadsheetIntegrationTests
         };
         sheetData.Append(row);
 
-        var cell = new SpreadsheetCell { CellReference = "A1" };
+        var cell = new SpreadsheetCell
+        {
+            CellReference = "A1"
+        };
         row.Append(cell);
 
         SpreadsheetHtmlConverter.SetCellHtml(cell, "<b>Hello</b> <i>World</i>");
@@ -69,7 +72,10 @@ public class SpreadsheetIntegrationTests
                         Name = "Sheet1"
                     }));
 
-            var row = new Row { RowIndex = 1 };
+            var row = new Row
+            {
+                RowIndex = 1
+            };
             var cell = new SpreadsheetCell();
             SpreadsheetHtmlConverter.SetCellHtml(cell,
                 """
@@ -117,8 +123,14 @@ public class SpreadsheetIntegrationTests
                         Name = "Sheet1"
                     }));
 
-            var row = new Row { RowIndex = 1 };
-            var cell = new SpreadsheetCell { CellReference = "A1" };
+            var row = new Row
+            {
+                RowIndex = 1
+            };
+            var cell = new SpreadsheetCell
+            {
+                CellReference = "A1"
+            };
             SpreadsheetHtmlConverter.SetCellHtml(cell,
                 """See the <a href="https://example.com/report">full report</a> for details.""",
                 worksheetPart);
@@ -228,8 +240,14 @@ public class SpreadsheetIntegrationTests
                         Name = "Sheet1"
                     }));
 
-            var row = new Row { RowIndex = 1 };
-            var cell = new SpreadsheetCell { CellReference = "A1" };
+            var row = new Row
+            {
+                RowIndex = 1
+            };
+            var cell = new SpreadsheetCell
+            {
+                CellReference = "A1"
+            };
             SpreadsheetHtmlConverter.SetCellHtml(cell,
                 """<a href="https://example.com">Link 1</a> and <a href="https://other.com">Link 2</a>""",
                 worksheetPart);

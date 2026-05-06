@@ -10,7 +10,12 @@ public class WordStyleMappingTests
         var stylesheet = new Styles();
         foreach (var (id, type) in styles)
         {
-            stylesheet.Append(new Style { StyleId = id, Type = type });
+            stylesheet.Append(
+                new Style
+                {
+                    StyleId = id,
+                    Type = type
+                });
         }
 
         stylesPart.Styles = stylesheet;
