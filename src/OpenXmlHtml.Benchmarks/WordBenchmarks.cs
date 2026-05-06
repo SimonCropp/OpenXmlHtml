@@ -1,11 +1,8 @@
-using System.Collections.Generic;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 #pragma warning disable CA1822 // Mark members as static - BenchmarkDotNet requires instance methods
-
-namespace OpenXmlHtml.Benchmarks;
 
 [MemoryDiagnoser]
 public class WordBenchmarks

@@ -37,11 +37,11 @@ static class WordNumberingBuilder
         return maxId + 1;
     }
 
-    static string[] bullets =
+    static (string Glyph, string Font)[] bullets =
     [
-        "\u25CF",
-        "\u25CB",
-        "\u25A0"
+        ("\uF0B7", "Symbol"),
+        ("o", "Courier New"),
+        ("\uF0A7", "Wingdings")
     ];
 
     internal static int CreateBulletAbstractNum(Numbering numbering, int abstractNumId)
@@ -69,7 +69,7 @@ static class WordNumberingBuilder
                 },
                 new LevelText
                 {
-                    Val = bullet
+                    Val = bullet.Glyph
                 },
                 new LevelJustification
                 {
@@ -84,8 +84,8 @@ static class WordNumberingBuilder
                 new NumberingSymbolRunProperties(
                     new RunFonts
                     {
-                        Ascii = "Symbol",
-                        HighAnsi = "Symbol"
+                        Ascii = bullet.Font,
+                        HighAnsi = bullet.Font
                     }))
             {
                 LevelIndex = i
