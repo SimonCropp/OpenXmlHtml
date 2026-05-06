@@ -380,7 +380,8 @@ static partial class WordContentBuilder
                     new NumberingId
                     {
                         Val = context.ListNumId.Value
-                    }));
+                    }),
+                new ContextualSpacing());
         }
 
         // Apply paragraph format (CSS margins, alignment, line-height)

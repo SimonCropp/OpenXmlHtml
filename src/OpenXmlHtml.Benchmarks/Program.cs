@@ -1,3 +1,1 @@
-using BenchmarkDotNet.Running;
-
-BenchmarkSwitcher.FromAssembly(typeof(OpenXmlHtml.Benchmarks.WordBenchmarks).Assembly).Run(args);
+BenchmarkSwitcher.FromAssembly(typeof(WordBenchmarks).Assembly).Run(args);
