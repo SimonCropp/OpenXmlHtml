@@ -141,8 +141,7 @@ static class HtmlSegmentParser
                 var href = element.GetAttribute("href");
                 if (!string.IsNullOrEmpty(href))
                 {
-                    var linkText = element.TextContent.Trim();
-                    if (linkText != href)
+                    if (!element.TextContent.AsSpan().Trim().Equals(href.AsSpan(), StringComparison.Ordinal))
                     {
                         segments.Add(new($" ({href})", format));
                     }
@@ -583,13 +582,13 @@ static class HtmlSegmentParser
             return null;
         }
 
-        value = value.Trim();
-        if (value.EndsWith("px", StringComparison.OrdinalIgnoreCase))
+        var valueSpan = value.AsSpan().Trim();
+        if (valueSpan.EndsWith("px".AsSpan(), StringComparison.OrdinalIgnoreCase))
         {
-            value = value.Substring(0, value.Length - 2);
+            valueSpan = valueSpan[..^2];
         }
 
-        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
+        if (double.TryParse(valueSpan, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
         {
             return (int)Math.Round(result);
         }

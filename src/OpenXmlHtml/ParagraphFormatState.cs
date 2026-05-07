@@ -100,7 +100,7 @@ class ParagraphFormatState
         }
 
         if (declarations.TryGetValue("direction", out var direction) &&
-            direction.Trim().Equals("rtl", StringComparison.OrdinalIgnoreCase))
+            direction.AsSpan().Trim().Equals("rtl".AsSpan(), StringComparison.OrdinalIgnoreCase))
         {
             pf.WritingMode ??= TextDirectionValues.TopToBottomRightToLeft;
         }
@@ -147,10 +147,10 @@ class ParagraphFormatState
                 pf.LineHeightMultiple = pct / 100.0;
             }
         }
-        else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple) &&
-                 !lh.Contains("pt") &&
-                 !lh.Contains("px") &&
-                 !lh.Contains("em"))
+        else if (double.TryParse(lhSpan, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple) &&
+                 !lhSpan.Contains("pt".AsSpan(), StringComparison.Ordinal) &&
+                 !lhSpan.Contains("px".AsSpan(), StringComparison.Ordinal) &&
+                 !lhSpan.Contains("em".AsSpan(), StringComparison.Ordinal))
         {
             pf.LineHeightMultiple = multiple;
         }

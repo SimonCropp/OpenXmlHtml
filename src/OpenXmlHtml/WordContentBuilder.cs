@@ -563,8 +563,7 @@ static partial class WordContentBuilder
         ProcessChildren(element, newFormat, elements, context, inPre);
         if (!string.IsNullOrEmpty(href))
         {
-            var linkText = element.TextContent.Trim();
-            if (linkText != href)
+            if (!element.TextContent.AsSpan().Trim().Equals(href.AsSpan(), StringComparison.Ordinal))
             {
                 AddTextRun($" ({href})", format, context);
             }
