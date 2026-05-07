@@ -4,6 +4,7 @@ global using System.Net.Http;
 #endif
 global using AngleSharp.Dom;
 global using AngleSharp.Html.Parser;
+global using AngleSharp.Xhtml;
 global using DocumentFormat.OpenXml;
 global using DocumentFormat.OpenXml.Packaging;
 global using DocumentFormat.OpenXml.Wordprocessing;
