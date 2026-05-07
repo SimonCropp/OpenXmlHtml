@@ -41,6 +41,7 @@ public class WordListNumberingTests
         using var stream = new MemoryStream();
         WordHtmlConverter.ConvertToDocx(
             """
+            <p>Intro paragraph</p>
             <ul>
               <li>Top level
                 <ul>
