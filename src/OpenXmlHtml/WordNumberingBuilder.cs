@@ -1,6 +1,6 @@
 static class WordNumberingBuilder
 {
-    static readonly string[] levelIndents = ["720", "1440", "2160", "2880", "3600", "4320", "5040", "5760", "6480"];
+    static readonly string[] levelIndents = ["240", "480", "720", "960", "1200", "1440", "1680", "1920", "2160"];
 
     internal static NumberingDefinitionsPart EnsureNumberingPart(MainDocumentPart main)
     {
@@ -79,7 +79,7 @@ static class WordNumberingBuilder
                     new Indentation
                     {
                         Left = levelIndents[i],
-                        Hanging = "360"
+                        Hanging = "180"
                     }),
                 new NumberingSymbolRunProperties(
                     new RunFonts
@@ -133,7 +133,7 @@ static class WordNumberingBuilder
                     new Indentation
                     {
                         Left = levelIndents[i],
-                        Hanging = "360"
+                        Hanging = "180"
                     }))
             {
                 LevelIndex = i
