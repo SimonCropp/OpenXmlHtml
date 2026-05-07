@@ -544,35 +544,36 @@ static class HtmlSegmentParser
 
     internal static ImageData ParseSvgElement(IElement element)
     {
-        var svgHtml = element.OuterHtml;
-
-        // Ensure SVG namespace is present for standalone SVG rendering
-        if (!svgHtml.Contains("xmlns="))
+        if (!element.HasAttribute("xmlns"))
         {
-            svgHtml = svgHtml.Replace("<svg", """<svg xmlns="http://www.w3.org/2000/svg" """);
+            element.SetAttribute("xmlns", "http://www.w3.org/2000/svg");
         }
 
-        // Convert HTML-style empty elements to self-closing XML form (Word requires valid XML SVG)
-        svgHtml = System.Text.RegularExpressions.Regex.Replace(
-            svgHtml, @"<([\w:-]+)(\s[^>]*)?>(\s*)</\1>", "<$1$2 />");
+        using var writer = new StringWriter();
+        element.ToHtml(writer, XhtmlMarkupFormatter.Instance);
+        var svgBytes = Encoding.UTF8.GetBytes(writer.ToString());
 
-        var svgBytes = Encoding.UTF8.GetBytes(svgHtml);
+        var (width, height) = ResolveSvgDimensions(element);
+        return new(svgBytes, "image/svg+xml", width, height);
+    }
 
+    static (int? Width, int? Height) ResolveSvgDimensions(IElement element)
+    {
         var width = ParseSvgDimension(element.GetAttribute("width"));
         var height = ParseSvgDimension(element.GetAttribute("height"));
-
-        if (width == null || height == null)
+        if (width != null && height != null)
         {
-            var viewBox = element.GetAttribute("viewBox");
-            if (viewBox != null)
-            {
-                var dims = ParseViewBox(viewBox);
-                width ??= dims.Width;
-                height ??= dims.Height;
-            }
+            return (width, height);
         }
 
-        return new(svgBytes, "image/svg+xml", width, height);
+        var viewBox = element.GetAttribute("viewBox");
+        if (viewBox == null)
+        {
+            return (width, height);
+        }
+
+        var dims = ParseViewBox(viewBox);
+        return (width ?? dims.Width, height ?? dims.Height);
     }
 
     static int? ParseSvgDimension(string? value)
