@@ -341,7 +341,7 @@ public static class WordHtmlConverter
             paragraph.ParagraphProperties = new(
                 new Indentation
                 {
-                    Left = (listDepth * 360).ToString()
+                    Left = (listDepth * 180).ToString()
                 });
         }
 
