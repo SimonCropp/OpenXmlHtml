@@ -141,8 +141,7 @@ static class HtmlSegmentParser
                 var href = element.GetAttribute("href");
                 if (!string.IsNullOrEmpty(href))
                 {
-                    var linkText = element.TextContent.Trim();
-                    if (linkText != href)
+                    if (!element.TextContent.AsSpan().Trim().Equals(href.AsSpan(), StringComparison.Ordinal))
                     {
                         segments.Add(new($" ({href})", format));
                     }
@@ -235,26 +234,29 @@ static class HtmlSegmentParser
                 break;
         }
 
-        var fontColor = element.GetAttribute("color");
-        if (fontColor != null)
+        if (tag == "font")
         {
-            var parsed = ColorParser.Parse(fontColor);
-            if (parsed != null)
+            var fontColor = element.GetAttribute("color");
+            if (fontColor != null)
             {
-                format.Color = parsed;
+                var parsed = ColorParser.Parse(fontColor);
+                if (parsed != null)
+                {
+                    format.Color = parsed;
+                }
             }
-        }
 
-        var fontFace = element.GetAttribute("face");
-        if (fontFace != null)
-        {
-            format.FontFamily = fontFace;
-        }
+            var fontFace = element.GetAttribute("face");
+            if (fontFace != null)
+            {
+                format.FontFamily = fontFace;
+            }
 
-        var fontSize = element.GetAttribute("size");
-        if (fontSize != null && double.TryParse(fontSize, CultureInfo.InvariantCulture, out var size))
-        {
-            format.FontSizePt = size;
+            var fontSize = element.GetAttribute("size");
+            if (fontSize != null && double.TryParse(fontSize, CultureInfo.InvariantCulture, out var size))
+            {
+                format.FontSizePt = size;
+            }
         }
 
         ApplyInlineStyle(element, ref format, out declarations);
@@ -289,34 +291,54 @@ static class HtmlSegmentParser
 
         if (declarations.TryGetValue("text-decoration", out var textDecoration))
         {
-            if (textDecoration.Contains("underline", StringComparison.OrdinalIgnoreCase))
+            var tdSpan = textDecoration.AsSpan();
+            var i = 0;
+            while (i < tdSpan.Length)
             {
-                format.UnderlineStyle ??= UnderlineValues.Single;
-            }
+                while (i < tdSpan.Length && tdSpan[i] == ' ')
+                {
+                    i++;
+                }
 
-            if (textDecoration.Contains("line-through", StringComparison.OrdinalIgnoreCase))
-            {
-                format.Strikethrough = true;
+                if (i >= tdSpan.Length)
+                {
+                    break;
+                }
+
+                var start = i;
+                while (i < tdSpan.Length && tdSpan[i] != ' ')
+                {
+                    i++;
+                }
+
+                var token = tdSpan[start..i];
+                if (token.Equals("underline", StringComparison.OrdinalIgnoreCase))
+                {
+                    format.UnderlineStyle ??= UnderlineValues.Single;
+                }
+                else if (token.Equals("line-through", StringComparison.OrdinalIgnoreCase))
+                {
+                    format.Strikethrough = true;
+                }
             }
         }
 
         if (declarations.TryGetValue("text-decoration-style", out var decorationStyle) &&
             format.UnderlineStyle != null)
         {
-            var ds = decorationStyle.AsSpan().Trim();
-            if (ds.Equals("dotted", StringComparison.OrdinalIgnoreCase))
+            if (decorationStyle.Equals("dotted", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Dotted;
             }
-            else if (ds.Equals("dashed", StringComparison.OrdinalIgnoreCase))
+            else if (decorationStyle.Equals("dashed", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Dash;
             }
-            else if (ds.Equals("wavy", StringComparison.OrdinalIgnoreCase))
+            else if (decorationStyle.Equals("wavy", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Wave;
             }
-            else if (ds.Equals("double", StringComparison.OrdinalIgnoreCase))
+            else if (decorationStyle.Equals("double", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Double;
             }
@@ -365,16 +387,15 @@ static class HtmlSegmentParser
 
         if (declarations.TryGetValue("text-transform", out var textTransform))
         {
-            var tt = textTransform.AsSpan().Trim();
-            if (tt.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
+            if (textTransform.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
             {
                 format.TextTransform = "uppercase";
             }
-            else if (tt.Equals("lowercase", StringComparison.OrdinalIgnoreCase))
+            else if (textTransform.Equals("lowercase", StringComparison.OrdinalIgnoreCase))
             {
                 format.TextTransform = "lowercase";
             }
-            else if (tt.Equals("capitalize", StringComparison.OrdinalIgnoreCase))
+            else if (textTransform.Equals("capitalize", StringComparison.OrdinalIgnoreCase))
             {
                 format.TextTransform = "capitalize";
             }
@@ -432,6 +453,32 @@ static class HtmlSegmentParser
     }
 
     internal static string CollapseWhitespace(string text)
+    {
+        // Fast scan: if every whitespace char is already a single ' ' with a non-space neighbor,
+        // the input is already in collapsed form and can be returned without allocation.
+        var lastWasSpace = false;
+        for (var i = 0; i < text.Length; i++)
+        {
+            var c = text[i];
+            if (char.IsWhiteSpace(c))
+            {
+                if (c != ' ' || lastWasSpace)
+                {
+                    return CollapseWhitespaceSlow(text);
+                }
+
+                lastWasSpace = true;
+            }
+            else
+            {
+                lastWasSpace = false;
+            }
+        }
+
+        return text;
+    }
+
+    static string CollapseWhitespaceSlow(string text)
     {
         var builder = new StringBuilder(text.Length);
         var lastWasSpace = false;
@@ -583,13 +630,13 @@ static class HtmlSegmentParser
             return null;
         }
 
-        value = value.Trim();
-        if (value.EndsWith("px", StringComparison.OrdinalIgnoreCase))
+        var valueSpan = value.AsSpan().Trim();
+        if (valueSpan.EndsWith("px".AsSpan(), StringComparison.OrdinalIgnoreCase))
         {
-            value = value.Substring(0, value.Length - 2);
+            valueSpan = valueSpan[..^2];
         }
 
-        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
+        if (double.TryParse(valueSpan, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
         {
             return (int)Math.Round(result);
         }
@@ -597,14 +644,39 @@ static class HtmlSegmentParser
         return null;
     }
 
-    static readonly char[] viewBoxSeparators = [' ', ','];
-
     static (int? Width, int? Height) ParseViewBox(string viewBox)
     {
-        var parts = viewBox.Split(viewBoxSeparators, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length >= 4 &&
-            double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var w) &&
-            double.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out var h))
+        var span = viewBox.AsSpan();
+        Span<int> starts = stackalloc int[4];
+        Span<int> ends = stackalloc int[4];
+        var count = 0;
+        var i = 0;
+        while (i < span.Length && count < 4)
+        {
+            while (i < span.Length && (span[i] == ' ' || span[i] == ','))
+            {
+                i++;
+            }
+
+            if (i >= span.Length)
+            {
+                break;
+            }
+
+            var start = i;
+            while (i < span.Length && span[i] != ' ' && span[i] != ',')
+            {
+                i++;
+            }
+
+            starts[count] = start;
+            ends[count] = i;
+            count++;
+        }
+
+        if (count >= 4 &&
+            double.TryParse(span.Slice(starts[2], ends[2] - starts[2]), NumberStyles.Float, CultureInfo.InvariantCulture, out var w) &&
+            double.TryParse(span.Slice(starts[3], ends[3] - starts[3]), NumberStyles.Float, CultureInfo.InvariantCulture, out var h))
         {
             return ((int)Math.Round(w), (int)Math.Round(h));
         }

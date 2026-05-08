@@ -597,13 +597,29 @@ public static class WordHtmlConverter
                 DistanceFromRight = 0U
             });
 
-    static string GetImagePartType(string contentType) =>
-        contentType.ToLowerInvariant() switch
+    static string GetImagePartType(string contentType)
+    {
+        if (contentType.Equals("image/jpeg", StringComparison.OrdinalIgnoreCase) ||
+            contentType.Equals("image/jpg", StringComparison.OrdinalIgnoreCase))
         {
-            "image/jpeg" or "image/jpg" => "image/jpeg",
-            "image/gif" => "image/gif",
-            "image/bmp" => "image/bmp",
-            "image/tiff" => "image/tiff",
-            _ => "image/png"
-        };
+            return "image/jpeg";
+        }
+
+        if (contentType.Equals("image/gif", StringComparison.OrdinalIgnoreCase))
+        {
+            return "image/gif";
+        }
+
+        if (contentType.Equals("image/bmp", StringComparison.OrdinalIgnoreCase))
+        {
+            return "image/bmp";
+        }
+
+        if (contentType.Equals("image/tiff", StringComparison.OrdinalIgnoreCase))
+        {
+            return "image/tiff";
+        }
+
+        return "image/png";
+    }
 }

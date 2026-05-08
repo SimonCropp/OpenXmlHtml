@@ -79,6 +79,10 @@ public class WordBenchmarks
         """;
 
     static readonly string largeDocument;
+    static readonly string hyperlinkHeavy;
+    static readonly string lineHeightHeavy;
+    static readonly string directionRtlHeavy;
+    static readonly string svgDimensionHeavy;
 
     static WordBenchmarks()
     {
@@ -95,6 +99,50 @@ public class WordBenchmarks
         }
 
         largeDocument = sections.ToString();
+
+        // Targeted hot-path inputs: dense repetition of a single feature so
+        // parser-level fixed costs are dwarfed by the per-element allocations
+        // touched by the span-conversion changes.
+
+        // Inputs use padded whitespace where the parser does not pre-trim the value,
+        // so the trim allocation difference between string.Trim() (allocates) and
+        // span.Trim() (no allocation) shows up.
+
+        var links = new System.Text.StringBuilder();
+        for (var i = 0; i < 100; i++)
+        {
+            // TextContent preserves leading/trailing whitespace inside <a>.
+            links.Append($"<p><a href=\"https://example.com/page{i}\">  link {i}  </a></p>");
+        }
+        hyperlinkHeavy = links.ToString();
+
+        // StyleParser.Parse pre-trims values from inline style="...", so the
+        // ParagraphFormatState span changes for line-height and direction do
+        // not have any input that would make Trim() allocate. Kept as a
+        // regression-witness that the changes did not slow the path down.
+        var lineHeights = new System.Text.StringBuilder();
+        for (var i = 0; i < 100; i++)
+        {
+            lineHeights.Append($"<p style=\"line-height: 1.5\">paragraph {i}</p>");
+        }
+        lineHeightHeavy = lineHeights.ToString();
+
+        var rtl = new System.Text.StringBuilder();
+        for (var i = 0; i < 100; i++)
+        {
+            rtl.Append($"<p style=\"direction: rtl\">paragraph {i}</p>");
+        }
+        directionRtlHeavy = rtl.ToString();
+
+        // Raw HTML width/height attributes are NOT pre-trimmed, so padded
+        // values exercise both the bug fix (EndsWith on trimmed span) and the
+        // Substring-replaced-with-span allocation savings.
+        var svg = new System.Text.StringBuilder();
+        for (var i = 0; i < 100; i++)
+        {
+            svg.Append("<svg width=\"100px \" height=\" 50px\" viewBox=\"0 0 100 50\"><rect width=\"10\" height=\"10\"/></svg>");
+        }
+        svgDimensionHeavy = svg.ToString();
     }
 
     // --- ToParagraphs (flat segment path) ---
@@ -182,4 +230,31 @@ public class WordBenchmarks
         main.Document = new(body);
         WordHtmlConverter.AppendHtml(body, largeDocument, main);
     }
+
+    // --- Targeted hot-path benchmarks (span-conversion changes) ---
+
+    // HtmlSegmentParser.ProcessNode "a" branch — hits HtmlParser.cs:144 linkText comparison.
+    [Benchmark]
+    public List<Paragraph> ToParagraphs_HyperlinkHeavy() =>
+        WordHtmlConverter.ToParagraphs(hyperlinkHeavy);
+
+    // WordContentBuilder hyperlink branch — hits WordContentBuilder.cs:566 linkText comparison.
+    [Benchmark]
+    public List<OpenXmlElement> ToElements_HyperlinkHeavy() =>
+        WordHtmlConverter.ToElements(hyperlinkHeavy);
+
+    // ParagraphFormatState.ParseLineHeight — hits the lhSpan TryParse/Contains path.
+    [Benchmark]
+    public List<OpenXmlElement> ToElements_LineHeightHeavy() =>
+        WordHtmlConverter.ToElements(lineHeightHeavy);
+
+    // ParagraphFormatState.From — hits the direction.AsSpan().Trim().Equals path.
+    [Benchmark]
+    public List<OpenXmlElement> ToElements_DirectionRtlHeavy() =>
+        WordHtmlConverter.ToElements(directionRtlHeavy);
+
+    // HtmlParser.ParseSvgDimension — hits the trimmed-span EndsWith("px") path.
+    [Benchmark]
+    public List<OpenXmlElement> ToElements_SvgDimensionHeavy() =>
+        WordHtmlConverter.ToElements(svgDimensionHeavy);
 }

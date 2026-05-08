@@ -377,10 +377,9 @@ static partial class WordContentBuilder
 
         if (declarations.TryGetValue("vertical-align", out var vAlign))
         {
-            var va = vAlign.AsSpan().Trim();
-            var val = va.Equals("top", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Top
-                : va.Equals("middle", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Center
-                : va.Equals("bottom", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Bottom
+            var val = vAlign.Equals("top", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Top
+                : vAlign.Equals("middle", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Center
+                : vAlign.Equals("bottom", StringComparison.OrdinalIgnoreCase) ? TableVerticalAlignmentValues.Bottom
                 : (TableVerticalAlignmentValues?)null;
             if (val != null)
             {
@@ -394,10 +393,9 @@ static partial class WordContentBuilder
 
         if (declarations.TryGetValue("writing-mode", out var cellWritingMode))
         {
-            var cwm = cellWritingMode.AsSpan().Trim();
-            var cellTextDir = cwm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
+            var cellTextDir = cellWritingMode.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || cellWritingMode.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
                 ? TextDirectionValues.TopToBottomRightToLeft
-                : cwm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || cwm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
+                : cellWritingMode.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || cellWritingMode.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
                     ? TextDirectionValues.BottomToTopLeftToRight
                     : (TextDirectionValues?)null;
             if (cellTextDir != null)

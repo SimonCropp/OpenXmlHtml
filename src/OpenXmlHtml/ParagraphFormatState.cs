@@ -91,16 +91,15 @@ class ParagraphFormatState
 
         if (declarations.TryGetValue("writing-mode", out var writingMode))
         {
-            var wm = writingMode.AsSpan().Trim();
-            pf.WritingMode = wm.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
+            pf.WritingMode = writingMode.Equals("vertical-rl", StringComparison.OrdinalIgnoreCase) || writingMode.Equals("tb-rl", StringComparison.OrdinalIgnoreCase)
                 ? TextDirectionValues.TopToBottomRightToLeft
-                : wm.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || wm.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
+                : writingMode.Equals("vertical-lr", StringComparison.OrdinalIgnoreCase) || writingMode.Equals("tb-lr", StringComparison.OrdinalIgnoreCase)
                     ? TextDirectionValues.BottomToTopLeftToRight
                     : null;
         }
 
         if (declarations.TryGetValue("direction", out var direction) &&
-            direction.Trim().Equals("rtl", StringComparison.OrdinalIgnoreCase))
+            direction.Equals("rtl", StringComparison.OrdinalIgnoreCase))
         {
             pf.WritingMode ??= TextDirectionValues.TopToBottomRightToLeft;
         }
@@ -139,19 +138,17 @@ class ParagraphFormatState
 
     static void ParseLineHeight(string lh, ParagraphFormatState pf)
     {
-        var lhSpan = lh.AsSpan().Trim();
-        if (lhSpan.EndsWith('%'))
+        if (lh.EndsWith('%'))
         {
-            if (double.TryParse(lhSpan[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var pct))
+            if (double.TryParse(lh.AsSpan()[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var pct))
             {
                 pf.LineHeightMultiple = pct / 100.0;
             }
         }
-        else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple) &&
-                 !lh.Contains("pt") &&
-                 !lh.Contains("px") &&
-                 !lh.Contains("em"))
+        else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple))
         {
+            // NumberStyles.Float rejects any non-numeric trailing chars, so a
+            // successful parse already excludes "pt", "px", "em" suffixes.
             pf.LineHeightMultiple = multiple;
         }
         else

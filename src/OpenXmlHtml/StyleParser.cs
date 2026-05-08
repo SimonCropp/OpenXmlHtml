@@ -100,9 +100,12 @@ static class StyleParser
         return null;
     }
 
-    internal static int? ParseLengthToTwips(string value)
+    internal static int? ParseLengthToTwips(string value) =>
+        ParseLengthToTwips(value.AsSpan());
+
+    internal static int? ParseLengthToTwips(ReadOnlySpan<char> value)
     {
-        var span = value.AsSpan().Trim();
+        var span = value.Trim();
 
         // 1pt = 20 twips
         if (TryParseSuffix(span, "pt", out var pt))
@@ -157,19 +160,62 @@ static class StyleParser
 
     internal static (int? Top, int? Right, int? Bottom, int? Left) ParseMarginShorthand(string value)
     {
-        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length switch
+        Span<Range> ranges = stackalloc Range[4];
+        var span = value.AsSpan();
+        var count = 0;
+        var i = 0;
+        while (i < span.Length)
         {
-            1 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[0]),
-                  ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[0])),
-            2 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1]),
-                  ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1])),
-            3 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1]),
-                  ParseLengthToTwips(parts[2]), ParseLengthToTwips(parts[1])),
-            4 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1]),
-                  ParseLengthToTwips(parts[2]), ParseLengthToTwips(parts[3])),
-            _ => (null, null, null, null)
-        };
+            while (i < span.Length && span[i] == ' ')
+            {
+                i++;
+            }
+
+            if (i >= span.Length)
+            {
+                break;
+            }
+
+            var start = i;
+            while (i < span.Length && span[i] != ' ')
+            {
+                i++;
+            }
+
+            if (count == 4)
+            {
+                // More than 4 parts — invalid shorthand.
+                return (null, null, null, null);
+            }
+
+            ranges[count++] = start..i;
+        }
+
+        if (count == 0)
+        {
+            return (null, null, null, null);
+        }
+
+        var v0 = ParseLengthToTwips(span[ranges[0]]);
+        if (count == 1)
+        {
+            return (v0, v0, v0, v0);
+        }
+
+        var v1 = ParseLengthToTwips(span[ranges[1]]);
+        if (count == 2)
+        {
+            return (v0, v1, v0, v1);
+        }
+
+        var v2 = ParseLengthToTwips(span[ranges[2]]);
+        if (count == 3)
+        {
+            return (v0, v1, v2, v1);
+        }
+
+        var v3 = ParseLengthToTwips(span[ranges[3]]);
+        return (v0, v1, v2, v3);
     }
 
     internal static JustificationValues? ParseTextAlign(string value)
@@ -198,24 +244,37 @@ static class StyleParser
         return null;
     }
 
-    static readonly HashSet<string> borderStyles = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "solid", "dotted", "dashed", "double", "none", "hidden",
-        "groove", "ridge", "inset", "outset"
-    };
-
     internal static BorderInfo? ParseBorder(string value)
     {
-        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var span = value.AsSpan();
         int? widthEighths = null;
         BorderValues? style = null;
         string? color = null;
 
-        foreach (var part in parts)
+        var i = 0;
+        while (i < span.Length)
         {
-            if (borderStyles.Contains(part))
+            while (i < span.Length && span[i] == ' ')
             {
-                style = ParseBorderStyle(part);
+                i++;
+            }
+
+            if (i >= span.Length)
+            {
+                break;
+            }
+
+            var start = i;
+            while (i < span.Length && span[i] != ' ')
+            {
+                i++;
+            }
+
+            var part = span[start..i];
+
+            if (TryParseBorderStyle(part, out var bs))
+            {
+                style = bs;
             }
             else if (widthEighths == null)
             {
@@ -227,7 +286,7 @@ static class StyleParser
                 }
 
                 // Not a width, try as color
-                var parsed = ColorParser.Parse(part);
+                var parsed = ColorParser.Parse(part.ToString());
                 if (parsed != null)
                 {
                     color = parsed;
@@ -235,7 +294,7 @@ static class StyleParser
             }
             else
             {
-                var parsed = ColorParser.Parse(part);
+                var parsed = ColorParser.Parse(part.ToString());
                 if (parsed != null)
                 {
                     color = parsed;
@@ -256,61 +315,70 @@ static class StyleParser
         return new(widthEighths ?? 4, style ?? BorderValues.Single, color);
     }
 
-    static BorderValues ParseBorderStyle(string part)
+    static bool TryParseBorderStyle(ReadOnlySpan<char> span, out BorderValues result)
     {
-        var span = part.AsSpan();
         if (span.Equals("solid", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.Single;
+            result = BorderValues.Single;
+            return true;
         }
 
         if (span.Equals("dotted", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.Dotted;
+            result = BorderValues.Dotted;
+            return true;
         }
 
         if (span.Equals("dashed", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.Dashed;
+            result = BorderValues.Dashed;
+            return true;
         }
 
         if (span.Equals("double", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.Double;
+            result = BorderValues.Double;
+            return true;
         }
 
         if (span.Equals("none", StringComparison.OrdinalIgnoreCase) ||
             span.Equals("hidden", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.None;
+            result = BorderValues.None;
+            return true;
         }
 
         if (span.Equals("groove", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.ThreeDEngrave;
+            result = BorderValues.ThreeDEngrave;
+            return true;
         }
 
         if (span.Equals("ridge", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.ThreeDEmboss;
+            result = BorderValues.ThreeDEmboss;
+            return true;
         }
 
         if (span.Equals("inset", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.Inset;
+            result = BorderValues.Inset;
+            return true;
         }
 
         if (span.Equals("outset", StringComparison.OrdinalIgnoreCase))
         {
-            return BorderValues.Outset;
+            result = BorderValues.Outset;
+            return true;
         }
 
-        return BorderValues.Single;
+        result = default;
+        return false;
     }
 
-    static int? ParseBorderWidth(string value)
+    static int? ParseBorderWidth(ReadOnlySpan<char> value)
     {
-        var span = value.AsSpan().Trim();
+        var span = value.Trim();
 
         if (span.Equals("thin", StringComparison.OrdinalIgnoreCase))
         {
