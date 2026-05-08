@@ -40,9 +40,13 @@ static partial class WordContentBuilder
         var numbering = part.Numbering!;
 
         var typeAttr = element.GetAttribute("type");
-        var listStyleCss = element.GetAttribute("style") is { } listStyle
-            ? StyleParser.Parse(listStyle).GetValueOrDefault("list-style-type")
+        var listDeclarations = element.GetAttribute("style") is { } listStyle
+            ? StyleParser.Parse(listStyle)
             : null;
+        var listStyleCss = listDeclarations?.GetValueOrDefault("list-style-type");
+        var inside = listDeclarations != null &&
+                     listDeclarations.TryGetValue("list-style-position", out var pos) &&
+                     pos.Equals("inside", StringComparison.OrdinalIgnoreCase);
         var format = WordNumberingBuilder.ParseListStyleType(typeAttr, listStyleCss, isOrdered);
 
         int abstractNumId;
@@ -75,7 +79,8 @@ static partial class WordContentBuilder
         var numId = WordNumberingBuilder.GetNextId(numbering);
         WordNumberingBuilder.AddNumberingInstance(numbering, numId, abstractNumId, startOverride);
         var ilvl = context.ListStack.Count > 0 ? context.ListStack.Peek().Ilvl + 1 : 0;
-        context.ListStack.Push((numId, ilvl, isOrdered));
+        var parentInside = context.ListStack.Count > 0 && context.ListStack.Peek().Inside;
+        context.ListStack.Push((numId, ilvl, isOrdered, inside || parentInside));
         ProcessChildren(element, newFormat, elements, context, inPre);
         context.ListStack.Pop();
     }
@@ -85,9 +90,10 @@ static partial class WordContentBuilder
         FlushParagraph(elements, context);
         if (context.ListStack.Count > 0)
         {
-            var (numId, ilvl, _) = context.ListStack.Peek();
+            var (numId, ilvl, _, inside) = context.ListStack.Peek();
             context.ListNumId = numId;
             context.ListIlvl = ilvl;
+            context.ListInside = inside;
         }
         else
         {

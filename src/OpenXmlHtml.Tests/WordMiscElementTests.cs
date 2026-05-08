@@ -74,6 +74,16 @@ public class WordMiscElementTests
         Verify(WordHtmlConverter.ToParagraphs("A <dfn>variable</dfn> stores data."));
 
     [Test]
+    public Task CiteTag() =>
+        Verify(WordHtmlConverter.ToParagraphs(
+            "From <cite>The Great Gatsby</cite> by F. Scott Fitzgerald."));
+
+    [Test]
+    public Task VarTag() =>
+        Verify(WordHtmlConverter.ToParagraphs(
+            "The variable <var>x</var> represents the unknown."));
+
+    [Test]
     public Task DetailsAndSummaryTags() =>
         Verify(WordHtmlConverter.ToParagraphs(
             "<details><summary>Click to expand</summary>Hidden content here</details>"));

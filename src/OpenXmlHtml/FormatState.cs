@@ -18,6 +18,9 @@ struct FormatState
     internal BorderInfo? Border { get; set; }
     internal bool SmallCaps { get; set; }
     internal string? TextTransform { get; set; }
+    internal bool Shadow { get; set; }
+    internal int? CharacterSpacingTwips { get; set; }
+    internal bool NoWrap { get; set; }
 
     internal readonly bool HasFormatting =>
         Bold ||
@@ -32,5 +35,7 @@ struct FormatState
         RunStyleId != null ||
         BackgroundColor != null ||
         Border != null ||
-        SmallCaps;
+        SmallCaps ||
+        Shadow ||
+        CharacterSpacingTwips != null;
 }

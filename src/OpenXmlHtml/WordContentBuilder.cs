@@ -74,11 +74,15 @@ static partial class WordContentBuilder
         var tag = element.LocalName;
         var newFormat = format;
         HtmlSegmentParser.ApplyElementFormatting(element, tag, ref newFormat, out var styleDeclarations);
+        inPre = HtmlSegmentParser.ApplyWhiteSpace(styleDeclarations, ref newFormat, inPre);
 
         switch (tag)
         {
             case "br":
                 ForceFlushParagraph(elements, context);
+                return;
+            case "wbr":
+                AddTextRun("​", format, context);
                 return;
             case "hr":
                 FlushParagraph(elements, context);
@@ -292,22 +296,30 @@ static partial class WordContentBuilder
         }
 
         run.Append(
-            new Text(ApplyTextTransform(text, format.TextTransform))
+            new Text(ApplyTextTransform(text, format))
             {
                 Space = SpaceProcessingModeValues.Preserve
             });
         ctx.CurrentRuns.Add(run);
     }
 
-    internal static string ApplyTextTransform(string text, string? transform) =>
-        XmlCharFilter.StripInvalidXmlChars(
-            transform switch
-            {
-                "uppercase" => text.ToUpperInvariant(),
-                "lowercase" => text.ToLowerInvariant(),
-                "capitalize" => CapitalizeWords(text),
-                _ => text
-            });
+    internal static string ApplyTextTransform(string text, FormatState format)
+    {
+        var transformed = format.TextTransform switch
+        {
+            "uppercase" => text.ToUpperInvariant(),
+            "lowercase" => text.ToLowerInvariant(),
+            "capitalize" => CapitalizeWords(text),
+            _ => text
+        };
+
+        if (format.NoWrap)
+        {
+            transformed = transformed.Replace(' ', ' ');
+        }
+
+        return XmlCharFilter.StripInvalidXmlChars(transformed);
+    }
 
     static string CapitalizeWords(string text)
     {
@@ -382,6 +394,15 @@ static partial class WordContentBuilder
                         Val = context.ListNumId.Value
                     }),
                 new ContextualSpacing());
+
+            if (context.ListInside)
+            {
+                paragraph.ParagraphProperties.Append(
+                    new Indentation
+                    {
+                        Hanging = "0"
+                    });
+            }
         }
 
         // Apply paragraph format (CSS margins, alignment, line-height)
@@ -399,6 +420,7 @@ static partial class WordContentBuilder
         context.ParagraphFormat = null;
         context.ListNumId = null;
         context.ListIlvl = null;
+        context.ListInside = false;
     }
 
     static void ApplyParagraphFormat(ParagraphProperties props, ParagraphFormatState pf)

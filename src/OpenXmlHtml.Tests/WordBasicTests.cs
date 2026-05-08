@@ -46,6 +46,10 @@ public class WordBasicTests
         Verify(WordHtmlConverter.ToParagraphs("line one<br>line two"));
 
     [Test]
+    public Task WordBreakOpportunity() =>
+        Verify(WordHtmlConverter.ToParagraphs("super<wbr>cali<wbr>fragilistic"));
+
+    [Test]
     public Task MixedFormatting() =>
         Verify(WordHtmlConverter.ToParagraphs("normal <b>bold</b> <i>italic</i> normal"));
 
