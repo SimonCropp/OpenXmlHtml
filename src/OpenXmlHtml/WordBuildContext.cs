@@ -11,10 +11,11 @@
     internal Dictionary<string, StyleType>? StyleMap;
     internal string? ParagraphStyleId;
     internal ParagraphFormatState? ParagraphFormat;
-    internal Stack<(int NumId, int Ilvl, bool IsOrdered)> ListStack = new();
+    internal Stack<(int NumId, int Ilvl, bool IsOrdered, bool Inside)> ListStack = new();
     internal int? BulletAbstractNumId;
     internal int NextNumId;
     internal int? ListNumId;
     internal int? ListIlvl;
+    internal bool ListInside;
     internal int? ReversedStart;
 }

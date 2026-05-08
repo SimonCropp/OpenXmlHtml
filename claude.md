@@ -63,11 +63,11 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 
 | Test File | Covers |
 |---|---|
-| `WordBasicTests` | `b`, `strong`, `i`, `em`, `u`, `ins`, `s`, `strike`, `del`, `sub`, `sup`, `br`, HTML entities |
+| `WordBasicTests` | `b`, `strong`, `i`, `em`, `u`, `ins`, `s`, `strike`, `del`, `sub`, `sup`, `br`, `wbr`, HTML entities |
 | `WordBlockTests` | `p`, `div`, `h1`–`h6`, `blockquote`, `pre`, `hr`, `ul`/`ol`/`li` (text prefix path), page breaks |
 | `WordHeadingTests` | `h1`–`h6` heading styles |
 | `WordColorAndFontTests` | `color`, `font-size`, `font-family`, `font` attributes, `small`, `code`/`kbd`/`samp`, named/hex/rgb colors |
-| `WordMiscElementTests` | `abbr`, `acronym`, `time`, `q`, `figure`/`figcaption`, `svg`, `article`, `section`, `nav`, `main`, `header`, `footer`, `aside`, `dfn`, `details`/`summary`, `address`, `dl`/`dt`/`dd` |
+| `WordMiscElementTests` | `abbr`, `acronym`, `time`, `q`, `figure`/`figcaption`, `svg`, `article`, `section`, `nav`, `main`, `header`, `footer`, `aside`, `dfn`, `cite`, `var`, `details`/`summary`, `address`, `dl`/`dt`/`dd` |
 | `WordTableTests` | `table`, `tr`, `td`, `th`, `colspan`, `rowspan`, `thead`/`tbody`/`tfoot`, `caption`, nested tables |
 | `WordTableStyleTests` | Cell `padding`/`width`/`background-color`/`vertical-align`, table `width`/`background-color`/`padding`, `cellpadding`/`bgcolor`/`width` HTML attributes |
 | `WordColgroupTests` | `<colgroup>`, `<col>`, `col width=` / `col style="width"`, `col span=`, column width propagation to `tblGrid` and cells |
@@ -82,9 +82,13 @@ Tests are organized by feature area. Each supported HTML element and CSS propert
 | `WordStyleMappingTests` | CSS `class` → Word paragraph/character style mapping |
 | `WordListNumberingTests` | Real Word numbering (`NumberingDefinitionsPart`), nested lists, separate list restart, fallback |
 | `WordListStyleTests` | `type` attribute (a/A/i/I), `start` attribute, `list-style-type` CSS, mixed list types |
+| `WordListStylePositionTests` | `list-style-position: inside`/`outside` |
 | `WordReversedListTests` | `<ol reversed>`, reversed with `start`, reversed fallback without MainPart |
 | `WordSmallCapsTests` | `font-variant: small-caps` CSS |
 | `WordTextTransformTests` | `text-transform`: uppercase, lowercase, capitalize (both code paths) |
+| `WordTextShadowTests` | `text-shadow` CSS → `<w:shadow/>` run property |
+| `WordLetterSpacingTests` | `letter-spacing` CSS → `<w:spacing>` character spacing |
+| `WordWhiteSpaceTests` | `white-space`: pre/pre-wrap/break-spaces (preserve) and nowrap (spaces → nbsp) |
 | `WordClickableImageTests` | Images inside `<a>` tags, external link hyperlinks, fallback without MainPart |
 | `WordWritingModeTests` | `writing-mode` (vertical-rl, vertical-lr), `direction: rtl`, vertical text in cells |
 | `WordRowHeightTests` | `height` CSS and HTML attribute on `<tr>` |

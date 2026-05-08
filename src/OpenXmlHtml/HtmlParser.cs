@@ -45,12 +45,16 @@ static class HtmlSegmentParser
     {
         var tag = element.LocalName;
         var newFormat = format;
-        ApplyElementFormatting(element, tag, ref newFormat);
+        ApplyElementFormatting(element, tag, ref newFormat, out var styleDeclarations);
+        inPre = ApplyWhiteSpace(styleDeclarations, ref newFormat, inPre);
 
         switch (tag)
         {
             case "br":
                 segments.Add(new("\n", format));
+                return;
+            case "wbr":
+                segments.Add(new("\u200B", format));
                 return;
             case "hr":
                 EnsureNewline(segments, format);
@@ -191,6 +195,30 @@ static class HtmlSegmentParser
 
     internal static void ApplyElementFormatting(IElement element, string tag, ref FormatState format) =>
         ApplyElementFormatting(element, tag, ref format, out _);
+
+    internal static bool ApplyWhiteSpace(Dictionary<string, string>? declarations, ref FormatState format, bool inPre)
+    {
+        if (declarations == null ||
+            !declarations.TryGetValue("white-space", out var value))
+        {
+            return inPre;
+        }
+
+        var ws = value.AsSpan().Trim();
+        if (ws.Equals("pre", StringComparison.OrdinalIgnoreCase) ||
+            ws.Equals("pre-wrap", StringComparison.OrdinalIgnoreCase) ||
+            ws.Equals("break-spaces", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (ws.Equals("nowrap", StringComparison.OrdinalIgnoreCase))
+        {
+            format.NoWrap = true;
+        }
+
+        return inPre;
+    }
 
     internal static void ApplyElementFormatting(IElement element, string tag, ref FormatState format, out Dictionary<string, string>? declarations)
     {
@@ -404,6 +432,22 @@ static class HtmlSegmentParser
         if (declarations.TryGetValue("border", out var borderVal))
         {
             format.Border = StyleParser.ParseBorder(borderVal);
+        }
+
+        if (declarations.TryGetValue("text-shadow", out var textShadow) &&
+            !textShadow.Equals("none", StringComparison.OrdinalIgnoreCase))
+        {
+            format.Shadow = true;
+        }
+
+        if (declarations.TryGetValue("letter-spacing", out var letterSpacing) &&
+            !letterSpacing.Equals("normal", StringComparison.OrdinalIgnoreCase))
+        {
+            var twips = StyleParser.ParseLengthToTwips(letterSpacing);
+            if (twips != null)
+            {
+                format.CharacterSpacingTwips = twips;
+            }
         }
 
         if (declarations.TryGetValue("vertical-align", out var verticalAlign))

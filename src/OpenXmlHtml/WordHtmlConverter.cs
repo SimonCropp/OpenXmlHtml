@@ -70,7 +70,7 @@ public static class WordHtmlConverter
             }
 
             run.Append(
-                new Text(WordContentBuilder.ApplyTextTransform(text, segment.Format.TextTransform))
+                new Text(WordContentBuilder.ApplyTextTransform(text, segment.Format))
                 {
                     Space = SpaceProcessingModeValues.Preserve
                 });
@@ -392,6 +392,20 @@ public static class WordHtmlConverter
         if (format.SmallCaps)
         {
             props.Append(new SmallCaps());
+        }
+
+        if (format.Shadow)
+        {
+            props.Append(new Shadow());
+        }
+
+        if (format.CharacterSpacingTwips != null)
+        {
+            props.Append(
+                new Spacing
+                {
+                    Val = format.CharacterSpacingTwips.Value
+                });
         }
 
         if (format.Color != null)
