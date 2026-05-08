@@ -82,7 +82,7 @@ static partial class WordContentBuilder
                 ForceFlushParagraph(elements, context);
                 return;
             case "wbr":
-                AddTextRun("​", format, context);
+                AddTextRun("\u200B", format, context);
                 return;
             case "hr":
                 FlushParagraph(elements, context);
@@ -315,7 +315,7 @@ static partial class WordContentBuilder
 
         if (format.NoWrap)
         {
-            transformed = transformed.Replace(' ', ' ');
+            transformed = transformed.Replace(' ', '\u00A0');
         }
 
         return XmlCharFilter.StripInvalidXmlChars(transformed);

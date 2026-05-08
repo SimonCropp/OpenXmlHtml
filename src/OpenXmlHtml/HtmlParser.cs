@@ -54,7 +54,7 @@ static class HtmlSegmentParser
                 segments.Add(new("\n", format));
                 return;
             case "wbr":
-                segments.Add(new("​", format));
+                segments.Add(new("\u200B", format));
                 return;
             case "hr":
                 EnsureNewline(segments, format);
