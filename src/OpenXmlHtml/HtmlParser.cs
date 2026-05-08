@@ -234,26 +234,29 @@ static class HtmlSegmentParser
                 break;
         }
 
-        var fontColor = element.GetAttribute("color");
-        if (fontColor != null)
+        if (tag == "font")
         {
-            var parsed = ColorParser.Parse(fontColor);
-            if (parsed != null)
+            var fontColor = element.GetAttribute("color");
+            if (fontColor != null)
             {
-                format.Color = parsed;
+                var parsed = ColorParser.Parse(fontColor);
+                if (parsed != null)
+                {
+                    format.Color = parsed;
+                }
             }
-        }
 
-        var fontFace = element.GetAttribute("face");
-        if (fontFace != null)
-        {
-            format.FontFamily = fontFace;
-        }
+            var fontFace = element.GetAttribute("face");
+            if (fontFace != null)
+            {
+                format.FontFamily = fontFace;
+            }
 
-        var fontSize = element.GetAttribute("size");
-        if (fontSize != null && double.TryParse(fontSize, CultureInfo.InvariantCulture, out var size))
-        {
-            format.FontSizePt = size;
+            var fontSize = element.GetAttribute("size");
+            if (fontSize != null && double.TryParse(fontSize, CultureInfo.InvariantCulture, out var size))
+            {
+                format.FontSizePt = size;
+            }
         }
 
         ApplyInlineStyle(element, ref format, out declarations);
@@ -302,20 +305,19 @@ static class HtmlSegmentParser
         if (declarations.TryGetValue("text-decoration-style", out var decorationStyle) &&
             format.UnderlineStyle != null)
         {
-            var ds = decorationStyle.AsSpan().Trim();
-            if (ds.Equals("dotted", StringComparison.OrdinalIgnoreCase))
+            if (decorationStyle.Equals("dotted", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Dotted;
             }
-            else if (ds.Equals("dashed", StringComparison.OrdinalIgnoreCase))
+            else if (decorationStyle.Equals("dashed", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Dash;
             }
-            else if (ds.Equals("wavy", StringComparison.OrdinalIgnoreCase))
+            else if (decorationStyle.Equals("wavy", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Wave;
             }
-            else if (ds.Equals("double", StringComparison.OrdinalIgnoreCase))
+            else if (decorationStyle.Equals("double", StringComparison.OrdinalIgnoreCase))
             {
                 format.UnderlineStyle = UnderlineValues.Double;
             }
@@ -364,16 +366,15 @@ static class HtmlSegmentParser
 
         if (declarations.TryGetValue("text-transform", out var textTransform))
         {
-            var tt = textTransform.AsSpan().Trim();
-            if (tt.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
+            if (textTransform.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
             {
                 format.TextTransform = "uppercase";
             }
-            else if (tt.Equals("lowercase", StringComparison.OrdinalIgnoreCase))
+            else if (textTransform.Equals("lowercase", StringComparison.OrdinalIgnoreCase))
             {
                 format.TextTransform = "lowercase";
             }
-            else if (tt.Equals("capitalize", StringComparison.OrdinalIgnoreCase))
+            else if (textTransform.Equals("capitalize", StringComparison.OrdinalIgnoreCase))
             {
                 format.TextTransform = "capitalize";
             }
@@ -431,6 +432,32 @@ static class HtmlSegmentParser
     }
 
     internal static string CollapseWhitespace(string text)
+    {
+        // Fast scan: if every whitespace char is already a single ' ' with a non-space neighbor,
+        // the input is already in collapsed form and can be returned without allocation.
+        var lastWasSpace = false;
+        for (var i = 0; i < text.Length; i++)
+        {
+            var c = text[i];
+            if (char.IsWhiteSpace(c))
+            {
+                if (c != ' ' || lastWasSpace)
+                {
+                    return CollapseWhitespaceSlow(text);
+                }
+
+                lastWasSpace = true;
+            }
+            else
+            {
+                lastWasSpace = false;
+            }
+        }
+
+        return text;
+    }
+
+    static string CollapseWhitespaceSlow(string text)
     {
         var builder = new StringBuilder(text.Length);
         var lastWasSpace = false;

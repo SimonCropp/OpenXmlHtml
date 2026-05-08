@@ -235,4 +235,16 @@ public class WordTableStyleTests
         stream.Position = 0;
         return Verify(stream, "docx");
     }
+
+    [Test]
+    public void CellVerticalAlignPaddedValue()
+    {
+        var padded = WordHtmlConverter.ToElements(
+            """<table><tr><td style="vertical-align:   top   ">x</td></tr></table>""");
+        var unpadded = WordHtmlConverter.ToElements(
+            """<table><tr><td style="vertical-align: top">x</td></tr></table>""");
+        Assert.That(
+            string.Join('\n', padded.Select(e => e.OuterXml)),
+            Is.EqualTo(string.Join('\n', unpadded.Select(e => e.OuterXml))));
+    }
 }

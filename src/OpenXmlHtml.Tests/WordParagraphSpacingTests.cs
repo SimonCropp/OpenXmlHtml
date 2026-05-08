@@ -124,4 +124,14 @@ public class WordParagraphSpacingTests
         stream.Position = 0;
         return Verify(stream, "docx");
     }
+
+    [Test]
+    public void LineHeightPaddedValue()
+    {
+        var padded = WordHtmlConverter.ToElements("""<p style="line-height:   1.5   ">x</p>""");
+        var unpadded = WordHtmlConverter.ToElements("""<p style="line-height: 1.5">x</p>""");
+        Assert.That(
+            string.Join('\n', padded.Select(e => e.OuterXml)),
+            Is.EqualTo(string.Join('\n', unpadded.Select(e => e.OuterXml))));
+    }
 }

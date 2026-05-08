@@ -100,9 +100,12 @@ static class StyleParser
         return null;
     }
 
-    internal static int? ParseLengthToTwips(string value)
+    internal static int? ParseLengthToTwips(string value) =>
+        ParseLengthToTwips(value.AsSpan());
+
+    internal static int? ParseLengthToTwips(ReadOnlySpan<char> value)
     {
-        var span = value.AsSpan().Trim();
+        var span = value.Trim();
 
         // 1pt = 20 twips
         if (TryParseSuffix(span, "pt", out var pt))
@@ -157,19 +160,62 @@ static class StyleParser
 
     internal static (int? Top, int? Right, int? Bottom, int? Left) ParseMarginShorthand(string value)
     {
-        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length switch
+        Span<Range> ranges = stackalloc Range[4];
+        var span = value.AsSpan();
+        var count = 0;
+        var i = 0;
+        while (i < span.Length)
         {
-            1 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[0]),
-                  ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[0])),
-            2 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1]),
-                  ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1])),
-            3 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1]),
-                  ParseLengthToTwips(parts[2]), ParseLengthToTwips(parts[1])),
-            4 => (ParseLengthToTwips(parts[0]), ParseLengthToTwips(parts[1]),
-                  ParseLengthToTwips(parts[2]), ParseLengthToTwips(parts[3])),
-            _ => (null, null, null, null)
-        };
+            while (i < span.Length && span[i] == ' ')
+            {
+                i++;
+            }
+
+            if (i >= span.Length)
+            {
+                break;
+            }
+
+            var start = i;
+            while (i < span.Length && span[i] != ' ')
+            {
+                i++;
+            }
+
+            if (count == 4)
+            {
+                // More than 4 parts — invalid shorthand.
+                return (null, null, null, null);
+            }
+
+            ranges[count++] = start..i;
+        }
+
+        if (count == 0)
+        {
+            return (null, null, null, null);
+        }
+
+        var v0 = ParseLengthToTwips(span[ranges[0]]);
+        if (count == 1)
+        {
+            return (v0, v0, v0, v0);
+        }
+
+        var v1 = ParseLengthToTwips(span[ranges[1]]);
+        if (count == 2)
+        {
+            return (v0, v1, v0, v1);
+        }
+
+        var v2 = ParseLengthToTwips(span[ranges[2]]);
+        if (count == 3)
+        {
+            return (v0, v1, v2, v1);
+        }
+
+        var v3 = ParseLengthToTwips(span[ranges[3]]);
+        return (v0, v1, v2, v3);
     }
 
     internal static JustificationValues? ParseTextAlign(string value)
