@@ -291,14 +291,35 @@ static class HtmlSegmentParser
 
         if (declarations.TryGetValue("text-decoration", out var textDecoration))
         {
-            if (textDecoration.Contains("underline", StringComparison.OrdinalIgnoreCase))
+            var tdSpan = textDecoration.AsSpan();
+            var i = 0;
+            while (i < tdSpan.Length)
             {
-                format.UnderlineStyle ??= UnderlineValues.Single;
-            }
+                while (i < tdSpan.Length && tdSpan[i] == ' ')
+                {
+                    i++;
+                }
 
-            if (textDecoration.Contains("line-through", StringComparison.OrdinalIgnoreCase))
-            {
-                format.Strikethrough = true;
+                if (i >= tdSpan.Length)
+                {
+                    break;
+                }
+
+                var start = i;
+                while (i < tdSpan.Length && tdSpan[i] != ' ')
+                {
+                    i++;
+                }
+
+                var token = tdSpan[start..i];
+                if (token.Equals("underline", StringComparison.OrdinalIgnoreCase))
+                {
+                    format.UnderlineStyle ??= UnderlineValues.Single;
+                }
+                else if (token.Equals("line-through", StringComparison.OrdinalIgnoreCase))
+                {
+                    format.Strikethrough = true;
+                }
             }
         }
 
@@ -623,14 +644,39 @@ static class HtmlSegmentParser
         return null;
     }
 
-    static readonly char[] viewBoxSeparators = [' ', ','];
-
     static (int? Width, int? Height) ParseViewBox(string viewBox)
     {
-        var parts = viewBox.Split(viewBoxSeparators, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length >= 4 &&
-            double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var w) &&
-            double.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out var h))
+        var span = viewBox.AsSpan();
+        Span<int> starts = stackalloc int[4];
+        Span<int> ends = stackalloc int[4];
+        var count = 0;
+        var i = 0;
+        while (i < span.Length && count < 4)
+        {
+            while (i < span.Length && (span[i] == ' ' || span[i] == ','))
+            {
+                i++;
+            }
+
+            if (i >= span.Length)
+            {
+                break;
+            }
+
+            var start = i;
+            while (i < span.Length && span[i] != ' ' && span[i] != ',')
+            {
+                i++;
+            }
+
+            starts[count] = start;
+            ends[count] = i;
+            count++;
+        }
+
+        if (count >= 4 &&
+            double.TryParse(span.Slice(starts[2], ends[2] - starts[2]), NumberStyles.Float, CultureInfo.InvariantCulture, out var w) &&
+            double.TryParse(span.Slice(starts[3], ends[3] - starts[3]), NumberStyles.Float, CultureInfo.InvariantCulture, out var h))
         {
             return ((int)Math.Round(w), (int)Math.Round(h));
         }

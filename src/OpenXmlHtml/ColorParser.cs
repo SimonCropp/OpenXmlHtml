@@ -170,45 +170,24 @@ static class ColorParser
                 return null;
             }
 
+            Span<char> buf = stackalloc char[6];
             if (hex.Length == 3)
             {
-                return string.Create(6, hex.ToString(), static (buf, h) =>
-                {
-                    buf[0] = buf[1] = char.ToUpperInvariant(h[0]);
-                    buf[2] = buf[3] = char.ToUpperInvariant(h[1]);
-                    buf[4] = buf[5] = char.ToUpperInvariant(h[2]);
-                });
+                buf[0] = buf[1] = char.ToUpperInvariant(hex[0]);
+                buf[2] = buf[3] = char.ToUpperInvariant(hex[1]);
+                buf[4] = buf[5] = char.ToUpperInvariant(hex[2]);
+                return buf.ToString();
             }
 
-            if (hex.Length == 6)
+            if (hex.Length is 6 or 8)
             {
-#if NETFRAMEWORK
-                return hex.ToString().ToUpperInvariant();
-#else
-                return string.Create(6, hex.ToString(), static (buf, h) =>
+                // #RRGGBBAA → strip alpha, keep RGB
+                for (var i = 0; i < 6; i++)
                 {
-                    for (var i = 0; i < 6; i++)
-                    {
-                        buf[i] = char.ToUpperInvariant(h[i]);
-                    }
-                });
-#endif
-            }
+                    buf[i] = char.ToUpperInvariant(hex[i]);
+                }
 
-            if (hex.Length == 8)
-            {
-                // #RRGGBBAA — strip alpha, keep RGB
-#if NETFRAMEWORK
-                return hex[..6].ToString().ToUpperInvariant();
-#else
-                return string.Create(6, hex[..6].ToString(), static (buf, h) =>
-                {
-                    for (var i = 0; i < 6; i++)
-                    {
-                        buf[i] = char.ToUpperInvariant(h[i]);
-                    }
-                });
-#endif
+                return buf.ToString();
             }
 
             return null;

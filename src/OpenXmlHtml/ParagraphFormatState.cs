@@ -145,11 +145,10 @@ class ParagraphFormatState
                 pf.LineHeightMultiple = pct / 100.0;
             }
         }
-        else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple) &&
-                 !lh.Contains("pt") &&
-                 !lh.Contains("px") &&
-                 !lh.Contains("em"))
+        else if (double.TryParse(lh, NumberStyles.Float, CultureInfo.InvariantCulture, out var multiple))
         {
+            // NumberStyles.Float rejects any non-numeric trailing chars, so a
+            // successful parse already excludes "pt", "px", "em" suffixes.
             pf.LineHeightMultiple = multiple;
         }
         else
